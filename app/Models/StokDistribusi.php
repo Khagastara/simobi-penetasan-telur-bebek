@@ -20,14 +20,14 @@ class StokDistribusi extends Model
     protected $fillable = [
         'nama_stok',
         'jumlah_stok',
-        'harga_stok'
-        'deskripsi_stok'
-        'gambar_stok'
+        'harga_stok',
+        'deskripsi_stok',
+        'gambar_stok',
         'id_detail_transaksi',
     ];
 
-    public function detailTransaski()
+    public function detailTransaski(): BelongsTo
     {
-        return $this->belongsTo(DetailTransaski::class, 'id_detail_transaksi');
+        return $this->belongsTo(DetailTransaksi::class, 'id_detail_transaksi');
     }
 }

@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
-class Transaksi extends Model
+class DetailTransaksi extends Model
 {
     use HasFactory;
 
-    protected $table = 'transaksi';
+    protected $table = 'detail_transaksi';
     protected $primaryKey = 'id_detail_transaksi';
     protected $keyType = 'int';
     public $incrementing = true;
@@ -21,7 +21,7 @@ class Transaksi extends Model
     protected $fillable = [
         'kuantitas',
         'sub_total',
-        'id_transaksi'
+        'id_transaksi',
     ];
 
     protected $dates = ['tgl_transaksi'];

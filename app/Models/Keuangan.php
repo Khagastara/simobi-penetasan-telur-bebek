@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class DetailTransaksi extends Model
+class Keuangan extends Model
 {
     use HasFactory;
 
@@ -25,7 +25,7 @@ class DetailTransaksi extends Model
         'total_penjualan',
     ];
 
-    public function transaksi(): BelongsTo
+    public function transaksi(): HasMany
     {
         return $this->HasMany(Transaksi::class, 'id_keuangan');
     }
