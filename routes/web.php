@@ -47,7 +47,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 });
 
-// Password Reset Routes (Available without auth)
 Route::prefix('owner')->group(function() {
     Route::get('/forgot-password', [PasswordResetController::class, 'showLinkRequestForm'])
          ->name('owner.password.request');
@@ -66,4 +65,9 @@ Route::prefix('owner')->group(function() {
 
     Route::post('/reset-password', [PasswordResetController::class, 'reset'])
          ->name('owner.password.update');
+});
+
+Route::middleware(['auth', 'pengepul'])->prefix('pengepul')->group(function () {
+    Route::post('/transaksi', [TransaksiController::class, 'store'])
+         ->name('pengepul.transaksi.store');
 });
