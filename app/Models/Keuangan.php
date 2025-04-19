@@ -12,8 +12,8 @@ class Keuangan extends Model
 {
     use HasFactory;
 
-    protected $table = 'keuangan';
-    protected $primaryKey = 'id_keuangan';
+    protected $table = 'keuangans';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -23,10 +23,11 @@ class Keuangan extends Model
         'grafik_penjualan',
         'tgl_rekaptulasi',
         'total_penjualan',
+        'id_transaksi'
     ];
 
-    public function transaksi(): HasMany
+    public function transaksi(): BelongsTo
     {
-        return $this->HasMany(Transaksi::class, 'id_keuangan');
+        return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id');
     }
 }
