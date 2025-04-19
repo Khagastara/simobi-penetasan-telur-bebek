@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('detail_penjadwalans', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->time('waktu_kegiatan');
+            $table->string('keterangan');
+            $table->unsignedBigInteger('id_penjadwalan');
+            $table->unsignedBigInteger('id_status_kegiatan');
+
+            $table->foreign('id_penjadwalan')->on('penjadwalan_kegiatans')->references('id');
+            $table->foreign('id_status_kegiatan')->on('status_kegiatans')->references('id');
         });
     }
 

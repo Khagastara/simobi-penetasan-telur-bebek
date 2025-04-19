@@ -13,8 +13,8 @@ class Pengepul extends Model
 {
     use HasFactory;
 
-    protected $table = 'pengepul';
-    protected $primaryKey = 'id_pengepul';
+    protected $table = 'pengepuls';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -26,11 +26,11 @@ class Pengepul extends Model
 
     public function akun(): BelongsTo
     {
-        return $this->belongsTo(Akun::class, 'id_akun');
+        return $this->belongsTo(Akun::class, 'id_akun','id');
     }
 
     public function transaksi(): HasMany
     {
-        return $this->hasMany(Transaksi::class, 'id_pengepul');
+        return $this->hasMany(Transaksi::class, 'id_pengepul', 'id');
     }
 }

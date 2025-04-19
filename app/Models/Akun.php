@@ -12,8 +12,8 @@ class Akun extends Model
 {
     use HasFactory;
 
-    protected $table = 'akun';
-    protected $primaryKey = 'id_akun';
+    protected $table = 'akuns';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
