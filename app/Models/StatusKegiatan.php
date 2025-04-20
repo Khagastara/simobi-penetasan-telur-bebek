@@ -26,4 +26,9 @@ class StatusKegiatan extends Model
     {
         return $this->hasMany(DetailPenjadwalan::class, 'id_status_kegiatan', 'id');
     }
+
+    public static function defaultStatusId()
+    {
+        return self::where('nama_status_kgtn', 'To Do')->value('id');
+    }
 }
