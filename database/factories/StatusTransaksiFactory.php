@@ -9,15 +9,12 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class StatusTransaksiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function definition()
     {
         return [
-            //
+            'nama_status' => $this->faker->randomElement(['Pembayaran Valid', 'Dikemas', 'Dikirim', 'Selesai']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

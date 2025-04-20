@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Keuangan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,19 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class KeuanganFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Keuangan::class;
+
+    public function definition()
     {
         return [
-            //
+            'saldo_pemasukan' => $this->faker->randomNumber(),
+            'saldo_pengeluaran' => $this->faker->randomNumberumber(),
+            'grafik_penjualan' => $this->faker->imageUrl(640, 480, 'business', true, 'Graph'),
+            'tgl_rekapitulasi' => $this->faker->date(),
+            'total_penjualan' => $this->faker->randomNumber(),
+            'id_transaksi' => \App\Models\Transaksi::factory(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

@@ -14,13 +14,13 @@ class MetodePembayaranSeeder extends Seeder
     public function run(): void
     {
         MetodePembayaran::insert([
-            'id' => 1,
-            'metode_pembayaran' => 'tunai',
+            // 'id' => 1,
+            'nama_metode' => 'tunai',
         ]);
 
         MetodePembayaran::insert([
-            'id' => 2,
-            'metode_pembayaran' => 'transfer',
+            // 'id' => 2,
+            'nama_metode' => 'transfer',
         ]);
     }
 }

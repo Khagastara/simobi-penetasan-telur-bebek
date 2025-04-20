@@ -13,26 +13,26 @@ class TransaksiSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([StatusTransaksiSeeder::class, PengepulSeeder::class, MetodePembayaranSeeder::class]);
+        // $this->call([StatusTransaksiSeeder::class, PengepulSeeder::class, MetodePembayaranSeeder::class]);
         Transaksi::insert([
-            'id' => 1,
-            'tgl_transaksi' => '20-4-2025 12:09:30',
+            // 'id' => 1,
+            'tgl_transaksi' => '2025-04-20 12:09:30',
             'id_status_transaksi' => 1,
             'id_pengepul' => 1,
             'id_metode_pembayaran' => 1,
         ]);
 
         Transaksi::insert([
-            'id' => 2,
-            'tgl_transaksi' => '20-4-2025 12:08:40',
+            // 'id' => 2,
+            'tgl_transaksi' => '2025-04-20 12:08:40',
             'id_status_transaksi' => 1,
             'id_pengepul' => 1,
             'id_metode_pembayaran' => 2,
         ]);
 
         Transaksi::insert([
-            'id' => 3,
-            'tgl_transaksi' => '21-4-2025 10:10:10',
+            // 'id' => 3,
+            'tgl_transaksi' => '2025-04-21 10:10:10',
             'id_status_transaksi' => 2,
             'id_pengepul' => 2,
             'id_metode_pembayaran' => 2,

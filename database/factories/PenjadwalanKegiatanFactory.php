@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\PenjadwalanKegiatan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PenjadwalanKegiatanFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = PenjadwalanKegiatan::class;
+
+    public function definition()
     {
         return [
-            //
+            'nama_kegiatan' => $this->faker->sentence(3),
+            'tgl_penjadwalan' => $this->faker->dateTimeBetween('now'),
+            'id_owner' => \App\Models\Owner::factory(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

@@ -13,9 +13,9 @@ class DetailTransaksiSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([StokDistribusiSeeder::class, TransaksiSeeder::class]);
+        // $this->call([StokDistribusiSeeder::class, TransaksiSeeder::class]);
         DetailTransaksi::insert([
-            'id' => 1,
+            // 'id' => 1,
             'kuantitas' => 30,
             'sub_total' => 8000,
             'id_stok_distribusi' => 1,
@@ -23,7 +23,7 @@ class DetailTransaksiSeeder extends Seeder
         ]);
 
         DetailTransaksi::insert([
-            'id' => 2,
+            // 'id' => 2,
             'kuantitas' => 20,
             'sub_total' => 10000,
             'id_stok_distribusi' => 1,

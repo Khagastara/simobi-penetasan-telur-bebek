@@ -13,9 +13,9 @@ class DetailPenjadwalanSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([StatusKegiatanSeeder::class, PenjadwalanKegiatanSeeder::class]);
+        // $this->call([StatusKegiatanSeeder::class, PenjadwalanKegiatanSeeder::class]);
         DetailPenjadwalan::insert([
-            'id' => 1,
+            // 'id' => 1,
             'waktu_kegiatan' => '07:00',
             'keterangan' => 'Mengecek kondisi telur',
             'id_penjadwalan' => 1,
@@ -23,7 +23,7 @@ class DetailPenjadwalanSeeder extends Seeder
         ]);
 
         DetailPenjadwalan::insert([
-            'id' => 2,
+            // 'id' => 2,
             'waktu_kegiatan' => '07:00',
             'keterangan' => 'Memberikan pakan',
             'id_penjadwalan' => 1,
@@ -31,7 +31,7 @@ class DetailPenjadwalanSeeder extends Seeder
         ]);
 
         DetailPenjadwalan::insert([
-            'id' => 3,
+            // 'id' => 3,
             'waktu_kegiatan' => '09:00',
             'keterangan' => 'Memberikan vitamin',
             'id_penjadwalan' => 1,

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\DetailTransaksi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class DetailTransaksiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = DetailTransaksi::class;
+
+    public function definition()
     {
         return [
-            //
+            'kuantitas' => $this->faker->randomNumber(),
+            'subtotal' => $this->faker->randomNumber(),
+            'id_transaksi' => \App\Models\Transaksi::factory(),
+            'id_stok' => \App\Models\StokDistribusi::factory(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

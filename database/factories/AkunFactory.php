@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Akun;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AkunFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Akun::class;
+
     public function definition(): array
     {
         return [
-            //
+            'username' => $this->faker->unique()->userName(),
+            'email' => $this->faker->unique()->safeEmail(),
+            // 'email_verified_at' => now(),
+            'password' => bcrypt('password123'),
+            // 'role' => $this->faker->randomElement(['owner', 'pengepul']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

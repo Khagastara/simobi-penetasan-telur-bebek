@@ -13,23 +13,23 @@ class PengepulSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([AkunSeeder::class]);
+        // $this->call([AkunSeeder::class]);
         Pengepul::insert([
-            'id' => 1,
+            // 'id' => 1,
             'nama' => 'Ilay Riegrow',
             'no_hp' => '081335191658',
             'id_akun' => 1,
         ]);
 
         Pengepul::insert([
-            'id' => 2,
+            // 'id' => 2,
             'nama' => 'Sagara Sastra',
             'no_hp' => '081234789087',
             'id_akun' => 2,
         ]);
 
         Pengepul::insert([
-            'id' => 3,
+            // 'id' => 3,
             'nama' => 'Alsaggaf Alam',
             'no_hp' => '087875334566',
             'id_akun' => 3,
