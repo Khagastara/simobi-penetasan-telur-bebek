@@ -14,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => 'web',
+        'passwords' => 'akuns',
     ],
 
     /*
@@ -40,6 +40,14 @@ return [
             'driver' => 'session',
             'provider' => 'akuns',
         ],
+        'owner' => [
+            'driver' => 'session',
+            'provider' => 'owners',
+        ],
+        'pengepul' => [
+            'driver' => 'session',
+            'provider' => 'pengepuls',
+        ],
     ],
 
     /*
@@ -61,6 +69,14 @@ return [
 
     'providers' => [
         'akuns' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Akun::class,
+        ],
+        'owners' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Akun::class,
+        ],
+        'pengepuls' => [
             'driver' => 'eloquent',
             'model' => App\Models\Akun::class,
         ],

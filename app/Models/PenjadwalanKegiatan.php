@@ -33,4 +33,11 @@ class PenjadwalanKegiatan extends Model
     {
         return $this->hasMany(DetailPenjadwalan::class, 'id_penjadwalan_kegiatan', 'id');
     }
+
+    public function scopeUpcomingDates($query)
+    {
+        return $query->where('tgl_penjadwalan', '>=', now())
+            ->pluck('tgl_penjadwalan')
+            ->unique();
+    }
 }
