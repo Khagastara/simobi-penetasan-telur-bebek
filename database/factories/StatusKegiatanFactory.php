@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\StatusKegiatan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class StatusKegiatanFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = StatusKegiatan::class;
+
+    public function definition()
     {
         return [
-            //
+            'nama_status' => $this->faker->randomElement(['To Do', 'Selesai', 'Gagal']),
+            'deskripsi' => $this->faker->sentence(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

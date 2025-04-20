@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('penjadwalan_kegiatans', function (Blueprint $table) {
             $table->id();
-            $table->date('tgl_penjawalan');
+            $table->date('tgl_penjadwalan');
             $table->unsignedBigInteger('id_owner');
 
             $table->foreign('id_owner')->on('owners')->references('id');

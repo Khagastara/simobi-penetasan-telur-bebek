@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Transaksi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TransaksiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Transaksi::class;
+
+    public function definition()
     {
         return [
-            //
+            'tanggal_transaksi' => $this->faker->dateTime(),
+            'id_status_transaksi' => \App\Models\StatusKegiatan::factory(),
+            'id_pengepul' => \App\Models\Pengepul::factory(),
+            'id_metode_pembayaran' => \App\Models\MetodePembayaran::factory(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

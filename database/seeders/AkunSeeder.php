@@ -14,25 +14,25 @@ class AkunSeeder extends Seeder
     public function run(): void
     {
         Akun::insert([
-            'id' => 1,
+            // 'id' => 1,
             'username' => 'ilay_riegrow',
             'email' => 'ilayriegrow20@gmail.com',
             'password' => 'ilaymuda89',
         ]);
         Akun::insert([
-            'id' => 2,
+            // 'id' => 2,
             'username' => 'sagara_sas',
             'email' => 'sagarasastra88@gmail.com',
             'password' => 'sag789ok',
         ]);
         Akun::insert([
-            'id' => 3,
+            // 'id' => 3,
             'username' => 'alam_rich',
             'email' => 'pecintalam90@gmail.com',
             'password' => 'alam0090',
         ]);
         Akun::insert([
-            'id' => 4,
+            // 'id' => 4,
             'username' => 'ama_mozzart',
             'email' => 'jagopiano77@gmail.com',
             'password' => 'mozart567',

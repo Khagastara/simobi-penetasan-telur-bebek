@@ -13,9 +13,9 @@ class OwnerSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([AkunSeeder::class]);
+        // $this->call([AkunSeeder::class]);
         Owner::insert([
-            'id' => 1,
+            // 'id' => 1,
             'nama' => 'Amadeus Mozart',
             'no_hp' => '08585802650',
             'id_akun' => 4,

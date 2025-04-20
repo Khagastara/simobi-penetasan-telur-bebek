@@ -14,7 +14,7 @@ class StokDistribusiSeeder extends Seeder
     public function run(): void
     {
         StokDistribusi::insert([
-            'id' => 1,
+            // 'id' => 1,
             'nama_stok' => 'Anakan Bebek',
             'jumlah_stok' => 20,
             'harga_stok' => 6000,
@@ -23,7 +23,7 @@ class StokDistribusiSeeder extends Seeder
         ]);
 
         StokDistribusi::insert([
-            'id' => 2,
+            // 'id' => 2,
             'nama_stok' => 'Telur Penetasan',
             'jumlah_stok' => 100,
             'harga_stok' => 8000,
@@ -32,7 +32,7 @@ class StokDistribusiSeeder extends Seeder
         ]);
 
         StokDistribusi::insert([
-            'id' => 3,
+            // 'id' => 3,
             'nama_stok' => 'Telur Gagal Menetas',
             'jumlah_stok' => 20,
             'harga_stok' => 5500,

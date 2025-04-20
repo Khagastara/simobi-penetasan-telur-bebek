@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\MetodePembayaran;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class MetodePembayaranFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = MetodePembayaran::class;
+
+    public function definition()
     {
         return [
-            //
+            'nama_metode' => $this->faker->randomElement(['Tunai', 'Transfer']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

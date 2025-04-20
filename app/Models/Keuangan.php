@@ -18,7 +18,7 @@ class Keuangan extends Model
     public $incrementing = true;
     public $timestamps = false;
     protected $fillable = [
-        'saldo_pemasukan',
+        'saldo_pemasukkan',
         'saldo_pengeluaran',
         'grafik_penjualan',
         'tgl_rekaptulasi',
