@@ -56,12 +56,12 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
-// Authentication routes
 Route::prefix('pengepul')->group(function () {
-    Route::get('/register', [PengepulRegisterController::class, 'showRegistrationForm'])
+    // Registration routes
+    Route::get('/register', [\App\Http\Controllers\Homepage\Pengepul\PengepulRegisterController::class, 'showRegistrationForm'])
          ->name('pengepul.register');
 
-    Route::post('/register', [PengepulRegisterController::class, 'register'])
+    Route::post('/register', [\App\Http\Controllers\Homepage\Pengepul\PengepulRegisterController::class, 'register'])
          ->name('pengepul.register.submit');
 });
 

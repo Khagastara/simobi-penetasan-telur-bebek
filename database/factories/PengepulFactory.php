@@ -18,8 +18,6 @@ class PengepulFactory extends Factory
             'nama' => $this->faker->name(),
             'no_hp' => '08' . $this->faker->unique()->numerify('##########'),
             'id_akun' => \App\Models\Akun::factory(),
-            'created_at' => now(),
-            'updated_at' => now(),
         ];
     }
 }
