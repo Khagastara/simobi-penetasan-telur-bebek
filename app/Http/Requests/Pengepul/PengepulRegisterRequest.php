@@ -18,7 +18,7 @@ class PengepulRegisterRequest extends FormRequest
             'nama' => 'required|string|max:255',
             'no_hp' => 'required|string|unique:pengepuls,no_hp',
             'email' => 'required|email|unique:akuns',
-            'username' => 'required|string|max:255|unique:akuns',
+            'username' => 'required|string|max:255|unique:akuns,username',
             'password' => 'required|string|confirmed'
         ];
     }
