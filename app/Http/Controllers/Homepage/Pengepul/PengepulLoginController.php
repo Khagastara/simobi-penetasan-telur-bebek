@@ -12,7 +12,7 @@ class PengepulLoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.pengepul.login');
+        return view('homepage.pengepul.pages.login');
     }
 
     public function login(PengepulLoginRequest $request)
