@@ -13,8 +13,8 @@ class DetailTransaksi extends Model
 {
     use HasFactory;
 
-    protected $table = 'detail_transaksi';
-    protected $primaryKey = 'id_detail_transaksi';
+    protected $table = 'detail_transaksis';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -22,16 +22,17 @@ class DetailTransaksi extends Model
         'kuantitas',
         'sub_total',
         'id_transaksi',
+        'id_stok_distribusi'
     ];
 
     protected $dates = ['tgl_transaksi'];
 
     public function transaksi(): BelongsTo
     {
-        return $this->belongsTo(Keuangan::class, 'id_transaksi');
+        return $this->belongsTo(Keuangan::class, 'id_transaksi', 'id');
     }
-    public function stokDistribusi(): HasMany
+    public function stokDistribusi(): BelongsTo
     {
-        return $this->hasMany(StokDistribusi::class, 'id_detail_transaksi');
+        return $this->belongsTo(StokDistribusi::class, 'id_detail_transaksi', 'id');
     }
 }

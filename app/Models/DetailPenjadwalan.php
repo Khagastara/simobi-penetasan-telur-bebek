@@ -13,8 +13,8 @@ class DetailPenjadwalan extends Model
 {
     use HasFactory;
 
-    protected $table = 'detail_penjadwalan';
-    protected $primaryKey = 'id_detail_penjadwalan';
+    protected $table = 'detail_penjadwalans';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;

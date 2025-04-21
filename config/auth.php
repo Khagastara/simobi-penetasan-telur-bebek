@@ -14,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => 'web',
+        'passwords' => 'akuns',
     ],
 
     /*
@@ -38,7 +38,15 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'akuns',
+        ],
+        'owner' => [
+            'driver' => 'session',
+            'provider' => 'owners',
+        ],
+        'pengepul' => [
+            'driver' => 'session',
+            'provider' => 'pengepuls',
         ],
     ],
 
@@ -60,17 +68,19 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'akuns' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\Akun::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'owners' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Akun::class,
+        ],
+        'pengepuls' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Akun::class,
+        ],
     ],
-
     /*
     |--------------------------------------------------------------------------
     | Resetting Passwords

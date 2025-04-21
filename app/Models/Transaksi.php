@@ -12,8 +12,8 @@ class Transaksi extends Model
 {
     use HasFactory;
 
-    protected $table = 'transaksi';
-    protected $primaryKey = 'id_transaksi';
+    protected $table = 'transaksis';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -21,33 +21,32 @@ class Transaksi extends Model
         'tgl_transaksi',
         'id_pengepul',
         'id_metode_pembayaran',
-        'id_keuangan',
     ];
 
     protected $dates = ['tgl_transaksi'];
 
     public function pengepul(): BelongsTo
     {
-        return $this->belongsTo(Pengepul::class, 'id_pengepul');
+        return $this->belongsTo(Pengepul::class, 'id_pengepul', 'id');
     }
 
     public function statusTransaksi(): HasMany
     {
-        return $this->hasMany(StatusTransaksi::class, 'id_transaksi');
+        return $this->hasMany(StatusTransaksi::class, 'id_transaksi', 'id');
     }
 
     public function metodePembayaran(): BelongsTo
     {
-        return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran');
+        return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran', 'id');
     }
 
     public function detailTransaksi(): HasMany
     {
-        return $this->hasMany(DetailTransaksi::class, 'id_transaksi');
+        return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id');
     }
 
-    public function keuangan(): BelongsTo
+    public function keuangan(): HasMany
     {
-        return $this->belongsTo(Keuangan::class, 'id_keuangan');
+        return $this->hasmany(Keuangan::class, 'id_transaksi', 'id');
     }
 }

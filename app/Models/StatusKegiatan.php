@@ -12,8 +12,8 @@ class StatusKegiatan extends Model
 {
     use HasFactory;
 
-    protected $table = 'status_kegiatan';
-    protected $primaryKey = 'id_status_kegiatan';
+    protected $table = 'status_kegiatans';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -24,6 +24,11 @@ class StatusKegiatan extends Model
 
     public function detailPenjadwalan(): HasMany
     {
-        return $this->hasMany(DetailPenjadwalan::class, 'id_status_kegiatan');
+        return $this->hasMany(DetailPenjadwalan::class, 'id_status_kegiatan', 'id');
+    }
+
+    public static function defaultStatusId()
+    {
+        return self::where('nama_status_kgtn', 'To Do')->value('id');
     }
 }

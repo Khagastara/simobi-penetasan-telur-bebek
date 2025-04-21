@@ -12,8 +12,8 @@ class MetodePembayaran extends Model
 {
     use HasFactory;
 
-    protected $table = 'metode_pembayaran';
-    protected $primaryKey = 'id_metode_pembayaran';
+    protected $table = 'metode_pembayarans';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -23,6 +23,6 @@ class MetodePembayaran extends Model
 
     public function transaksi(): HasMany
     {
-        return $this->hasMany(Transaksi::class, 'id_metode_pembayaran');
+        return $this->hasMany(Transaksi::class, 'id_metode_pembayaran', 'id');
     }
 }

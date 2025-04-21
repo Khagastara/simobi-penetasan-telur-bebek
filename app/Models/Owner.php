@@ -12,8 +12,8 @@ class Owner extends Model
 {
     use HasFactory;
 
-    protected $table = 'owner';
-    protected $primaryKey = 'id_owner';
+    protected $table = 'owners';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -25,11 +25,11 @@ class Owner extends Model
 
     public function akun(): BelongsTo
     {
-        return $this->belongsTo(Akun::class, 'id_akun');
+        return $this->belongsTo(Akun::class, 'id_akun', 'id');
     }
 
     public function penjadwalanKegiatan(): HasMany
     {
-        return $this->hasMany(penjadwalanKegiatan::class, 'id_owner');
+        return $this->hasMany(penjadwalanKegiatan::class, 'id_owner', 'id');
     }
 }

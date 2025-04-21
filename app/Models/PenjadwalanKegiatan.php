@@ -12,8 +12,8 @@ class PenjadwalanKegiatan extends Model
 {
     use HasFactory;
 
-    protected $table = 'penjadwalan_kegiatan';
-    protected $primaryKey = 'id_kegiatan';
+    protected $table = 'penjadwalan_kegiatans';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -32,5 +32,12 @@ class PenjadwalanKegiatan extends Model
     public function detailPenjadwalan(): HasMany
     {
         return $this->hasMany(DetailPenjadwalan::class, 'id_penjadwalan_kegiatan', 'id');
+    }
+
+    public function scopeUpcomingDates($query)
+    {
+        return $query->where('tgl_penjadwalan', '>=', now())
+            ->pluck('tgl_penjadwalan')
+            ->unique();
     }
 }

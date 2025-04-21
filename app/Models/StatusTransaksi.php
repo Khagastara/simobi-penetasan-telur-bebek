@@ -12,8 +12,8 @@ class StatusTransaksi extends Model
 {
     use HasFactory;
 
-    protected $table = 'status_transaksi';
-    protected $primaryKey = 'id_status_transaksi';
+    protected $table = 'status_transaksis';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -23,6 +23,6 @@ class StatusTransaksi extends Model
 
     public function transaksi(): BelongsTo
     {
-        return $this->belongsTo(Transaksi::class, 'id_transaksi');
+        return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id');
     }
 }

@@ -12,8 +12,8 @@ class StokDistribusi extends Model
 {
     use HasFactory;
 
-    protected $table = 'stok_distribusi';
-    protected $primaryKey = 'id_stok_distribusi';
+    protected $table = 'stok_distribusis';
+    protected $primaryKey = 'id';
     protected $keyType = 'int';
     public $incrementing = true;
     public $timestamps = false;
@@ -23,11 +23,10 @@ class StokDistribusi extends Model
         'harga_stok',
         'deskripsi_stok',
         'gambar_stok',
-        'id_detail_transaksi',
     ];
 
-    public function detailTransaski(): BelongsTo
+    public function detailTransaski(): HasMany
     {
-        return $this->belongsTo(DetailTransaksi::class, 'id_detail_transaksi');
+        return $this->hasMany(DetailTransaksi::class, 'id_detail_transaksi', 'id');
     }
 }
