@@ -13,7 +13,7 @@ class PengepulRegisterController extends Controller
 {
     public function showRegistrationForm()
     {
-        return view('auth.pengepul.register');
+        return view('homepage.pages.pengepul.register');
     }
 
     public function register(PengepulRegisterRequest $request)
