@@ -7,6 +7,7 @@ use App\Http\Controllers\Homepage\Owner\OwnerLoginController;
 use App\Http\Controllers\Homepage\Pengepul\PengepulLoginController;
 use App\Http\Controllers\Homepage\Pengepul\PengepulRegisterController;
 use App\Http\Controllers\Dashboard\Pengepul\PengepulProfilController;
+use App\Http\Controllers\Homepage\Owner\OwnerPasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,3 +77,10 @@ Route::middleware(['auth', 'role:pengepul'])->prefix('dashboard/pengepul')->grou
     Route::put('/profil', [PengepulProfilController::class, 'update'])
          ->name('dashboard.pengepul.profile.update');
 });
+
+Route::get('/forgot-password', [OwnerPasswordResetController::class, 'showForgotPasswordForm'])->name('forgot.password.form');
+Route::post('/forgot-password', [OwnerPasswordResetController::class, 'sendOtp'])->name('forgot.password.send');
+Route::get('/verify-otp', [OwnerPasswordResetController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
+Route::post('/verify-otp', [OwnerPasswordResetController::class, 'verifyOtp'])->name('verify.otp');
+Route::get('/reset-password', [OwnerPasswordResetController::class, 'showResetPasswordForm'])->name('reset.password.form');
+Route::post('/reset-password', [OwnerPasswordResetController::class, 'resetPassword'])->name('reset.password');
