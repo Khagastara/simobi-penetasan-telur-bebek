@@ -36,4 +36,8 @@ class Kernel extends HttpKernel
         'pengepul' => \App\Http\Middleware\AuthenticatePengepul::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
     ];
+
+    protected $routeMiddleware = [
+        'auth:owner' => \App\Http\Middleware\EnsureOwnerIsAuthenticated::class,
+    ];
 }

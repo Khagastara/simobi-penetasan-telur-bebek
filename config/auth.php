@@ -74,11 +74,11 @@ return [
         ],
         'owners' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Akun::class,
+            'model' => App\Models\Owner::class,
         ],
         'pengepuls' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Akun::class,
+            'model' => App\Models\Pengepul::class,
         ],
     ],
     /*
