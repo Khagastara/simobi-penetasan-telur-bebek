@@ -22,6 +22,10 @@ class PenjadwalanKegiatan extends Model
         'id_owner',
     ];
 
+    protected $casts = [
+        'tgl_penjadwalan' => 'date',
+    ];
+
     protected $dates = ['tgl_penjadwalan'];
 
     public function owner(): BelongsTo
@@ -31,7 +35,7 @@ class PenjadwalanKegiatan extends Model
 
     public function detailPenjadwalan(): HasMany
     {
-        return $this->hasMany(DetailPenjadwalan::class, 'id_penjadwalan_kegiatan', 'id');
+        return $this->hasMany(DetailPenjadwalan::class, 'id_penjadwalan', 'id');
     }
 
     public function scopeUpcomingDates($query)
