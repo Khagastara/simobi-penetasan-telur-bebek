@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PenjadwalanKegiatan;
 use App\Models\DetailPenjadwalan;
+use App\Models\StatusKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +19,7 @@ class PenjadwalanKegiatanController extends Controller
 
     public function create()
     {
-        $statusKegiatans = \App\Models\StatusKegiatan::all();
+        $statusKegiatans = StatusKegiatan::all();
         return view('owner.penjadwalan.create', compact('statusKegiatans'));
     }
 
@@ -51,7 +52,8 @@ class PenjadwalanKegiatanController extends Controller
     public function edit($id)
     {
         $penjadwalanKegiatan = PenjadwalanKegiatan::with('detailPenjadwalan')->findOrFail($id);
-        return view('owner.penjadwalan.edit', compact('penjadwalanKegiatan'));
+        $statusKegiatan = StatusKegiatan::all();
+        return view('owner.penjadwalan.edit', compact('penjadwalanKegiatan', 'statusKegiatan'));
     }
 
     public function update(Request $request, $id)

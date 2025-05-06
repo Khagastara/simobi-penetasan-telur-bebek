@@ -33,6 +33,6 @@ class DetailTransaksi extends Model
     }
     public function stokDistribusi(): BelongsTo
     {
-        return $this->belongsTo(StokDistribusi::class, 'id_detail_transaksi', 'id');
+        return $this->belongsTo(StokDistribusi::class, 'id_stok_distribusi', 'id');
     }
 }
