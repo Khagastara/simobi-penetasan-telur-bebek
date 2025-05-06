@@ -21,8 +21,8 @@ class StatusTransaksi extends Model
         'nama_status',
     ];
 
-    public function transaksi(): BelongsTo
+    public function transaksi(): HasMany
     {
-        return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id');
+        return $this->hasMany(Transaksi::class, 'id_status_transaksi', 'id');
     }
 }

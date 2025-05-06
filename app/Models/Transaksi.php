@@ -19,20 +19,23 @@ class Transaksi extends Model
     public $timestamps = false;
     protected $fillable = [
         'tgl_transaksi',
+        'id_status_transaksi',
         'id_pengepul',
         'id_metode_pembayaran',
     ];
 
-    protected $dates = ['tgl_transaksi'];
+    protected $casts = [
+        'tgl_transaksi' => 'datetime',
+    ];
 
     public function pengepul(): BelongsTo
     {
         return $this->belongsTo(Pengepul::class, 'id_pengepul', 'id');
     }
 
-    public function statusTransaksi(): HasMany
+    public function statusTransaksi(): BelongsTo
     {
-        return $this->hasMany(StatusTransaksi::class, 'id_transaksi', 'id');
+        return $this->belongsTo(StatusTransaksi::class, 'id_status_transaksi', 'id');
     }
 
     public function metodePembayaran(): BelongsTo

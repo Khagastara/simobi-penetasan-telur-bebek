@@ -27,6 +27,6 @@ class StokDistribusi extends Model
 
     public function detailTransaski(): HasMany
     {
-        return $this->hasMany(DetailTransaksi::class, 'id_detail_transaksi', 'id');
+        return $this->hasMany(DetailTransaksi::class, 'id_stok_distribusi', 'id');
     }
 }

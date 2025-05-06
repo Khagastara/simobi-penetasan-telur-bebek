@@ -5,6 +5,9 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\PengepulRegisterController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\StokDistribusiController;
+
 use App\Http\Controllers\OwnerProfilController;
 use App\Http\Controllers\PenjadwalanKegiatanController;
 use App\Http\Controllers\TransaksiController;
@@ -22,12 +25,22 @@ Route::get('/', function () {
     return view('auth.welcome');
 });
 
-Route::get('/pengepuls/register', [PengepulRegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/pengepuls/register', [PengepulRegisterController::class, 'register'])->name('register.submit');
-
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])
+    ->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])
+    ->name('password.email');
+Route::get('/otp-verification', [ForgotPasswordController::class, 'showOtpForm'])
+    ->name('password.otp');
+Route::post('/otp-verification', [ForgotPasswordController::class, 'verifyOtp'])
+    ->name('password.otp.verify');
+Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])
+    ->name('password.reset');
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])
+    ->name('password.update');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/owner/dashboard', function () {
@@ -40,13 +53,19 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Owner
-Route::middleware(['auth:owner'])->group(function () {
+// Route::middleware(['auth:owner'])->group(function () {
+//     Route::get('/owner/dashboard', function () {
+//         return view('owner.dashboard');
+//     })->name('owner.dashboard');
+// });
+
+Route::middleware(['auth'])->group(function () {
     Route::get('o/profil', [OwnerProfilController::class, 'show'])->name('owner.profil.show');
     Route::get('o/profil/edit', [OwnerProfilController::class, 'edit'])->name('owner.profil.edit');
     Route::post('o/profil/update', [OwnerProfilController::class, 'update'])->name('owner.profil.update');
 });
 
-Route::middleware(['auth:owner'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/penjadwalan', [PenjadwalanKegiatanController::class, 'index'])->name('owner.penjadwalan.index');
     Route::get('/penjadwalan/create', [PenjadwalanKegiatanController::class, 'create'])->name('owner.penjadwalan.create');
     Route::post('/penjadwalan', [PenjadwalanKegiatanController::class, 'store'])->name('owner.penjadwalan.store');
@@ -54,15 +73,46 @@ Route::middleware(['auth:owner'])->group(function () {
     Route::put('/penjadwalan/{id}', [PenjadwalanKegiatanController::class, 'update'])->name('owner.penjadwalan.update');
 });
 
-Route::middleware(['auth:owner'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/stok', [StokDistribusiController::class, 'index'])->name('owner.stok.index');
+    Route::get('/stok/create', [StokDistribusiController::class, 'create'])->name('owner.stok.create');
+    Route::post('/stok', [StokDistribusiController::class, 'store'])->name('owner.stok.store');
+    Route::get('/stok/{id}', [StokDistribusiController::class, 'show'])->name('owner.stok.show');
+    Route::get('/stok/{id}/edit', [StokDistribusiController::class, 'edit'])->name('owner.stok.edit');
+    Route::put('/stok/{id}', [StokDistribusiController::class, 'update'])->name('owner.stok.update');
+});
+
+Route::middleware(['auth'])->group(function () {
     Route::get('o/riwayat-transaksi', [TransaksiController::class, 'index'])->name('owner.transaksi.index');
     Route::get('o/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('owner.transaksi.show');
+    Route::put('o/riwayat-transaksi/{id}/update-status', [TransaksiController::class, 'updateStatus'])->name('transaksi.update-status');
+
 });
 
 // Pengepul
+// Route::middleware(['auth:pengepul'])->group(function () {
+//     Route::get('/pengepul/dashboard', function () {
+//         return view('pengepul.dashboard');
+//     })->name('pengepul.dashboard');
+// });
 
-Route::middleware(['auth:pengepul'])->group(function () {
+Route::get('/pengepuls/register', [PengepulRegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/pengepuls/register', [PengepulRegisterController::class, 'register'])->name('register.submit');
+
+Route::middleware(['auth'])->group(function () {
     Route::get('p/profil', [PengepulProfilController::class, 'show'])->name('pengepul.profil.show');
     Route::get('p/profil/edit', [PengepulProfilController::class, 'edit'])->name('pengepul.profil.edit');
     Route::post('p/profil/update', [PengepulProfilController::class, 'update'])->name('pengepul.profil.update');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/stok-distribusi', [StokDistribusiController::class, 'indexPengepul'])->name('pengepul.stok.index');
+    Route::get('/stok-distribusi/{id}', [StokDistribusiController::class, 'showPengepul'])->name('pengepul.stok.show');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('p/riwayat-transaksi', [TransaksiController::class, 'index'])->name('pengepul.transaksi.index');
+    Route::get('p/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('pengepul.transaksi.show');
+    Route::get('p/transaksi/create/{stokId}', [TransaksiController::class, 'create'])->name('pengepul.transaksi.create');
+    Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.stok.index');
 });

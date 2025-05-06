@@ -22,7 +22,6 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Username</th>
                                     <th>ID Transaksi</th>
                                     <th>Nama Stok</th>
                                     <th>Kuantitas</th>
@@ -35,7 +34,6 @@
                                 @forelse ($transaksis as $index => $transaksi)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $transaksi['username'] }}</td>
                                         <td>{{ $transaksi['id'] }}</td>
                                         <td>{{ $transaksi['nama_stok'] }}</td>
                                         <td>{{ $transaksi['kuantitas'] }}</td>
@@ -46,16 +44,20 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('owner.transaksi.show', $transaksi['id']) }}" class="btn btn-info btn-sm">Detail</a>
+                                            <a href="{{ route('transaksi.pengepul.show', $transaksi['id']) }}" class="btn btn-info btn-sm">Detail</a>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">Tidak ada data transaksi</td>
+                                        <td colspan="7" class="text-center">Tidak ada data transaksi</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{{ route('stok.pengepul.index') }}" class="btn btn-primary">Buat Transaksi Baru</a>
                     </div>
                 </div>
             </div>
@@ -63,12 +65,6 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    // Script tambahan jika diperlukan
-</script>
-@endpush
 
 @php
 function getStatusBadgeColor($status) {

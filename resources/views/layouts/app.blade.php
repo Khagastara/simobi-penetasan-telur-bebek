@@ -19,8 +19,6 @@
                 {{ $header ?? '' }}
             </div>
         </header>
-
-        <!-- Page Content -->
         <main>
             @yield('content')
         </main>
