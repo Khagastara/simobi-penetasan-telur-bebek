@@ -9,9 +9,5 @@
         <a href="{{ route('owner.transaksi.index') }}" class="btn btn-info">Riwayat Transaksi</a>
         <a href="{{ route('owner.stok.index') }}" class="btn btn-info">Stok Distribusi</a>
         <a href="{{ route('owner.transaksi.index') }}" class="btn btn-info">Riwayat Transaksi</a>
-        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-            @csrf
-            <button type="submit" class="btn btn-danger">Logout</button>
-        </form>
     </div>
 @endsection

@@ -46,7 +46,7 @@ class ForgotPasswordController extends Controller
 
     public function showOtpForm(Request $request)
     {
-        return view('Auth.otp-verification', ['email' => $request->email]);
+        return view('Auth.forgot-password', ['email' => $request->email]);
     }
 
     public function verifyOtp(Request $request)
@@ -71,9 +71,7 @@ class ForgotPasswordController extends Controller
         $cachedOtp = Cache::get('otp_' . $email);
 
         if (!$cachedOtp || $cachedOtp != $otp) {
-            return redirect()->back()
-                ->with('error', 'Kode OTP tidak valid')
-                ->withInput();
+            return redirect()->back()->with('error', 'Kode OTP tidak valid')->withInput();
         }
 
         return redirect()->route('password.reset', ['email' => $email, 'token' => Str::random(60)]);

@@ -72,14 +72,4 @@ class LoginController extends Controller
             'username' => 'Username atau password salah',
         ]);
     }
-
-    public function logout()
-    {
-        // Logout from all possible guards
-        Auth::guard('web')->logout();
-        Auth::guard('owner')->logout();
-        Auth::guard('pengepul')->logout();
-
-        return redirect()->route('login');
-    }
 }
