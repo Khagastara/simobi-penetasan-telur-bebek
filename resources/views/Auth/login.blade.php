@@ -78,13 +78,19 @@
                     </div>
                 </div>
             </div>
-
             <!-- Footer -->
             <div class="mt-6 text-center">
                 <p class="text-xs text-gray-500">
                     &copy; 2024 SiMOBI - Tim PPL Agroindustri B4. All rights reserved.
                 </p>
             </div>
+
         </div>
+            <button type="submit" class="btn btn-primary">Masuk</button>
+
+            <a href="{{ route('password.request') }}" class="btn btn-link">
+                Lupa Password?
+            </a>
+        </form>
     </div>
 @endsection

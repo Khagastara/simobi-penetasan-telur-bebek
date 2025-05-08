@@ -55,4 +55,12 @@ class PengepulProfilController extends Controller
 
         return redirect()->route('pengepul.profil.show')->with('success', 'Data berhasil diubah');
     }
+
+    public function logout()
+    {
+        Auth::guard('web')->logout();
+        Auth::guard('pengepul')->logout();
+
+        return redirect()->route('login');
+    }
 }

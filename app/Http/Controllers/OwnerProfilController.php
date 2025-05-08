@@ -56,4 +56,12 @@ class OwnerProfilController extends Controller
 
         return redirect()->route('owner.profil.show')->with('success', 'Data berhasil diubah');
     }
+
+    public function logout()
+    {
+        Auth::guard('web')->logout();
+        Auth::guard('owner')->logout();
+
+        return redirect()->route('login');
+    }
 }

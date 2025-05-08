@@ -52,40 +52,24 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Try to log in using Laravel's Auth system
         if (Auth::attempt([
             'username' => $request->username,
             'password' => $request->password,
         ])) {
-            // Redirect based on user type
-            $akun = Auth::user();
+
+            $akun = Auth::guard('web')->user();
             if ($akun->owner) {
-                if (Auth::guard('owner')->attempt([
-                    'username' => $request->username,
-                    'password' => $request->password
-                ])) {
-                    return redirect()->route('owner.dashboard');
-                }
+                Auth::guard('owner')->login($akun->owner);
+                return redirect()->route('owner.dashboard');
             }
             elseif ($akun->pengepul) {
-                if (Auth::guard('pengepul')->attempt([
-                    'username' => $request->username,
-                    'password' => $request->password
-                ])) {
-                    return redirect()->route('pengepul.dashboard');
-                }
+                Auth::guard('pengepul')->login($akun->pengepul);
+                return redirect()->route('pengepul.dashboard');
             }
         }
 
-        // If login fails
         return back()->withErrors([
             'username' => 'Username atau password salah',
         ]);
-    }
-
-    public function logout()
-    {
-        Auth::logout();
-        return redirect()->route('login'); // Redirect to login page
     }
 }
