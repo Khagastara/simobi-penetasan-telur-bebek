@@ -6,6 +6,7 @@ use App\Models\PenjadwalanKegiatan;
 use App\Models\DetailPenjadwalan;
 use App\Models\StatusKegiatan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class PenjadwalanKegiatanController extends Controller
@@ -53,6 +54,7 @@ class PenjadwalanKegiatanController extends Controller
     {
         $penjadwalanKegiatan = PenjadwalanKegiatan::with('detailPenjadwalan')->findOrFail($id);
         $statusKegiatan = StatusKegiatan::all();
+
         return view('owner.penjadwalan.edit', compact('penjadwalanKegiatan', 'statusKegiatan'));
     }
 
@@ -61,22 +63,28 @@ class PenjadwalanKegiatanController extends Controller
         $request->validate([
             'tgl_penjadwalan' => 'required|date',
             'detail_penjadwalan.*.waktu_kegiatan' => 'required|date_format:H:i',
-            'detail_penjadwalan.*.keterangan' => 'required|string|max:255',
+            'detail_penjadwalan.*.keterangan' => 'required|string',
             'detail_penjadwalan.*.id_status_kegiatan' => 'required|exists:status_kegiatans,id',
         ]);
 
         $penjadwalanKegiatan = PenjadwalanKegiatan::findOrFail($id);
-        $penjadwalanKegiatan->tgl_penjadwalan = $request->tgl_penjadwalan;
-        $penjadwalanKegiatan->save();
+        $penjadwalanKegiatan->update([
+            'tgl_penjadwalan' => $request->tgl_penjadwalan,
+        ]);
 
+        Log::info($request->all());
         foreach ($request->detail_penjadwalan as $detail) {
-            $detailPenjadwalan = DetailPenjadwalan::findOrFail($detail['id']);
-            $detailPenjadwalan->waktu_kegiatan = $detail['waktu_kegiatan'];
-            $detailPenjadwalan->keterangan = $detail['keterangan'];
-            $detailPenjadwalan->id_status_kegiatan = $detail['id_status_kegiatan'];
-            $detailPenjadwalan->save();
+            DetailPenjadwalan::updateOrCreate(
+                ['id' => $detail['id']],
+                [
+                    'penjadwalan_kegiatan_id' => $penjadwalanKegiatan->id,
+                    'waktu_kegiatan' => $detail['waktu_kegiatan'],
+                    'keterangan' => $detail['keterangan'],
+                    'id_status_kegiatan' => $detail['id_status_kegiatan'],
+                ]
+            );
         }
 
-        return redirect()->route('penjadwalan.index')->with('success', 'Jadwal berhasil diubah');
+        return redirect()->route('owner.penjadwalan.index')->with('success', 'Jadwal updated successfully.');
     }
 }

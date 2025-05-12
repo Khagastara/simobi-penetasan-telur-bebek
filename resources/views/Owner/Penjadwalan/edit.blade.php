@@ -24,9 +24,14 @@
             <h3>Detail Kegiatan</h3>
             @foreach($penjadwalanKegiatan->detailPenjadwalan as $detail)
                 <div class="detail-item">
+                    <input type="hidden" name="detail_penjadwalan[{{ $loop->index }}][id]" value="{{ $detail->id }}">
+
                     <div class="form-group">
                         <label for="waktu_kegiatan">Waktu Kegiatan:</label>
-                        <input type="time" name="detail_penjadwalan[{{ $loop->index }}][waktu_kegiatan]" class="form-control" value="{{ $detail->waktu_kegiatan }}" required>
+                        <input type="time" name="detail_penjadwalan[{{ $loop->index }}][waktu_kegiatan]"
+                            class="form-control"
+                            value="{{ isset($detail->waktu_kegiatan) ? \Carbon\Carbon::createFromFormat('H:i:s', $detail->waktu_kegiatan)->format('H:i') : '' }}"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="keterangan">Keterangan:</label>
@@ -34,16 +39,16 @@
                     </div>
                     <div class="form-group">
                         <label for="id_status_kegiatan">Status Kegiatan:</label>
-                        <select name="detail_penjadwalan[{{ $loop ->index }}][id_status_kegiatan]" class="form-control" required>
+                        <select name="detail_penjadwalan[{{ $loop->index }}][id_status_kegiatan]" class="form-control" required>
                             @foreach($statusKegiatan as $status)
                                 <option value="{{ $status->id }}" {{ $detail->id_status_kegiatan == $status->id ? 'selected' : '' }}>
-                                    {{ $status->nama_status }}
+                                    {{ $status->nama_status_kgtn }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-            @endforeach
+                @endforeach
 
             <button type="submit" class="btn btn-primary">Simpan</button>
         </form>
