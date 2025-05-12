@@ -12,6 +12,9 @@
                 <a href="{{ route('owner.penjadwalan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.penjadwalan*') ? 'active-menu' : '' }}">
                     <i class="fas fa-egg mr-2"></i> Jadwal
                 </a>
+                <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
+                    <i class="fas fa-exchange-alt mr-2"></i> Stok Distribusi
+                </a>
                 <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
                     <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
                 </a>
@@ -21,7 +24,7 @@
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
                 </form>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                    class="block px-4 py-2 rounded hover:text-black">
                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                 </a>
@@ -47,7 +50,7 @@
             <div class="p-8">
                 <h1 class="text-2xl font-bold text-[#877B66] mb-4">Dashboard Owner</h1>
                 <p class="mb-6">Welcome, {{ Auth::user()->owner->nama }}!</p>
-                
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <a href="{{ route('owner.profil.show') }}" class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition border-l-4 border-[#AFC97E]">
                         <h3 class="text-lg font-bold text-[#877B66] mb-2">Profil</h3>

@@ -22,8 +22,7 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Username</th>
-                                    <th>ID Transaksi</th>
+                                    <th>Nama Pengepul</th>
                                     <th>Nama Stok</th>
                                     <th>Kuantitas</th>
                                     <th>Total Transaksi</th>
@@ -36,7 +35,6 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $transaksi['username'] }}</td>
-                                        <td>{{ $transaksi['id'] }}</td>
                                         <td>{{ $transaksi['nama_stok'] }}</td>
                                         <td>{{ $transaksi['kuantitas'] }}</td>
                                         <td>Rp {{ number_format($transaksi['total_transaksi'], 0, ',', '.') }}</td>

@@ -94,5 +94,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('p/riwayat-transaksi', [TransaksiController::class, 'index'])->name('pengepul.transaksi.index');
     Route::get('p/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('pengepul.transaksi.show');
     Route::get('p/transaksi/create/{stokId}', [TransaksiController::class, 'create'])->name('pengepul.transaksi.create');
-    Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.stok.index');
+    Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.transaksi.store');
 });

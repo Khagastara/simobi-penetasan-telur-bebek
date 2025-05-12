@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nama_status_kgtn');
             $table->text('deskripsi')->nullable();
+
+            $table->timestamps();
         });
     }
 

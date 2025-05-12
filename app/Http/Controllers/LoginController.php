@@ -13,38 +13,6 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'username' => 'required|string',
-    //         'password' => 'required|string',
-    //     ]);
-
-    //     // Attempt to find the user by username
-    //     $akun = Akun::where('username', $request->username)->first();
-
-    //     if (!$akun) {
-    //         return back()->withErrors(['username' => 'Username tidak terdaftar']);
-    //     }
-
-    //     // Check if the password is correct
-    //     if (!password_verify($request->password, $akun->password)) {
-    //         return back()->withErrors(['password' => 'Password salah']);
-    //     }
-
-    //     // Log the user in
-    //     Auth::login($akun);
-
-    //     // Redirect based on user type
-    //     if ($akun->owner) {
-    //         return redirect()->route('owner.dashboard'); // Define this route
-    //     } elseif ($akun->pengepul) {
-    //         return redirect()->route('pengepul.dashboard'); // Define this route
-    //     }
-
-    //     return redirect()->route('home'); // Default route
-    // }
-
     public function login(Request $request)
     {
         $request->validate([
