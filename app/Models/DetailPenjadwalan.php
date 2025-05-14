@@ -34,4 +34,16 @@ class DetailPenjadwalan extends Model
     {
         return $this->belongsTo(StatusKegiatan::class, 'id_status_kegiatan', 'id');
     }
+
+    public function isDue()
+    {
+        $scheduledDate = $this->penjadwalanKegiatan->tgl_penjadwalan;
+        $scheduledTime = $this->waktu_kegiatan;
+
+        $now = now();
+        $today = $now->format('Y-m-d');
+        $currentTime = $now->format('H:i');
+
+        return $scheduledDate == $today && $scheduledTime == $currentTime;
+    }
 }
