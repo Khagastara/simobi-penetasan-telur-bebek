@@ -46,45 +46,23 @@
                                 required
                             >
                         </div>
-
-                        <!-- Submit Button -->
                         <button
                             type="submit"
-                            class="w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-[#FFDF64] text-black hover:bg-[#E2D686] hover:translate-y-[-1px] transition-all duration-200"
-                        >
-                    </div>
-
-                    <!-- Register Link -->
-                    <div class="mt-6 text-center">
-                        <p class="text-sm text-[#877B66]">
-                            Belum punya akun?
-                            <a href="{{ route('register') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
-                                Daftar sebagai Pengepul
+                            class="w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-[#FFDF64] text-black hover:bg-[#E2D686] hover:translate-y-[-1px] transition-all duration-200"> Masuk
+                        </button>
+                        <div class="mt-6 text-center">
+                            <p class="text-sm text-[#877B66]">
+                                Belum punya akun?
+                                <a href="{{ route('register') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
+                                    Daftar sebagai Pengepul
+                                </a>
+                            </p>
+                            <a href="{{ route('password.request') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
+                                Lupa Password?
                             </a>
-                        </p>
-                        <a href="{{ route('password.request') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
-                            Lupa Password?
-                        </a>
+                        </div>
                     </div>
-
-                    <!-- Submit Button -->
-                    <button 
-                        type="submit"
-                        class="w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-[#FFDF64] text-black hover:bg-[#E2D686] hover:translate-y-[-1px] transition-all duration-200"
-                    >
-                        Masuk
-                    </button>
                 </form>
-
-                <!-- Register Link -->
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-[#877B66]">
-                        Belum punya akun? 
-                        <a href="{{ route('register') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
-                            Daftar sebagai Pengepul
-                        </a>
-                    </p>
-                </div>
             </div>
         </div>
         </form>
