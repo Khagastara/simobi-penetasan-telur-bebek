@@ -35,10 +35,10 @@
                             <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
                                 Username
                             </label>
-                            <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:border-[#E2D686] focus:shadow-[0_0_0_3px_rgba(226,214,134,0.4)] transition duration-200"
                                 required
                             >
@@ -49,17 +49,17 @@
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
                                 Password
                             </label>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:border-[#E2D686] focus:shadow-[0_0_0_3px_rgba(226,214,134,0.4)] transition duration-200"
                                 required
                             >
                         </div>
 
                         <!-- Submit Button -->
-                        <button 
+                        <button
                             type="submit"
                             class="w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-[#FFDF64] text-black hover:bg-[#E2D686] hover:translate-y-[-1px] transition-all duration-200"
                         >
@@ -70,11 +70,14 @@
                     <!-- Register Link -->
                     <div class="mt-6 text-center">
                         <p class="text-sm text-[#877B66]">
-                            Belum punya akun? 
+                            Belum punya akun?
                             <a href="{{ route('register') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
                                 Daftar sebagai Pengepul
                             </a>
                         </p>
+                        <a href="{{ route('password.request') }}" class="text-[#AFC97E] font-medium hover:text-[#E2D686] hover:underline">
+                            Lupa Password?
+                        </a>
                     </div>
                 </div>
             </div>
@@ -86,11 +89,6 @@
             </div>
 
         </div>
-            <button type="submit" class="btn btn-primary">Masuk</button>
-
-            <a href="{{ route('password.request') }}" class="btn btn-link">
-                Lupa Password?
-            </a>
         </form>
     </div>
 @endsection

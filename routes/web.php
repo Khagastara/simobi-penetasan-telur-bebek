@@ -98,8 +98,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/stok-distribusi', [StokDistribusiController::class, 'indexPengepul'])->name('pengepul.stok.index');
     Route::get('/stok-distribusi/{id}', [StokDistribusiController::class, 'showPengepul'])->name('pengepul.stok.show');
 
-    Route::get('p/riwayat-transaksi', [TransaksiController::class, 'index'])->name('pengepul.transaksi.index');
-    Route::get('p/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('pengepul.transaksi.show');
+    Route::get('p/riwayat-transaksi', [TransaksiController::class, 'indexPengepul'])->name('pengepul.transaksi.index');
+    Route::get('p/riwayat-transaksi/{id}', [TransaksiController::class, 'showPengepul'])->name('pengepul.transaksi.show');
     Route::get('p/transaksi/create/{stokId}', [TransaksiController::class, 'create'])->name('pengepul.transaksi.create');
     Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.transaksi.store');
 });
