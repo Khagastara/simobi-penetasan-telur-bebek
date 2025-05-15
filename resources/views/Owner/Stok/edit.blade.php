@@ -1,69 +1,88 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Ubah Stok Distribusi</h4>
-                </div>
-
-                <div class="card-body">
-                    @if (session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    <form action="{{ route('owner.stok.update', $stok->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="mb-3">
-                            <label for="nama_stok" class="form-label">Nama Stok <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama_stok" name="nama_stok" value="{{ old('nama_stok', $stok->nama_stok) }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="gambar_stok" class="form-label">Gambar Stok</label>
-                            <div class="mb-2">
-                                <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
-                                    alt="{{ $stok->nama_stok }}"
-                                    class="img-thumbnail"
-                                    style="max-height: 150px;">
-                            </div>
-                            <input type="file" class="form-control" id="gambar_stok" name="gambar_stok">
-                            <small class="text-muted">Format: JPG, JPEG, PNG, GIF. Maksimal ukuran: 2MB. Biarkan kosong jika tidak ingin mengubah gambar.</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="jumlah_stok" class="form-label">Jumlah Stok <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="jumlah_stok" name="jumlah_stok" value="{{ old('jumlah_stok', $stok->jumlah_stok) }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="harga_stok" class="form-label">Harga Stok <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                <input type="number" class="form-control" id="harga_stok" name="harga_stok" value="{{ old('harga_stok', $stok->harga_stok) }}" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="deskripsi_stok" class="form-label">Deskripsi Stok</label>
-                            <textarea class="form-control" id="deskripsi_stok" name="deskripsi_stok" rows="4">{{ old('deskripsi_stok', $stok->deskripsi_stok) }}</textarea>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ route('owner.stok.show', $stok->id) }}" class="btn btn-secondary">Kembali</a>
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                        </div>
-                    </form>
-                </div>
+<main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
+    <!-- Topbar -->
+    <header class="topbar p-6 shadow-md">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold text-[#877B66]">Ubah Stok Distribusi</h1>
+                <p class="text-sm text-gray-700">Formulir untuk memperbarui data stok</p>
+            </div>
+            <div class="text-right text-gray-800">
+                <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
             </div>
         </div>
-    </div>
-</div>
+    </header>
+
+    <!-- Content -->
+    <section class="p-8">
+        @if (session('error'))
+            <div class="bg-red-500 text-white px-4 py-2 rounded-lg shadow mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <div class="bg-white p-6 rounded-xl shadow-md max-w-3xl mx-auto">
+            <form action="{{ route('owner.stok.update', $stok->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+
+                <div class="mb-4">
+                    <label for="nama_stok" class="block font-semibold text-[#877B66] mb-1">Nama Stok <span class="text-red-500">*</span></label>
+                    <input type="text" name="nama_stok" id="nama_stok"
+                        value="{{ old('nama_stok', $stok->nama_stok) }}"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-[#AFC97E]" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="gambar_stok" class="block font-semibold text-[#877B66] mb-1">Gambar Stok</label>
+                    <div class="mb-2">
+                        <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
+                            alt="{{ $stok->nama_stok }}"
+                            class="rounded-lg max-h-[150px]">
+                    </div>
+                    <input type="file" name="gambar_stok" id="gambar_stok"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    <p class="text-xs text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengubah gambar.</p>
+                </div>
+
+                <div class="mb-4">
+                    <label for="jumlah_stok" class="block font-semibold text-[#877B66] mb-1">Jumlah Stok <span class="text-red-500">*</span></label>
+                    <input type="number" name="jumlah_stok" id="jumlah_stok"
+                        value="{{ old('jumlah_stok', $stok->jumlah_stok) }}"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-[#AFC97E]" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="harga_stok" class="block font-semibold text-[#877B66] mb-1">Harga Stok <span class="text-red-500">*</span></label>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-600">Rp</span>
+                        <input type="number" name="harga_stok" id="harga_stok"
+                            value="{{ old('harga_stok', $stok->harga_stok) }}"
+                            class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-[#AFC97E]" required>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="deskripsi_stok" class="block font-semibold text-[#877B66] mb-1">Deskripsi Stok</label>
+                    <textarea name="deskripsi_stok" id="deskripsi_stok" rows="4"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-[#AFC97E]">{{ old('deskripsi_stok', $stok->deskripsi_stok) }}</textarea>
+                </div>
+
+                <!-- Tombol bawah -->
+                <div class="flex justify-between">
+                    <a href="{{ route('owner.stok.show', $stok->id) }}"
+                        class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg shadow transition">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali
+                    </a>
+                    <button type="submit"
+                        class="bg-[#AFC97E] hover:bg-[#94b260] text-white px-4 py-2 rounded-lg shadow transition">
+                        <i class="fas fa-save mr-1"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
 @endsection
