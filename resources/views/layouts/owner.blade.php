@@ -106,7 +106,7 @@
 
     @stack('styles')
 </head>
-<body>
+{{-- <body>
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
@@ -156,10 +156,10 @@
                     <div class="d-flex align-items-center ms-auto">
                         <div class="dropdown">
                             <a href="#" class="dropdown-toggle d-flex align-items-center text-decoration-none"
-                               id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="user-profile me-2">
                                     <img src="{{ Auth::user()->owner->foto_profil ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&background=random' }}"
-                                         alt="Profile Picture">
+                                        alt="Profile Picture">
                                 </div>
                                 <span>{{ Auth::user()->name }}</span>
                             </a>
@@ -168,7 +168,7 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="fas fa-sign-out-alt me-2"></i> Logout
                                     </a>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -179,7 +179,7 @@
                         </div>
                     </div>
                 </div>
-            </nav>
+            </nav> --}}
 
             <!-- Page Content -->
             <div class="container-fluid">
@@ -203,7 +203,7 @@
             const sidebar = document.getElementById('sidebar');
             const isClickInsideSidebar = sidebar.contains(event.target);
             const isClickOnToggle = event.target === document.getElementById('sidebarToggle') ||
-                                  document.getElementById('sidebarToggle').contains(event.target);
+                                document.getElementById('sidebarToggle').contains(event.target);
 
             if (window.innerWidth <= 768 && !isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('active')) {
                 sidebar.classList.remove('active');

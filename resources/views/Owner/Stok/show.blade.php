@@ -1,58 +1,69 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Detail Stok Distribusi</h4>
-                    <a href="{{ route('owner.stok.edit', $stok->id) }}" class="btn btn-warning">Ubah</a>
+    <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
+        <!-- Top Banner -->
+        <header class="topbar p-6 shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-[#877B66]">Detail Stok Distribusi</h1>
+                    <p class="text-sm text-gray-700">Informasi lengkap terkait stok distribusi</p>
                 </div>
-
-                <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="text-center mb-4">
-                                <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
-                                    alt="{{ $stok->nama_stok }}"
-                                    class="img-fluid rounded"
-                                    style="max-height: 300px;">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h4>{{ $stok->nama_stok }}</h4>
-                            <hr>
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="40%">Harga</th>
-                                    <td>: Rp {{ number_format($stok->harga_stok, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Jumlah Stok</th>
-                                    <td>: {{ $stok->jumlah_stok }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Deskripsi</th>
-                                    <td>: {{ $stok->deskripsi_stok ?: '-' }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <a href="{{ route('owner.stok.index') }}" class="btn btn-secondary">Kembali</a>
-                    </div>
+                <div class="text-right text-gray-800">
+                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        </header>
+
+        <!-- Main Content -->
+        <section class="p-8">
+            @if (session('success'))
+                <div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow mb-4">
+                    {{ session('success') }}
+                </div>
+                <script>
+                    setTimeout(() => {
+                        document.querySelector('.bg-green-500').remove();
+                    }, 3000);
+                </script>
+            @endif
+
+            <div class="bg-white p-6 rounded-xl shadow-md max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="text-center">
+                        <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
+                             alt="{{ $stok->nama_stok }}"
+                             class="rounded-xl max-h-[300px] mx-auto">
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-[#877B66] mb-4">{{ $stok->nama_stok }}</h2>
+                        <table class="w-full text-sm text-gray-700">
+                            <tr>
+                                <th class="w-1/3 align-top">Harga</th>
+                                <td>: Rp {{ number_format($stok->harga_stok, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr>
+                                <th class="align-top">Jumlah Stok</th>
+                                <td>: {{ $stok->jumlah_stok }}</td>
+                            </tr>
+                            <tr>
+                                <th class="align-top">Deskripsi</th>
+                                <td>: {{ $stok->deskripsi_stok ?: '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tombol di dalam card, posisi kiri-kanan -->
+                <div class="mt-6 flex justify-between">
+                    <a href="{{ route('owner.stok.index') }}" class="inline-block bg-gray-400 text-white hover:bg-gray-500 px-4 py-2 rounded-lg shadow transition">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali
+                    </a>
+                    <a href="{{ route('owner.stok.edit', $stok->id) }}" class="inline-block bg-yellow-400 text-white hover:bg-yellow-500 px-4 py-2 rounded-lg shadow transition">
+                        <i class="fas fa-edit mr-1"></i> Ubah
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
 @endsection

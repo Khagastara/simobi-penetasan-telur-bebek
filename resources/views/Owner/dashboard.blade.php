@@ -12,6 +12,9 @@
                 <a href="{{ route('owner.penjadwalan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.penjadwalan*') ? 'active-menu' : '' }}">
                     <i class="fas fa-egg mr-2"></i> Jadwal
                 </a>
+                <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
+                    <i class="fas fa-exchange-alt mr-2"></i> Stok Distribusi
+                    
                 <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
                     <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
                 </a>
@@ -22,7 +25,7 @@
                     @csrf
                 </form>
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
-                   class="block px-4 py-2 rounded hover:text-black">
+                    class="block px-4 py-2 rounded hover:text-black">
                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                 </a>
             </nav>
@@ -64,16 +67,6 @@
                 </div>
             </div>
         </main>
-    <div class="container">
-        <h1>Dashboard Owner</h1>
-        <p>Welcome, {{ Auth::user()->owner->nama }}!</p>
-        <a href="{{ route('owner.profil.show') }}" class="btn btn-info">Profil</a>
-        <a href="{{ route('owner.penjadwalan.index') }}" class="btn btn-primary">Jadwal</a>
-        <a href="{{ route('owner.transaksi.index') }}" class="btn btn-info">Riwayat Transaksi</a>
-        <a href="{{ route('owner.stok.index') }}" class="btn btn-info">Stok Distribusi</a>
-        <a href="{{ route('owner.transaksi.index') }}" class="btn btn-info">Riwayat Transaksi</a>
-    </div>
-
     @if(session('success'))
         <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
             {{ session('success') }}
