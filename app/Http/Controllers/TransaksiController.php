@@ -94,12 +94,12 @@ class TransaksiController extends Controller
 
     public function indexPengepul()
     {
-        $pengepulId = Auth::user()->pengepul->id;
+        $pengepul = Auth::user()->pengepul;
 
         $transaksis = Transaksi::with(['detailTransaksi.stokDistribusi', 'statusTransaksi'])
-            ->where('id_pengepul', $pengepulId)
+            ->where('id_pengepul', $pengepul->id)
             ->get()
-            ->map(function ($transaksi) {
+            ->map(function ($transaksi) use ($pengepul) {
                 $latestStatus = $transaksi->statusTransaksi()
                     ->orderBy('id', 'desc')
                     ->first();
@@ -108,7 +108,7 @@ class TransaksiController extends Controller
 
                 return [
                     'id' => $transaksi->id,
-                    'username' => Auth::user()->name,
+                    'username' => $pengepul->nama,
                     'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
                     'kuantitas' => $detail ? $detail->kuantitas : 0,
                     'total_transaksi' => $detail ? $detail->sub_total : 0,
@@ -119,12 +119,13 @@ class TransaksiController extends Controller
         return view('pengepul.transaksi.index', compact('transaksis'));
     }
 
+
     public function showPengepul($id)
     {
-        $pengepulId = Auth::user()->pengepul->id;
+        $pengepul = Auth::user()->pengepul;
 
         $transaksi = Transaksi::with(['detailTransaksi.stokDistribusi', 'metodePembayaran', 'statusTransaksi'])
-            ->where('id_pengepul', $pengepulId)
+            ->where('id_pengepul', $pengepul)
             ->findOrFail($id);
 
         $latestStatus = $transaksi->statusTransaksi()
@@ -135,7 +136,7 @@ class TransaksiController extends Controller
 
         $transaksiDetail = [
             'id' => $transaksi->id,
-            'username' => Auth::user()->name,
+            'username' => $pengepul->nama,
             'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
             'kuantitas' => $detail ? $detail->kuantitas : 0,
             'total_transaksi' => $detail ? $detail->sub_total : 0,
