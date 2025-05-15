@@ -24,78 +24,57 @@
                     </ul>
                 </div>
             @endif
-            <h3>Detail Kegiatan</h3>
-            @foreach($penjadwalanKegiatan->detailPenjadwalan as $detail)
-                <div class="detail-item">
-                    <input type="hidden" name="detail_penjadwalan[{{ $loop->index }}][id]" value="{{ $detail->id }}">
-
-                    <div class="form-group">
-                        <label for="waktu_kegiatan">Waktu Kegiatan:</label>
-                        <input type="time" name="detail_penjadwalan[{{ $loop->index }}][waktu_kegiatan]"
-                            class="form-control"
-                            value="{{ isset($detail->waktu_kegiatan) ? \Carbon\Carbon::createFromFormat('H:i:s', $detail->waktu_kegiatan)->format('H:i') : '' }}"
-                            required>
-                    </div>
-                    <div class="form-group">
-                        <label for="keterangan">Keterangan:</label>
-                        <input type="text" name="detail_penjadwalan[{{ $loop->index }}][keterangan]" class="form-control" value="{{ $detail->keterangan }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_status_kegiatan">Status Kegiatan:</label>
-                        <select name="detail_penjadwalan[{{ $loop->index }}][id_status_kegiatan]" class="form-control" required>
-                            @foreach($statusKegiatan as $status)
-                                <option value="{{ $status->id }}" {{ $detail->id_status_kegiatan == $status->id ? 'selected' : '' }}>
-                                    {{ $status->nama_status_kgtn }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                @endforeach
-
             <div class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto">
-                <form action="{{ route('owner.penjadwalan.update', $penjadwalanKegiatan->id) }}" method="POST" class="space-y-6">
-                    @csrf
-                    @method('PUT')
+                @if(isset($penjadwalanKegiatan))
+                    <form action="{{ route('owner.penjadwalan.update', $penjadwalanKegiatan->id) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('PUT')
 
-                    <div>
-                        <label for="tgl_penjadwalan" class="block text-sm font-medium text-[#877B66] mb-1">Tanggal Penjadwalan:</label>
-                        <input type="date" name="tgl_penjadwalan" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" value="{{ $penjadwalanKegiatan->tgl_penjadwalan->format('Y-m-d') }}" required>
-                    </div>
-
-                    <h3 class="text-lg font-semibold text-[#877B66] border-b pb-2">Detail Kegiatan</h3>
-
-                    @foreach($penjadwalanKegiatan->detailPenjadwalan as $detail)
-                        <div class="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Kegiatan:</label>
-                                <input type="time" name="detail_penjadwalan[{{ $loop->index }}][waktu_kegiatan]" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" value="{{ $detail->waktu_kegiatan }}" required>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan:</label>
-                                <input type="text" name="detail_penjadwalan[{{ $loop->index }}][keterangan]" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" value="{{ $detail->keterangan }}" required>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Status Kegiatan:</label>
-                                <select name="detail_penjadwalan[{{ $loop ->index }}][id_status_kegiatan]" class="form-select w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
-                                    @foreach($statusKegiatan as $status)
-                                        <option value="{{ $status->id }}" {{ $detail->id_status_kegiatan == $status->id ? 'selected' : '' }}>
-                                            {{ $status->nama_status }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div>
+                            <label for="tgl_penjadwalan" class="block text-sm font-medium text-[#877B66] mb-1">Tanggal Penjadwalan:</label>
+                            <input type="date" name="tgl_penjadwalan" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" value="{{ $penjadwalanKegiatan->tgl_penjadwalan->format('Y-m-d') }}" required>
                         </div>
-                    @endforeach
 
-                    <div class="text-right">
-                        <button type="submit" class="bg-[#AFC97E] hover:bg-[#8fa866] text-white font-semibold px-6 py-2 rounded-lg shadow transition">
-                            Simpan Perubahan
-                        </button>
+                        <h3 class="text-lg font-semibold text-[#877B66] border-b pb-2">Detail Kegiatan</h3>
+
+                        @foreach($penjadwalanKegiatan->detailPenjadwalan as $detail)
+                            <div class="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
+                                <input type="hidden" name="detail_penjadwalan[{{ $loop->index }}][id]" value="{{ $detail->id }}">
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Kegiatan:</label>
+                                    <input type="time" name="detail_penjadwalan[{{ $loop->index }}][waktu_kegiatan]" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" value="{{ \Carbon\Carbon::parse($detail->waktu_kegiatan)->format('H:i') }}" required>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan:</label>
+                                    <input type="text" name="detail_penjadwalan[{{ $loop->index }}][keterangan]" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" value="{{ $detail->keterangan }}" required>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status Kegiatan:</label>
+                                    <select name="detail_penjadwalan[{{ $loop->index }}][id_status_kegiatan]" class="form-select w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
+                                        @foreach($statusKegiatan as $status)
+                                        <option value="{{ $status->id }}" {{ $detail->id_status_kegiatan == $status->id ? 'selected' : '' }}>
+                                            {{ $status->nama_status_kgtn }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div class="text-right">
+                            <button type="submit" class="bg-[#AFC97E] hover:bg-[#8fa866] text-white font-semibold px-6 py-2 rounded-lg shadow transition">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                @else
+                    <div class="text-center py-8">
+                        <p class="text-red-500">Data penjadwalan tidak ditemukan</p>
                     </div>
-                </form>
+                @endif
             </div>
         </section>
     </main>

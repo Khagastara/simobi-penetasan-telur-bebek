@@ -2,6 +2,7 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
+        
         <!-- Top Banner -->
         <header class="topbar p-6 shadow-md">
             <div class="flex items-center justify-between">

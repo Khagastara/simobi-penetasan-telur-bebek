@@ -73,7 +73,6 @@ class PenjadwalanKegiatanController extends Controller
             'tgl_penjadwalan' => $request->tgl_penjadwalan,
         ]);
 
-        Log::info($request->all());
         foreach ($request->detail_penjadwalan as $detail) {
             DetailPenjadwalan::updateOrCreate(
                 ['id' => $detail['id']],
