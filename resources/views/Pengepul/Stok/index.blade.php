@@ -21,7 +21,7 @@
                                     <div class="card-body">
                                         <h5 class="card-title">{{ $stok->nama_stok }}</h5>
                                         <p class="card-text text-primary fw-bold">Rp {{ number_format($stok->harga_stok, 0, ',', '.') }}</p>
-                                        <a href="{{ route('stok.pengepul.show', $stok->id) }}" class="btn btn-info">Detail</a>
+                                        <a href="{{ route('pengepul.stok.show', $stok->id) }}" class="btn btn-info">Detail</a>
                                     </div>
                                 </div>
                             </div>

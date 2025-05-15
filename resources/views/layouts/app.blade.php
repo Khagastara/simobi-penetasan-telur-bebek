@@ -25,5 +25,15 @@
             @yield('content')
         </main>
     </div>
+
+    @auth
+        <enable-notifications></enable-notifications>
+    @endauth
+
+    @push('scripts')
+    <script>
+        Vue.component('enable-notifications', require('./components/EnableNotifications.vue').default);
+    </script>
+    @endpush
 </body>
 </html>

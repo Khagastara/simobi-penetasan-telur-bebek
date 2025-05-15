@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <a href="{{ route('stok.pengepul.index') }}" class="btn btn-secondary">Kembali</a>
+                        <a href="{{ route('pengepul.stok.index') }}" class="btn btn-secondary">Kembali</a>
                     </div>
                 </div>
             </div>
