@@ -7,6 +7,7 @@ use App\Http\Controllers\PengepulRegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\StokDistribusiController;
+use App\Http\Controllers\PushSubscriptionController;
 
 use App\Http\Controllers\OwnerProfilController;
 use App\Http\Controllers\PenjadwalanKegiatanController;
@@ -50,6 +51,12 @@ Route::middleware(['auth'])->group(function () {
         return view('pengepul.dashboard');
     })->name('pengepul.dashboard');
 });
+
+// Notification
+Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store'])
+    ->middleware('auth');
+Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy'])
+    ->middleware('auth');
 
 // Owner
 Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');

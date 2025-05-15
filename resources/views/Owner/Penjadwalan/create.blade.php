@@ -16,9 +16,9 @@
                 <label for="keterangan">Keterangan:</label>
                 <input type="text" name="detail_penjadwalan[0][keterangan]" required>
                 <label for="id_status_kegiatan">Status Kegiatan:</label>
-                <select name="detail_penjadwalan[0][id_status_kegiatan]" required>
-                    @foreach($statusKegiatans as $status)
-                        <option value="{{ $status->id }}">{{ $status->nama_status_kegiatan }}</option>
+                <select name="detail_penjadwalan[0][id_status_kegiatan]" class="form-control" required>
+                    @foreach($statusKegiatan as $status)
+                        <option value="{{ $status->id }}">{{ $status->nama_status_kgtn }}</option>
                     @endforeach
                 </select>
             </div>
@@ -40,7 +40,7 @@
                 <input type="text" name="detail_penjadwalan[${index}][keterangan]" required>
                 <label for="id_status_kegiatan">Status Kegiatan:</label>
                 <select name="detail_penjadwalan[${index}][id_status_kegiatan]" required>
-                    @foreach($statusKegiatans as $status)
+                    @foreach($statusKegiatan as $status)
                         <option value="{{ $status->id }}">{{ $status->nama_status_kegiatan }}</option>
                     @endforeach
                 </select>
