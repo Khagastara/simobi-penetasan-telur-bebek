@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.owner')
 
 @section('content')
 @php
@@ -91,4 +91,6 @@
         </div>
     </section>
 </main>
+
+
 @endsection

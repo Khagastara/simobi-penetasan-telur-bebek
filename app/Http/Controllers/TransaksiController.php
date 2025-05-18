@@ -7,6 +7,7 @@ use App\Models\MetodePembayaran;
 use App\Models\StokDistribusi;
 use App\Models\StatusTransaksi;
 use App\Models\Transaksi;
+use App\Models\Keuangan;
 use App\Models\Pengepul;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -197,6 +198,14 @@ class TransaksiController extends Controller
             ]);
             $stokDistribusi->update([
                 'jumlah_stok' => $stokDistribusi->jumlah_stok - $request->kuantitas,
+            ]);
+
+            Keuangan::create([
+                'tgl_rekapitulasi' => now()->toDateString(),
+                'saldo_pengeluaran' => 0,
+                'saldo_pemasukkan' => $subTotal,
+                'total_penjualan' => $request->kuantitas,
+                'id_transaksi' => $transaksi->id,
             ]);
 
             DB::commit();

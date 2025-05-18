@@ -2,26 +2,27 @@
 
 namespace App\Notifications;
 
-use App\Models\DetailPenjadwalan;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use NotificationChannels\WebPush\WebPushMessage;
-use NotificationChannels\WebPush\WebPushChannel;
+use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Broadcasting\PrivateChannel;
 
-class ActivityReminder extends Notification implements ShouldQueue
+class ActivityReminder extends Notification implements ShouldQueue, ShouldBroadcast
 {
     use Queueable;
+
+    protected $activity;
 
     /**
      * Create a new notification instance.
      */
-    protected $detailPenjadwalan;
-
-    public function __construct(DetailPenjadwalan $detailPenjadwalan)
+    public function __construct($activity)
     {
-        $this->detailPenjadwalan = $detailPenjadwalan;
+        $this->activity = $activity;
     }
 
     /**
@@ -29,31 +30,24 @@ class ActivityReminder extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['database', WebPushChannel::class];
+        return ['database', 'broadcast'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toDatabase(object $notifiable)
+
+    public function toBroadcast($notifiable)
     {
-        return [
-            'title' => 'Reminder: Scheduled Activity',
-            'message' => 'You have an activity: ' . $this->detailPenjadwalan->keterangan,
-            'activity_id' => $this->detailPenjadwalan->id,
-            'penjadwalan_id' => $this->detailPenjadwalan->id_penjadwalan,
-        ];
+        return new BroadcastMessage([
+            'title' => 'Reminder: Upcoming Activity',
+            'body' => $this->activity->keterangan,
+            'date' => $this->activity->penjadwalanKegiatan->tgl_penjadwalan,
+            'time' => $this->activity->waktu_kegiatan,
+        ]);
     }
 
-    public function toWebPush($notifiable, $notification)
+    public function broadcastType()
     {
-        return (new WebPushMessage)
-            ->title('Reminder: Scheduled Activity')
-            ->icon('/notification-icon.png')
-            ->body('You have an activity: ' . $this->detailPenjadwalan->keterangan)
-            ->action('View Activity', 'view_activity')
-            ->data(['url' => route('owner.penjadwalan.index', $this->detailPenjadwalan->id_penjadwalan)]);
+        return 'ActivityReminderEvent';
     }
 }

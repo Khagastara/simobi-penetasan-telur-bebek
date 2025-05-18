@@ -13,18 +13,23 @@
                     <i class="fas fa-egg mr-2"></i> Jadwal
                 </a>
                 <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
-                    <i class="fas fa-exchange-alt mr-2"></i> Stok Distribusi                    
+                    <i class="fas fa-exchange-alt mr-2"></i> Stok Distribusi
                 </a>
                 <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
                     <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
                 </a>
+                <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
+                    <i class="fas fa-user-circle mr-2"></i> Keuangan
+                </a>
+                <form
                 <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
                     <i class="fas fa-user-circle mr-2"></i> Profil
                 </a>
+
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
                 </form>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                     class="block px-4 py-2 rounded hover:text-black">
                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                 </a>

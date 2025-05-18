@@ -20,7 +20,6 @@ class Keuangan extends Model
     protected $fillable = [
         'saldo_pemasukkan',
         'saldo_pengeluaran',
-        'grafik_penjualan',
         'tgl_rekaptulasi',
         'total_penjualan',
         'id_transaksi'

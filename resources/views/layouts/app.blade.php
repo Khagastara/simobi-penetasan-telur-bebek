@@ -9,12 +9,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <script src="{{ asset('js/app.js') }}" defer></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
-        @include('layouts.navigation')
 
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -27,13 +26,20 @@
     </div>
 
     @auth
-        <enable-notifications></enable-notifications>
-    @endauth
-
-    @push('scripts')
     <script>
-        Vue.component('enable-notifications', require('./components/EnableNotifications.vue').default);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Notification && Notification.permission !== 'granted') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('Welcome to SiMOBI!', {
+                            body: 'You have successfully logged in.',
+                            icon: '/path-to-your-icon/icon.png' // Replace with your icon path
+                        });
+                    }
+                });
+            }
+        });
     </script>
-    @endpush
+    @endauth
 </body>
 </html>
