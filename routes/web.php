@@ -2,12 +2,13 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\PushSubscriptionController;
 
 use App\Http\Controllers\PengepulRegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\StokDistribusiController;
-use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\KeuanganController;
 
 use App\Http\Controllers\OwnerProfilController;
 use App\Http\Controllers\PenjadwalanKegiatanController;
@@ -23,7 +24,7 @@ use App\Http\Controllers\PengepulProfilController;
 */
 
 Route::get('/', function () {
-    return view('auth.welcome');
+    return view('auth.login');
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -52,12 +53,6 @@ Route::middleware(['auth'])->group(function () {
     })->name('pengepul.dashboard');
 });
 
-// Notification
-Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store'])
-    ->middleware('auth');
-Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy'])
-    ->middleware('auth');
-
 // Owner
 Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');
 
@@ -82,6 +77,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('o/riwayat-transaksi', [TransaksiController::class, 'index'])->name('owner.transaksi.index');
     Route::get('o/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('owner.transaksi.show');
     Route::put('o/riwayat-transaksi/{id}/update-status', [TransaksiController::class, 'updateStatus'])->name('transaksi.update-status');
+
+    Route::get('/keuangan', [KeuanganController::class, 'index'])->name('owner.keuangan.index');
+    Route::get('/keuangan/create', [KeuanganController::class, 'create'])->name('owner.keuangan.create');
+    Route::post('/keuangan', [KeuanganController::class, 'store'])->name('owner.keuangan.store');
+    Route::get('/keuangan/{id}', [KeuanganController::class, 'show'])->name('owner.keuangan.show');
+    Route::get('/keuangan/{id}/edit', [KeuanganController::class, 'edit'])->name('owner.keuangan.edit');
+    Route::put('/keuangan/{id}', [KeuanganController::class, 'update'])->name('owner.keuangan.update');
 });
 
 // Pengepul

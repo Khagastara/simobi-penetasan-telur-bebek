@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Transaksi;
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -39,9 +40,18 @@ class TransaksiSeeder extends Seeder
         ]);
 
         Transaksi::insert([
+            // 'id' => 4,
             'tgl_transaksi' => '2025-04-21 10:10:10',
             'id_status_transaksi' => 3,
             'id_pengepul' => 3,
+            'id_metode_pembayaran' => 1,
+        ]);
+
+        Transaksi::insert([
+            // 'id' => 5,
+            'tgl_transaksi' => '2025-05-17 10:10:10',
+            'id_status_transaksi' => 3,
+            'id_pengepul' => 2,
             'id_metode_pembayaran' => 1,
         ]);
     }

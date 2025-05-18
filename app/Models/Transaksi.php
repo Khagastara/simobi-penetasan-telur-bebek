@@ -28,6 +28,22 @@ class Transaksi extends Model
         'tgl_transaksi' => 'datetime',
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($transaksi) {
+            $saldoPemasukkan = $transaksi->detailTransaksi->sum('sub_total');
+
+            // Buat data keuangan baru
+            \App\Models\Keuangan::create([
+                'tgl_rekapitulasi' => $transaksi->tgl_transaksi->format('Y-m-d'),
+                'saldo_pengeluaran' => 0,
+                'saldo_pemasukkan' => $saldoPemasukkan,
+                'total_penjualan' => $transaksi->detailTransaksi->sum('kuantitas'),
+                'id_transaksi' => $transaksi->id,
+            ]);
+        });
+    }
+
     public function pengepul(): BelongsTo
     {
         return $this->belongsTo(Pengepul::class, 'id_pengepul', 'id');
