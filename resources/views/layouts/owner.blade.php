@@ -3,214 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title') - SIMOBI Owner</title>
+    <title>SiMOBI Owner</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <title>{{ config('app.name', 'SIMOBI') }}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Custom CSS -->
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
-        }
-
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .sidebar {
-            background-color: var(--secondary-color);
-            color: white;
-            height: 100vh;
-            position: fixed;
-            width: 250px;
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-menu {
-            padding: 0;
-            list-style: none;
-        }
-
-        .sidebar-menu li {
-            padding: 10px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-menu li a {
-            color: white;
-            text-decoration: none;
-            display: block;
-        }
-
-        .sidebar-menu li a:hover {
-            color: var(--primary-color);
-        }
-
-        .sidebar-menu li.active {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .sidebar-menu li i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .navbar-custom {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-left: -250px;
-            }
-
-            .sidebar.active {
-                margin-left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-        }
-    </style>
-
-    @stack('styles')
 </head>
-{{-- <body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h4>SIMOBI</h4>
-                <p class="mb-0">Owner Panel</p>
-            </div>
+<body class="font-['Poppins'] bg-[#D4E6B5] min-h-screen flex">
 
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="{{ route('owner.dashboard') }}">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard
-                    </a>
-                </li>
-                <li class="{{ request()->routeIs('penjadwalan.*') ? 'active' : '' }}">
-                    <a href="{{ route('owner.penjadwalan.index') }}">
-                        <i class="fas fa-calendar-alt"></i> Jadwal Pembiakan
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('owner.ternak') }}">
-                        <i class="fas fa-egg"></i> Manajemen Ternak
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('owner.laporan') }}">
-                        <i class="fas fa-chart-bar"></i> Laporan
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('owner.pengaturan') }}">
-                        <i class="fas fa-cog"></i> Pengaturan
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-custom mb-4">
-                <div class="container-fluid">
-                    <button class="btn btn-link d-lg-none" id="sidebarToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-
-                    <div class="d-flex align-items-center ms-auto">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle d-flex align-items-center text-decoration-none"
-                                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="user-profile me-2">
-                                    <img src="{{ Auth::user()->owner->foto_profil ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&background=random' }}"
-                                        alt="Profile Picture">
-                                </div>
-                                <span>{{ Auth::user()->name }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ route('owner.profile') }}"><i class="fas fa-user me-2"></i> Profil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </nav> --}}
-
-            <!-- Page Content -->
-            <div class="container-fluid">
-                @yield('content')
-            </div>
-        </div>
+{{-- Sidebar --}}
+<aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
+    {{-- Bagian Atas: Judul dan Menu --}}
+    <div>
+        <h2 class="text-xl font-bold mb-8 text-white">SiMOBI Owner</h2>
+        <nav class="space-y-3">
+            <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.dashboard') ? 'active-menu' : '' }}">
+                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+            </a>
+            <a href="{{ route('owner.penjadwalan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.penjadwalan*') ? 'active-menu' : '' }}">
+                <i class="fas fa-egg mr-2"></i> Jadwal
+            </a>
+            <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.stok*') ? 'active-menu' : '' }}">
+                <i class="fas fa-warehouse mr-2"></i> Stok Distribusi
+            </a>
+            <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
+                <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
+            </a>
+            <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
+                <i class="fas fa-user-circle mr-2"></i> Profil
+            </a>
+        </nav>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- Bagian Bawah: Logout --}}
+    <div>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+            @csrf
+        </form>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+            class="block px-4 py-2 rounded hover:text-black mt-6">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </a>
+    </div>
+</aside>
 
-    <!-- Custom Script -->
-    <script>
-        // Toggle sidebar on mobile
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
 
-        // Auto-close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const isClickInsideSidebar = sidebar.contains(event.target);
-            const isClickOnToggle = event.target === document.getElementById('sidebarToggle') ||
-                                document.getElementById('sidebarToggle').contains(event.target);
+    {{-- Main Content --}}
+    <main class="flex-1 flex flex-col">
+        {{-- Topbar --}}
+        <header class="topbar p-6 shadow-md" style="background-color: #FFDF64;">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-[#877B66]">SiMOBI</h1>
+                    <p class="text-sm text-gray-700">Sistem Manajemen Operasional Penetasan Telur Bebek - <span class="font-medium">Owner</span></p>
+                </div>
+                <div class="text-right text-gray-800">
+                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
+                </div>
+            </div>
+        </header>
 
-            if (window.innerWidth <= 768 && !isClickInsideSidebar && !isClickOnToggle && sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-            }
-        });
-    </script>
+        {{-- Page Content --}}
+        <div class="p-8">
+            @yield('content')
+        </div>
+    </main>
 
-    @stack('scripts')
+    {{-- Optional: Success Message --}}
+    @if(session('success'))
+        <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            {{ session('success') }}
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.fixed').remove();
+            }, 3000);
+        </script>
+    @endif
+
+    {{-- Inline Styles --}}
+<style>
+    .sidebar a {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-radius: 0.75rem; /* rounded-xl */
+        transition: all 0.3s ease;
+    }
+
+    .sidebar a::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        background-color: #FFDF64;
+        border-top-left-radius: 0.75rem;
+        border-bottom-left-radius: 0.75rem;
+        transition: width 0.3s ease;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active-menu {
+        background-color: #E2D686;
+        color: #000;
+        font-weight: 500;
+
+        /* Buat hanya sisi kiri yang rounded */
+        border-top-right-radius: 0.75rem;
+        border-bottom-right-radius: 0.75rem;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .sidebar a:hover::before,
+    .sidebar a.active-menu::before {
+        width: 6px;
+    }
+</style>
 </body>
 </html>
