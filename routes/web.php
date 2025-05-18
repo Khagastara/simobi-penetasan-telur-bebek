@@ -2,7 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\NotificationController;
 
 use App\Http\Controllers\PengepulRegisterController;
 use App\Http\Controllers\LoginController;
@@ -26,6 +26,9 @@ use App\Http\Controllers\PengepulProfilController;
 Route::get('/', function () {
     return view('auth.login');
 });
+
+Route::get('/send-notification', [NotificationController::class, 'sendNotification'])
+    ->name('send.notification');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
@@ -62,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('o/profil/update', [OwnerProfilController::class, 'update'])->name('owner.profil.update');
 
     Route::get('/penjadwalan', [PenjadwalanKegiatanController::class, 'index'])->name('owner.penjadwalan.index');
+    Route::get('/owner/penjadwalan/{id}', [PenjadwalanKegiatanController::class, 'show'])->name('owner.penjadwalan.show');
     Route::get('/penjadwalan/create', [PenjadwalanKegiatanController::class, 'create'])->name('owner.penjadwalan.create');
     Route::post('/penjadwalan', [PenjadwalanKegiatanController::class, 'store'])->name('owner.penjadwalan.store');
     Route::get('/penjadwalan/{id}/edit', [PenjadwalanKegiatanController::class, 'edit'])->name('owner.penjadwalan.edit');

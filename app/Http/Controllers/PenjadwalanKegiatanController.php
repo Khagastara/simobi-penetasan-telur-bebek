@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\PenjadwalanKegiatan;
 use App\Models\DetailPenjadwalan;
 use App\Models\StatusKegiatan;
-use App\Notifications\ActivityReminder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Pusher\PushNotifications\PushNotifications;
 
 class PenjadwalanKegiatanController extends Controller
 {
@@ -101,5 +101,28 @@ class PenjadwalanKegiatanController extends Controller
         }
 
         return view('owner.penjadwalan.show', compact('penjadwalanKegiatan'));
+    }
+
+    public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)
+    {
+        $beamsClient = new PushNotifications([
+            'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
+            'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
+        ]);
+
+        $response = $beamsClient->publishToInterests(
+            ['owner-' . $penjadwalanKegiatan->id_owner],
+            [
+                'web' => [
+                    'notification' => [
+                        'title' => 'Pengingat Kegiatan',
+                        'body' => "Kegiatan: {$detailPenjadwalan->keterangan} pada {$penjadwalanKegiatan->tgl_penjadwalan} pukul {$detailPenjadwalan->waktu_kegiatan}.",
+                    ],
+                ],
+            ]
+        );
+        Log::info('Notification response: ', $response->jsonSerialize());
+
+        return response()->json($response);
     }
 }

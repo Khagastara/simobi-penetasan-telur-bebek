@@ -7,8 +7,8 @@
 
     <title>{{ config('app.name', 'SIMOBI') }}</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    {{-- <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/app.js') }}" defer></script> --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -24,22 +24,5 @@
             @yield('content')
         </main>
     </div>
-
-    @auth
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (Notification && Notification.permission !== 'granted') {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        new Notification('Welcome to SiMOBI!', {
-                            body: 'You have successfully logged in.',
-                            icon: '/path-to-your-icon/icon.png' // Replace with your icon path
-                        });
-                    }
-                });
-            }
-        });
-    </script>
-    @endauth
 </body>
 </html>

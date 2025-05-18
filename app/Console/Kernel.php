@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('reminders:send')->everyMinute();
+        $schedule->command('notifications:send')->everyMinute();
     }
 
     /**
