@@ -1,4 +1,5 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app') --}}
+@extends('layouts.owner')
 
 @section('content')
     <div class="flex min-h-screen bg-[#D4E6B5] font-['Poppins']">
