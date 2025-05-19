@@ -44,7 +44,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('transaksi.pengepul.show', $transaksi['id']) }}" class="btn btn-info btn-sm">Detail</a>
+                                            <a href="{{ route('pengepul.transaksi.show', $transaksi['id']) }}" class="btn btn-info btn-sm">Detail</a>
                                         </td>
                                     </tr>
                                 @empty
@@ -57,7 +57,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <a href="{{ route('stok.pengepul.index') }}" class="btn btn-primary">Buat Transaksi Baru</a>
+                        <a href="{{ route('pengepul.stok.index') }}" class="btn btn-primary">Buat Transaksi Baru</a>
                     </div>
                 </div>
             </div>

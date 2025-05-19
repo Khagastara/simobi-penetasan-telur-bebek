@@ -7,6 +7,7 @@ use App\Http\Controllers\PengepulRegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\StokDistribusiController;
+use App\Http\Controllers\PushSubscriptionController;
 
 use App\Http\Controllers\OwnerProfilController;
 use App\Http\Controllers\PenjadwalanKegiatanController;
@@ -51,6 +52,12 @@ Route::middleware(['auth'])->group(function () {
     })->name('pengepul.dashboard');
 });
 
+// Notification
+Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store'])
+    ->middleware('auth');
+Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy'])
+    ->middleware('auth');
+
 // Owner
 Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');
 
@@ -94,5 +101,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('p/riwayat-transaksi', [TransaksiController::class, 'index'])->name('pengepul.transaksi.index');
     Route::get('p/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('pengepul.transaksi.show');
     Route::get('p/transaksi/create/{stokId}', [TransaksiController::class, 'create'])->name('pengepul.transaksi.create');
-    Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.stok.index');
+    Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.transaksi.store');
 });
