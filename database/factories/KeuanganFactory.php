@@ -17,7 +17,6 @@ class KeuanganFactory extends Factory
         return [
             'saldo_pemasukan' => $this->faker->randomNumber(),
             'saldo_pengeluaran' => $this->faker->randomNumberumber(),
-            'grafik_penjualan' => $this->faker->imageUrl(640, 480, 'business', true, 'Graph'),
             'tgl_rekapitulasi' => $this->faker->date(),
             'total_penjualan' => $this->faker->randomNumber(),
             'id_transaksi' => \App\Models\Transaksi::factory(),

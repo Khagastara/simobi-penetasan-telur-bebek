@@ -1,3 +1,4 @@
+{{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\layouts\owner.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>

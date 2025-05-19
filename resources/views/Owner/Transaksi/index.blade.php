@@ -1,6 +1,19 @@
 @extends('layouts.owner')
 
 @section('content')
+@php
+    function getStatusBadgeColor($status) {
+        return match($status) {
+            'Menunggu Pembayaran' => 'warning',
+            'Pembayaran Valid' => 'primary',
+            'Packing' => 'info',
+            'Pengiriman' => 'secondary',
+            'Selesai' => 'success',
+            default => 'secondary',
+        };
+    }
+@endphp
+
 <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
     <!-- Top Banner -->
     <header class="topbar p-6 shadow-md">
@@ -8,64 +21,6 @@
             <div>
                 <h1 class="text-2xl font-semibold text-[#877B66]">Riwayat Transaksi</h1>
                 <p class="text-sm text-gray-700">Data transaksi pembelian stok</p>
-            </div>
-            <div class="text-right text-gray-800">
-                <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">Riwayat Transaksi</h4>
-                </div>
-
-                <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama Pengepul</th>
-                                    <th>Nama Stok</th>
-                                    <th>Kuantitas</th>
-                                    <th>Total Transaksi</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($transaksis as $index => $transaksi)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $transaksi['username'] }}</td>
-                                        <td>{{ $transaksi['nama_stok'] }}</td>
-                                        <td>{{ $transaksi['kuantitas'] }}</td>
-                                        <td>Rp {{ number_format($transaksi['total_transaksi'], 0, ',', '.') }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ getStatusBadgeColor($transaksi['status']) }}">
-                                                {{ $transaksi['status'] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('owner.transaksi.show', $transaksi['id']) }}" class="btn btn-info btn-sm">Detail</a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center">Tidak ada data transaksi</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     </header>
@@ -127,6 +82,8 @@
         </div>
     </section>
 </main>
+
+
 @endsection
 
 @php

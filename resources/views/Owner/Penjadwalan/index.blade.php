@@ -2,6 +2,7 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
+
         <!-- Top Banner -->
         <header class="topbar p-6 shadow-md">
             <div class="flex items-center justify-between">
@@ -38,6 +39,7 @@
                         <tr>
                             <th class="px-4 py-2 font-semibold">Tanggal</th>
                             <th class="px-4 py-2 font-semibold">Detail Kegiatan</th>
+                            <th class="px-4 py-2 font-semibold">Status Kegiatan</th>
                             <th class="px-4 py-2 font-semibold">Aksi</th>
                         </tr>
                     </thead>
@@ -48,6 +50,11 @@
                                 <td class="px-4 py-3">
                                     @foreach($penjadwalan->detailPenjadwalan as $detail)
                                         <div class="mb-1">{{ $detail->waktu_kegiatan }} - {{ $detail->keterangan }}</div>
+                                    @endforeach
+                                </td>
+                                <td class="px-4 py-3">
+                                    @foreach($penjadwalan->detailPenjadwalan as $status)
+                                        <div class="mb-1">{{ $status->statusKegiatan->nama_status_kgtn }}</div>
                                     @endforeach
                                 </td>
                                 <td class="px-4 py-3">

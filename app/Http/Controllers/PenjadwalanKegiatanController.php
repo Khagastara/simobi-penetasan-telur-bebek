@@ -5,18 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\PenjadwalanKegiatan;
 use App\Models\DetailPenjadwalan;
 use App\Models\StatusKegiatan;
-use App\Notifications\ActivityReminder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Pusher\PushNotifications\PushNotifications;
 
 class PenjadwalanKegiatanController extends Controller
 {
     public function index()
     {
         $owner = Auth::user()->owner;
-        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan')->get();
-        return view('owner.penjadwalan.index', compact('penjadwalanKegiatans'));
+        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
+        $statusKegiatan = StatusKegiatan::all();
+        return view('owner.penjadwalan.index', compact('penjadwalanKegiatans', 'statusKegiatan'));
     }
 
     public function create()
@@ -38,14 +39,16 @@ class PenjadwalanKegiatanController extends Controller
             'tgl_penjadwalan' => $request->tgl_penjadwalan,
             'id_owner' => Auth::user()->owner->id,
         ]);
+        Log::info('Penjadwalan created:', $penjadwalanKegiatan->toArray());
 
         foreach ($request->detail_penjadwalan as $detail) {
-            DetailPenjadwalan::create([
+            $detailPenjadwalan = DetailPenjadwalan::create([
                 'waktu_kegiatan' => $detail['waktu_kegiatan'],
                 'keterangan' => $detail['keterangan'],
                 'id_penjadwalan' => $penjadwalanKegiatan->id,
                 'id_status_kegiatan' => $detail['id_status_kegiatan'],
             ]);
+            Log::info('Detail created:', $detailPenjadwalan->toArray());
         }
 
         return redirect()->route('owner.penjadwalan.index')->with('success', 'Jadwal berhasil dibuat');
@@ -73,7 +76,6 @@ class PenjadwalanKegiatanController extends Controller
             'tgl_penjadwalan' => $request->tgl_penjadwalan,
         ]);
 
-        Log::info($request->all());
         foreach ($request->detail_penjadwalan as $detail) {
             DetailPenjadwalan::updateOrCreate(
                 ['id' => $detail['id']],
@@ -101,125 +103,26 @@ class PenjadwalanKegiatanController extends Controller
         return view('owner.penjadwalan.show', compact('penjadwalanKegiatan'));
     }
 
-    /**
-     * Delete the specified resource
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)
     {
-        $penjadwalanKegiatan = PenjadwalanKegiatan::findOrFail($id);
-
-        // Check if the current user is authorized to delete this
-        if ($penjadwalanKegiatan->id_owner != Auth::user()->owner->id) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        // Delete related detail records first
-        DetailPenjadwalan::where('id_penjadwalan', $id)->delete();
-
-        // Then delete the main record
-        $penjadwalanKegiatan->delete();
-
-        return redirect()->route('owner.penjadwalan.index')
-            ->with('success', 'Jadwal kegiatan berhasil dihapus.');
-    }
-
-    /**
-     * Send a test notification for a specific activity
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function sendTestNotification($id)
-    {
-        $detailPenjadwalan = DetailPenjadwalan::with('penjadwalanKegiatan.owner.user')
-            ->findOrFail($id);
-
-        // Check if the current user is authorized
-        if ($detailPenjadwalan->penjadwalanKegiatan->id_owner != Auth::user()->owner->id) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        // Send notification to the user
-        $user = Auth::user();
-        $user->notify(new ActivityReminder($detailPenjadwalan));
-
-        Log::info('Test notification sent for activity ID: ' . $id);
-
-        return back()->with('success', 'Test notification sent.');
-    }
-
-    /**
-     * Get all upcoming activities for the user as notifications
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getUpcomingActivities()
-    {
-        $owner = Auth::user()->owner;
-        $today = now()->format('Y-m-d');
-
-        $upcomingActivities = DetailPenjadwalan::whereHas('penjadwalanKegiatan', function ($query) use ($owner, $today) {
-            $query->where('id_owner', $owner->id)
-                  ->where('tgl_penjadwalan', '>=', $today);
-        })
-        ->with('penjadwalanKegiatan', 'statusKegiatan')
-        ->orderBy('waktu_kegiatan', 'asc')
-        ->take(5)
-        ->get();
-
-        return response()->json([
-            'activities' => $upcomingActivities->map(function ($activity) {
-                return [
-                    'id' => $activity->id,
-                    'date' => $activity->penjadwalanKegiatan->tgl_penjadwalan,
-                    'time' => $activity->waktu_kegiatan,
-                    'description' => $activity->keterangan,
-                    'status' => $activity->statusKegiatan->nama_status
-                ];
-            })
-        ]);
-    }
-
-    /**
-     * Show notification settings page
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function notificationSettings()
-    {
-        $user = Auth::user();
-        $pushEnabled = $user->pushSubscriptions()->exists();
-
-        return view('owner.notifications.settings', compact('pushEnabled'));
-    }
-
-    /**
-     * Update notification settings
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function updateNotificationSettings(Request $request)
-    {
-        $request->validate([
-            'enable_email_notifications' => 'boolean',
-            'enable_browser_notifications' => 'boolean',
-            'notification_lead_time' => 'nullable|integer|min:0|max:60',
+        $beamsClient = new PushNotifications([
+            'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
+            'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
         ]);
 
-        $user = Auth::user();
-        $user->settings()->updateOrCreate(
-            ['user_id' => $user->id],
+        $response = $beamsClient->publishToInterests(
+            ['owner-' . $penjadwalanKegiatan->id_owner],
             [
-                'email_notifications' => $request->enable_email_notifications ?? false,
-                'browser_notifications' => $request->enable_browser_notifications ?? false,
-                'notification_lead_time' => $request->notification_lead_time ?? 15,
+                'web' => [
+                    'notification' => [
+                        'title' => 'Pengingat Kegiatan',
+                        'body' => "Kegiatan: {$detailPenjadwalan->keterangan} pada {$penjadwalanKegiatan->tgl_penjadwalan} pukul {$detailPenjadwalan->waktu_kegiatan}.",
+                    ],
+                ],
             ]
         );
+        Log::info('Notification response: ', $response->jsonSerialize());
 
-        return back()->with('success', 'Notification settings updated successfully.');
+        return response()->json($response);
     }
 }

@@ -12,27 +12,6 @@
                 <div class="text-right text-gray-800">
                     <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
                 </div>
-    <h1>Tambah Jadwal Pembiakan</h1>
-    <form action="{{ route('owner.penjadwalan.store') }}" method="POST">
-        @csrf
-        <div>
-            <label for="tgl_penjadwalan">Tanggal Penjadwalan:</label>
-            <input type="date" name="tgl_penjadwalan" required>
-        </div>
-        <div id="detail-container">
-            <h3>Detail Kegiatan</h3>
-            <div class="detail-item">
-                <label for="waktu_kegiatan">Waktu Kegiatan:</label>
-                <input type="time" name="detail_penjadwalan[0][waktu_kegiatan]" required>
-                <label for="keterangan">Keterangan:</label>
-                <input type="text" name="detail_penjadwalan[0][keterangan]" required>
-                <label for="id_status_kegiatan">Status Kegiatan:</label>
-                <select name="detail_penjadwalan[0][id_status_kegiatan]" class="form-control" required>
-                    @foreach($statusKegiatan as $status)
-                        <option value="{{ $status->id }}">{{ $status->nama_status_kgtn }}</option>
-                    @endforeach
-                </select>
-            </div>
         </header>
 
         <!-- Main Content -->
@@ -60,8 +39,8 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status Kegiatan:</label>
                                 <select name="detail_penjadwalan[0][id_status_kegiatan]" class="form-select w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
-                                    @foreach($statusKegiatans as $status)
-                                        <option value="{{ $status->id }}">{{ $status->nama_status_kegiatan }}</option>
+                                    @foreach($statusKegiatan as $status)
+                                        <option value="{{ $status->id }}">{{ $status->nama_status_kgtn }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -101,7 +80,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status Kegiatan:</label>
                     <select name="detail_penjadwalan[${index}][id_status_kegiatan]" class="form-select w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
-                        @foreach($statusKegiatans as $status)
+                        @foreach($statusKegiatan as $status)
                             <option value="{{ $status->id }}">{{ $status->nama_status_kegiatan }}</option>
                         @endforeach
                     </select>
