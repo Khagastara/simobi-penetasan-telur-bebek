@@ -1,5 +1,5 @@
 {{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\Owner\Keuangan\index.blade.php --}}
-@extends('layouts.app')
+@extends('layouts.owner')
 
 @section('content')
 
@@ -74,7 +74,7 @@
     const keuanganChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {!! json_encode($keuanganLabels) !!}, 
+            labels: {!! json_encode($keuanganLabels) !!},
             datasets: [
                 {
                     label: 'Saldo Pemasukkan',
