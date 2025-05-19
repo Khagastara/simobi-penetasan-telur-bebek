@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Pusher\PushNotifications\PushNotifications;
+use Carbon\Carbon;
 
 class PenjadwalanKegiatanController extends Controller
 {
@@ -105,24 +106,52 @@ class PenjadwalanKegiatanController extends Controller
 
     public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)
     {
-        $beamsClient = new PushNotifications([
-            'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
-            'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
-        ]);
+        try {
+            $beamsClient = new PushNotifications([
+                'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
+                'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
+            ]);
 
-        $response = $beamsClient->publishToInterests(
-            ['owner-' . $penjadwalanKegiatan->id_owner],
-            [
-                'web' => [
-                    'notification' => [
-                        'title' => 'Pengingat Kegiatan',
-                        'body' => "Kegiatan: {$detailPenjadwalan->keterangan} pada {$penjadwalanKegiatan->tgl_penjadwalan} pukul {$detailPenjadwalan->waktu_kegiatan}.",
+            $formattedDate = Carbon::parse($penjadwalanKegiatan->tgl_penjadwalan)->format('Y-m-d');
+
+            $response = $beamsClient->publishToInterests(
+                ['owner-' . $penjadwalanKegiatan->id_owner],
+                [
+                    'web' => [
+                        'notification' => [
+                            'title' => 'Pengingat Kegiatan',
+                            'body' => "Kegiatan: {$detailPenjadwalan->keterangan} pada " .
+                                $formattedDate .
+                                " pukul {$detailPenjadwalan->waktu_kegiatan}.",
+                        ],
                     ],
-                ],
-            ]
-        );
-        Log::info('Notification response: ', $response->jsonSerialize());
+                ]
+            );
 
-        return response()->json($response);
+            Log::info('Notification sent:', [
+                'activity' => $detailPenjadwalan->keterangan,
+                'date' => $formattedDate,
+                'time' => $detailPenjadwalan->waktu_kegiatan,
+                'owner_id' => $penjadwalanKegiatan->id_owner
+            ]);
+
+            // Return response in a format that works for both HTTP and CLI contexts
+            if (request()->expectsJson()) {
+                return response()->json($response);
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Failed to send notification: ' . $e->getMessage(), [
+                'activity_id' => $detailPenjadwalan->id,
+                'schedule_id' => $penjadwalanKegiatan->id
+            ]);
+
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'Failed to send notification'], 500);
+            }
+
+            throw $e; // Rethrow for CLI handling
+        }
     }
 }
