@@ -108,8 +108,8 @@ class PenjadwalanKegiatanController extends Controller
     {
         try {
             $beamsClient = new PushNotifications([
-                'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
-                'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
+                'instanceId' => env('VITE_PUSHER_BEAMS_INSTANCE_ID'),
+                'secretKey' => env('VITE_PUSHER_BEAMS_SECRET_KEY'),
             ]);
 
             $formattedDate = Carbon::parse($penjadwalanKegiatan->tgl_penjadwalan)->format('Y-m-d');

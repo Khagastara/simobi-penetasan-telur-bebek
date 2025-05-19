@@ -10,8 +10,8 @@ class NotificationController extends Controller
     public function sendNotification(Request $request)
     {
         $beamsClient = new PushNotifications([
-            'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
-            'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
+            'instanceId' => env('VITE_PUSHER_BEAMS_INSTANCE_ID'),
+            'secretKey' => env('VITE_PUSHER_BEAMS_SECRET_KEY'),
         ]);
 
         $response = $beamsClient->publishToInterests(
