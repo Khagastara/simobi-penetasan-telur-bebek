@@ -3,39 +3,6 @@
 
 @section('content')
     <div class="flex min-h-screen bg-[#D4E6B5] font-['Poppins']">
-        <!-- Sidebar -->
-        <aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg">
-            <h2 class="text-xl font-bold mb-8 text-white">SiMOBI Owner</h2>
-            <nav class="space-y-3">
-                <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.dashboard') ? 'active-menu' : '' }}">
-                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
-                </a>
-                <a href="{{ route('owner.penjadwalan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.penjadwalan*') ? 'active-menu' : '' }}">
-                    <i class="fas fa-egg mr-2"></i> Jadwal
-                </a>
-                <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
-                    <i class="fas fa-exchange-alt mr-2"></i> Stok Distribusi
-                </a>
-                <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
-                    <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
-                </a>
-                <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
-                    <i class="fas fa-user-circle mr-2"></i> Keuangan
-                </a>
-                <form
-                <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
-                    <i class="fas fa-user-circle mr-2"></i> Profil
-                </a>
-
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                    @csrf
-                </form>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="block px-4 py-2 rounded hover:text-black">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                </a>
-            </nav>
-        </aside>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col">
