@@ -19,7 +19,7 @@ class StokDistribusiSeeder extends Seeder
             'jumlah_stok' => 20,
             'harga_stok' => 6000,
             'deskripsi_stok' => 'Anakan bebek berkualitas umur 2 minggu',
-            'gambar_stok' => 'C:\user\acer\anakan_bebek',
+            'gambar_stok' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/White_domesticated_duck%2C_stretching.jpg/1200px-White_domesticated_duck%2C_stretching.jpg',
         ]);
 
         StokDistribusi::insert([

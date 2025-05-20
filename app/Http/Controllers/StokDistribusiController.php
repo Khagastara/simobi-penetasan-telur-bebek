@@ -76,7 +76,7 @@ class StokDistribusiController extends Controller
             'gambar_stok' => $gambarPath ?? '',
         ]);
 
-        return redirect()->route('stok.index')->with('success', 'data stok distribusi berhasil dibuat');
+        return redirect()->route('owner.stok.index')->with('success', 'data stok distribusi berhasil dibuat');
     }
 
     /**

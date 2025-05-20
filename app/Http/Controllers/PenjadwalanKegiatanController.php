@@ -96,7 +96,6 @@ class PenjadwalanKegiatanController extends Controller
     {
         $penjadwalanKegiatan = PenjadwalanKegiatan::with('detailPenjadwalan')->findOrFail($id);
 
-        // Check if the current user is authorized to view this
         if ($penjadwalanKegiatan->id_owner != Auth::user()->owner->id) {
             abort(403, 'Unauthorized action.');
         }
@@ -108,8 +107,8 @@ class PenjadwalanKegiatanController extends Controller
     {
         try {
             $beamsClient = new PushNotifications([
-                'instanceId' => env('PUSHER_BEAMS_INSTANCE_ID'),
-                'secretKey' => env('PUSHER_BEAMS_SECRET_KEY'),
+                'instanceId' => env('VITE_PUSHER_BEAMS_INSTANCE_ID'),
+                'secretKey' => env('VITE_PUSHER_BEAMS_SECRET_KEY'),
             ]);
 
             $formattedDate = Carbon::parse($penjadwalanKegiatan->tgl_penjadwalan)->format('Y-m-d');
@@ -135,7 +134,6 @@ class PenjadwalanKegiatanController extends Controller
                 'owner_id' => $penjadwalanKegiatan->id_owner
             ]);
 
-            // Return response in a format that works for both HTTP and CLI contexts
             if (request()->expectsJson()) {
                 return response()->json($response);
             }
@@ -151,7 +149,7 @@ class PenjadwalanKegiatanController extends Controller
                 return response()->json(['error' => 'Failed to send notification'], 500);
             }
 
-            throw $e; // Rethrow for CLI handling
+            throw $e;
         }
     }
 }
