@@ -25,12 +25,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Run the notification checker every minute
         $schedule->command('notifications:send')
-                 ->everyMinute()
-                 ->withoutOverlapping()
-                 ->appendOutputTo(storage_path('logs/scheduler.log'));
+                ->everyMinute()
+                ->appendOutputTo(storage_path('logs/scheduler.log'));
     }
+
 
     /**
      * Register the commands for the application.
@@ -44,3 +43,5 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
+
+
