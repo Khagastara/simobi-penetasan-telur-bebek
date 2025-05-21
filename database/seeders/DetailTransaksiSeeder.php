@@ -46,7 +46,7 @@ class DetailTransaksiSeeder extends Seeder
         DetailTransaksi::insert([
             'kuantitas' => 20,
             'sub_total' => 160000,
-            'id_stok_distribusi' => 3,
+            'id_stok_distribusi' => 2,
             'id_transaksi' => 5,
         ]);
     }
