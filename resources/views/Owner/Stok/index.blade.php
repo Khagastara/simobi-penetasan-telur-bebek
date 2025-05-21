@@ -48,7 +48,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $stok->nama_stok }}</td>
                                     <td>
-                                        <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
+                                        <img src="{{ asset($stok->gambar_stok) }}"
                                             alt="{{ $stok->nama_stok }}"
                                             class="img-thumbnail"
                                             style="max-height: 100px;">

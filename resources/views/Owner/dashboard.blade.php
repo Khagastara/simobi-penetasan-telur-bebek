@@ -2,7 +2,6 @@
 @extends('layouts.owner')
 
 @section('content')
-
             <!-- Dashboard Content -->
             <div class="p-8">
                 <h1 class="text-2xl font-bold text-[#877B66] mb-4">Dashboard Owner</h1>

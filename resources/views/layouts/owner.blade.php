@@ -8,8 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <title>{{ config('app.name', 'SIMOBI') }}</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    {{-- <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/app.js') }}" defer></script> --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
@@ -36,14 +37,14 @@
             <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
                 <i class="fas fa-exchange-alt mr-2"></i> Laporan Keuangan
             </a>
+            <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
+                <i class="fas fa-exchange-alt mr-2"></i> Keuangan
             <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
                 <i class="fas fa-user-circle mr-2"></i> Profil
             </a>
         </nav>
     </div>
 </aside>
-
-
     {{-- Main Content --}}
     <main class="flex-1 flex flex-col">
         {{-- Topbar --}}

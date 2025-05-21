@@ -32,7 +32,7 @@ class DetailPenjadwalanSeeder extends Seeder
 
         DetailPenjadwalan::insert([
             // 'id' => 3,
-            'waktu_kegiatan' => '09:00',
+            'waktu_kegiatan' => '22:30',
             'keterangan' => 'Memberikan vitamin',
             'id_penjadwalan' => 1,
             'id_status_kegiatan' => 2,

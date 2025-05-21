@@ -7,7 +7,11 @@ const beamsClient = new PusherPushNotifications.Client({
   });
 
   beamsClient.start()
-    .then(() => beamsClient.addDeviceInterest('hello'))
+    .then(() => {
+        return Promise.all([
+        beamsClient.addDeviceInterest('hello'),
+        beamsClient.addDeviceInterest('owner-1')
+        ]);
+    })
     .then(() => console.log('Successfully registered and subscribed!'))
     .catch(console.error);
-

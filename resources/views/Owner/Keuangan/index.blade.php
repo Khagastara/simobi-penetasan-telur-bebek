@@ -74,7 +74,7 @@
     const keuanganChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {!! json_encode($keuanganLabels) !!}, 
+            labels: {!! json_encode($keuanganLabels) !!},
             datasets: [
                 {
                     label: 'Saldo Pemasukkan',
