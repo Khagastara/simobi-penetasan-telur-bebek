@@ -49,9 +49,9 @@
                                     <td>{{ $stok->nama_stok }}</td>
                                     <td>
                                         <img src="{{ asset($stok->gambar_stok) }}"
-                                            alt="{{ $stok->nama_stok }}"
-                                            class="img-thumbnail"
-                                            style="max-height: 100px;">
+                                             alt="{{ $stok->nama_stok }}"
+                                             class="img-thumbnail rounded shadow"
+                                             style="max-height: 100px; max-width: 150px;">
                                     </td>
                                     <td>Rp {{ number_format($stok->harga_stok, 0, ',', '.') }}</td>
                                     <td>

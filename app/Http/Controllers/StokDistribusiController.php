@@ -47,7 +47,6 @@ class StokDistribusiController extends Controller
             'gambar_stok' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Jika validasi gagal, kembali ke form dengan pesan error
         if ($validator->fails()) {
             if ($validator->errors()->has('jumlah_stok')) {
                 return redirect()->back()->with('error', 'jumlah stok harus berisi angka')->withInput();
@@ -59,12 +58,11 @@ class StokDistribusiController extends Controller
             return redirect()->back()->with('error', 'data ada yang kosong')->withInput();
         }
 
-        // Proses upload gambar
         if ($request->hasFile('gambar_stok')) {
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
-            $gambarStok->storeAs('public/stok', $namaGambar);
-            $gambarPath = 'stok/' . $namaGambar;
+            $gambarStok->storeAs('public/images/stok', $namaGambar);
+            $gambarPath = 'images/stok/' . $namaGambar;
         }
 
         // Simpan data stok distribusi
@@ -145,14 +143,14 @@ class StokDistribusiController extends Controller
         if ($request->hasFile('gambar_stok')) {
             // Hapus gambar lama jika ada
             if ($stok->gambar_stok && Storage::exists('public/' . $stok->gambar_stok)) {
-                Storage::delete('public/' . $stok->gambar_stok);
+                Storage::delete('public/images' . $stok->gambar_stok);
             }
 
             // Upload gambar baru
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
-            $gambarStok->storeAs('public/stok', $namaGambar);
-            $gambarPath = 'stok/' . $namaGambar;
+            $gambarStok->storeAs('public/images//stok', $namaGambar);
+            $gambarPath = 'images/stok/' . $namaGambar;
 
             // Update data dengan gambar baru
             $stok->update([
@@ -172,7 +170,7 @@ class StokDistribusiController extends Controller
             ]);
         }
 
-        return redirect()->route('stok.show', $stok->id)->with('success', 'data stok distribusi berhasil diubah');
+        return redirect()->route('owner.stok.show', $stok->id)->with('success', 'data stok distribusi berhasil diubah');
     }
 
     /**
