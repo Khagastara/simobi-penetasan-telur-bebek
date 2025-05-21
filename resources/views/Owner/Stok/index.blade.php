@@ -9,9 +9,6 @@
                     <h1 class="text-2xl font-semibold text-[#877B66]">Data Stok Distribusi</h1>
                     <p class="text-sm text-gray-700">Kelola data stok produk yang tersedia untuk distribusi</p>
                 </div>
-                <div class="text-right text-gray-800">
-                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
-                </div>
             </div>
         </header>
 
