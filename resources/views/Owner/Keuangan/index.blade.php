@@ -1,5 +1,5 @@
 {{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\Owner\Keuangan\index.blade.php --}}
-@extends('layouts.app')
+@extends('layouts.owner')
 
 @section('content')
 

@@ -19,24 +19,18 @@
 <aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
     {{-- Bagian Atas: Judul dan Menu --}}
     <div>
-        <h2 class="text-xl font-bold mb-8 text-white">SiMOBI Owner</h2>
+        <h2 class="text-xl font-bold mb-8 text-white">SiMOBI Pengepul</h2>
         <nav class="space-y-3">
-            <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.dashboard') ? 'active-menu' : '' }}">
+            <a href="{{ route('pengepul.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('pengepul.dashboard') ? 'active-menu' : '' }}">
                 <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
             </a>
-            <a href="{{ route('owner.penjadwalan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.penjadwalan*') ? 'active-menu' : '' }}">
-                <i class="fas fa-egg mr-2"></i> Jadwal
-            </a>
-            <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.stok*') ? 'active-menu' : '' }}">
+            <a href="{{ route('pengepul.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('pengepul.stok*') ? 'active-menu' : '' }}">
                 <i class="fas fa-warehouse mr-2"></i> Stok Distribusi
             </a>
-            <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
-                <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
-
-            <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
-                <i class="fas fa-exchange-alt mr-2"></i> Laporan Keuangan
+            <a href="{{ route('pengepul.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('pengepul.transaksi*') ? 'active-menu' : '' }}">
+                <i class="fas fa-exchange-alt mr-2"></i> Transaksi
             </a>
-            <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
+            <a href="{{ route('pengepul.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('pengepul.profil*') ? 'active-menu' : '' }}">
                 <i class="fas fa-user-circle mr-2"></i> Profil
             </a>
         </nav>
@@ -51,10 +45,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-semibold text-[#877B66]">SiMOBI</h1>
-                    <p class="text-sm text-gray-700">Sistem Manajemen Operasional Penetasan Telur Bebek - <span class="font-medium">Owner</span></p>
+                    <p class="text-sm text-gray-700">Sistem Manajemen Operasional Penetasan Telur Bebek - <span class="font-medium">Pengepul</span></p>
                 </div>
                 <div class="text-right text-gray-800">
-                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
+                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->pengepul->nama }}</span></p>
                 </div>
             </div>
         </header>
