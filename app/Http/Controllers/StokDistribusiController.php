@@ -106,7 +106,7 @@ class StokDistribusiController extends Controller
 
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
-            $gambarStok->storeAs('public/images//stok', $namaGambar);
+            $gambarStok->storeAs('public/images/stok', $namaGambar);
             $gambarPath = 'images/stok/' . $namaGambar;
 
             $stok->update([
