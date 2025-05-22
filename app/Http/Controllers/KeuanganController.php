@@ -9,16 +9,10 @@ use Illuminate\Support\Facades\Validator;
 
 class KeuanganController extends Controller
 {
-    /**
-     * Display a listing of the keuangan data.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
         $keuangans = Keuangan::all();
 
-        // Kelompokkan data berdasarkan tanggal
         $groupedKeuangans = $keuangans->groupBy('tgl_rekapitulasi')->map(function ($items) {
             return [
                 'saldo_pemasukkan' => $items->sum('saldo_pemasukkan'),
@@ -26,34 +20,23 @@ class KeuanganController extends Controller
             ];
         });
 
-        // Siapkan data untuk grafik
-        $keuanganLabels = $groupedKeuangans->keys()->toArray(); // Tanggal sebagai label sumbu X
-        $keuanganPemasukkan = $groupedKeuangans->pluck('saldo_pemasukkan')->toArray(); // Total saldo pemasukkan
-        $keuanganPengeluaran = $groupedKeuangans->pluck('saldo_pengeluaran')->toArray(); // Total saldo pengeluaran
+        $keuanganLabels = $groupedKeuangans->keys()->toArray();
+        $keuanganPemasukkan = $groupedKeuangans->pluck('saldo_pemasukkan')->toArray();
+        $keuanganPengeluaran = $groupedKeuangans->pluck('saldo_pengeluaran')->toArray();
 
         return view('owner.keuangan.index', compact('keuangans', 'keuanganLabels', 'keuanganPemasukkan', 'keuanganPengeluaran'));
     }
 
-    /**
-     * Show the form for creating a new keuangan entry.
-     *
-     * @return \Illuminate\View\View
-     */
     public function create()
     {
-        $transaksis = Transaksi::select('id', 'tgl_transaksi')
+        $tanggalRekapitulasi = Transaksi::select('tgl_transaksi')
+            ->distinct()
             ->orderBy('tgl_transaksi', 'desc')
             ->get();
 
-        return view('owner.keuangan.create', compact('transaksis'));
+        return view('owner.keuangan.create', compact('tanggalRekapitulasi'));
     }
 
-    /**
-     * Store a newly created keuangan entry in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -65,48 +48,31 @@ class KeuanganController extends Controller
             return redirect()->back()->withErrors($validator)->withInput()->with('error', 'Saldo pengeluaran harus berisikan angka');
         }
 
-        Keuangan::create([
-            'tgl_rekapitulasi' => $request->tgl_rekapitulasi,
-            'saldo_pengeluaran' => $request->saldo_pengeluaran,
-            'saldo_pemasukkan' => $this->calculateSaldoPemasukkan($request->tgl_rekapitulasi),
-            'total_penjualan' => $this->calculateTotalPenjualan($request->tgl_rekapitulasi),
-            'id_transaksi' => $request->id_transaksi,
-        ]);
+        Keuangan::updateOrCreate(
+            ['tgl_rekapitulasi' => $request->tgl_rekapitulasi],
+            [
+                'saldo_pengeluaran' => $request->saldo_pengeluaran,
+                'saldo_pemasukkan' => $this->calculateSaldoPemasukkan($request->tgl_rekapitulasi),
+                'total_penjualan' => $this->calculateTotalPenjualan($request->tgl_rekapitulasi),
+                'id_transaksi' => $request->id_transaksi,
+            ]
+        );
 
         return redirect()->route('owner.keuangan.index')->with('success', 'Data keuangan berhasil dibuat');
     }
 
-    /**
-     * Display the specified keuangan entry.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
-     */
     public function show($id)
     {
         $keuangan = Keuangan::findOrFail($id);
         return view('owner.keuangan.show', compact('keuangan'));
     }
 
-    /**
-     * Show the form for editing the specified keuangan entry.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
-     */
     public function edit($id)
     {
         $keuangan = Keuangan::findOrFail($id);
         return view('owner.keuangan.edit', compact('keuangan'));
     }
 
-    /**
-     * Update the specified keuangan entry in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -130,12 +96,6 @@ class KeuanganController extends Controller
         return redirect()->route('owner.keuangan.show', $id)->with('success', 'Data keuangan berhasil diubah');
     }
 
-    /**
-     * Calculate saldo pemasukkan based on transactions.
-     *
-     * @param  string  $date
-     * @return int
-     */
     private function calculateSaldoPemasukkan($date)
     {
         return Transaksi::whereDate('tgl_transaksi', $date)
@@ -146,12 +106,6 @@ class KeuanganController extends Controller
             });
     }
 
-    /**
-     * Calculate total penjualan based on transactions.
-     *
-     * @param  string  $date
-     * @return int
-     */
     private function calculateTotalPenjualan($date)
     {
         return Transaksi::whereDate('tgl_transaksi', $date)
@@ -162,12 +116,7 @@ class KeuanganController extends Controller
             });
     }
 
-    /**
-     * Generate grafik penjualan data.
-     *
-     * @param  string  $date
-     * @return string
-     */
+
     private function generateGrafikPenjualan($date)
     {
         $transactions = Transaksi::whereDate('tgl_transaksi', $date)
@@ -178,7 +127,7 @@ class KeuanganController extends Controller
             return [
                 'tanggal' => $transaksi->tgl_transaksi->format('Y-m-d'),
                 'saldo_pemasukkan' => $transaksi->detailTransaksi->sum('sub_total'),
-                'saldo_pengeluaran' => 0, // Placeholder, adjust if needed
+                'saldo_pengeluaran' => 0,
             ];
         });
 

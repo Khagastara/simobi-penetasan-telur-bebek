@@ -1,4 +1,4 @@
-@extends('layouts.pengepul
+@extends('layouts.pengepul')
 
 @section('content')
 <div class="container">
@@ -14,7 +14,7 @@
                         @forelse ($stokDistribusi as $stok)
                             <div class="col-md-4 mb-4">
                                 <div class="card h-100">
-                                    <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
+                                    <img src="{{ asset($stok->gambar_stok) }}"
                                         class="card-img-top"
                                         alt="{{ $stok->nama_stok }}"
                                         style="height: 200px; object-fit: cover;">

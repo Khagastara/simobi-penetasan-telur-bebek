@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use app\Models\Keuangan;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,6 +23,7 @@ class Transaksi extends Model
         'id_status_transaksi',
         'id_pengepul',
         'id_metode_pembayaran',
+        'id_keuangan'
     ];
 
     protected $casts = [
@@ -31,16 +33,26 @@ class Transaksi extends Model
     protected static function booted()
     {
         static::created(function ($transaksi) {
-            $saldoPemasukkan = $transaksi->detailTransaksi->sum('sub_total');
+            $tanggal = $transaksi->tgl_transaksi->format('d-m-Y');
 
-            // Buat data keuangan baru
-            \App\Models\Keuangan::create([
-                'tgl_rekapitulasi' => $transaksi->tgl_transaksi->format('Y-m-d'),
-                'saldo_pengeluaran' => 0,
-                'saldo_pemasukkan' => $saldoPemasukkan,
-                'total_penjualan' => $transaksi->detailTransaksi->sum('kuantitas'),
-                'id_transaksi' => $transaksi->id,
-            ]);
+            $saldoPemasukkan = $transaksi->detailTransaksi->sum('sub_total');
+            $totalPenjualan = $transaksi->detailTransaksi->sum('kuantitas');
+
+            $keuangan = Keuangan::whereDate('tgl_rekapitulasi', $tanggal)->first();
+
+            if ($keuangan) {
+                $keuangan->update([
+                    'saldo_pemasukkan' => $keuangan->saldo_pemasukkan + $saldoPemasukkan,
+                    'total_penjualan' => $keuangan->total_penjualan + $totalPenjualan,
+                ]);
+            } else {
+                Keuangan::create([
+                    'tgl_rekapitulasi' => $tanggal,
+                    'saldo_pengeluaran' => 0,
+                    'saldo_pemasukkan' => $saldoPemasukkan,
+                    'total_penjualan' => $totalPenjualan,
+                ]);
+            }
         });
     }
 
@@ -64,8 +76,9 @@ class Transaksi extends Model
         return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id');
     }
 
-    public function keuangan(): HasMany
+    public function keuangan(): BelongsTo
     {
-        return $this->hasmany(Keuangan::class, 'id_transaksi', 'id');
+        return $this->belongsTo(Keuangan::class, 'id_keuangan', 'id');
+
     }
 }
