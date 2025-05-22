@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pengepul')
 
 @section('content')
 <div class="container">
@@ -43,7 +43,7 @@
                             <label for="kuantitas" class="col-md-4 col-form-label text-md-right">Kuantitas</label>
                             <div class="col-md-6">
                                 <input id="kuantitas" type="number" class="form-control @error('kuantitas') is-invalid @enderror"
-                                       name="kuantitas" value="{{ old('kuantitas', 1) }}" required min="1" max="{{ $stokDistribusi->jumlah_stok }}">
+                                        name="kuantitas" value="{{ old('kuantitas', 1) }}" required min="1" max="{{ $stokDistribusi->jumlah_stok }}">
 
                                 @error('kuantitas')
                                     <span class="invalid-feedback" role="alert">

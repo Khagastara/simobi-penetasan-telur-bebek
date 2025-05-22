@@ -2,23 +2,6 @@
 @extends('layouts.owner')
 
 @section('content')
-    <div class="flex min-h-screen bg-[#D4E6B5] font-['Poppins']">
-
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col">
-            <!-- Top Banner -->
-            <header class="topbar p-6 shadow-md">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-2xl font-semibold text-[#877B66]">SiMOBI</h1>
-                        <p class="text-sm text-gray-700">Sistem Manajemen Operasional Penetasan Telur Bebek - <span class="font-medium">Owner</span></p>
-                    </div>
-                    <div class="text-right text-gray-800">
-                        <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
-                    </div>
-                </div>
-            </header>
-
             <!-- Dashboard Content -->
             <div class="p-8">
                 <h1 class="text-2xl font-bold text-[#877B66] mb-4">Dashboard Owner</h1>

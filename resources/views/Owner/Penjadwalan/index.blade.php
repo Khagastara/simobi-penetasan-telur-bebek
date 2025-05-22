@@ -10,9 +10,6 @@
                     <h1 class="text-2xl font-semibold text-[#877B66]">Jadwal Pembiakan</h1>
                     <p class="text-sm text-gray-700">Kelola jadwal penetasan telur bebek</p>
                 </div>
-                <div class="text-right text-gray-800">
-                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
-                </div>
             </div>
         </header>
 
