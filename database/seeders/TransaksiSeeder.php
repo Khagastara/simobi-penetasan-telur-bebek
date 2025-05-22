@@ -21,6 +21,7 @@ class TransaksiSeeder extends Seeder
             'id_status_transaksi' => 3,
             'id_pengepul' => 1,
             'id_metode_pembayaran' => 1,
+            'id_keuangan' => 1,
         ]);
 
         Transaksi::insert([
@@ -29,6 +30,7 @@ class TransaksiSeeder extends Seeder
             'id_status_transaksi' => 3,
             'id_pengepul' => 2,
             'id_metode_pembayaran' => 2,
+            'id_keuangan' => 1,
         ]);
 
         Transaksi::insert([
@@ -37,6 +39,7 @@ class TransaksiSeeder extends Seeder
             'id_status_transaksi' => 3,
             'id_pengepul' => 2,
             'id_metode_pembayaran' => 2,
+            'id_keuangan' => 2,
         ]);
 
         Transaksi::insert([
@@ -45,6 +48,7 @@ class TransaksiSeeder extends Seeder
             'id_status_transaksi' => 3,
             'id_pengepul' => 3,
             'id_metode_pembayaran' => 1,
+            'id_keuangan' => 2,
         ]);
 
         Transaksi::insert([
@@ -53,6 +57,7 @@ class TransaksiSeeder extends Seeder
             'id_status_transaksi' => 3,
             'id_pengepul' => 2,
             'id_metode_pembayaran' => 1,
+            'id_keuangan' => 3,
         ]);
     }
 }

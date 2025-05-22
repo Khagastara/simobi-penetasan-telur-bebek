@@ -15,27 +15,24 @@ class KeuanganSeeder extends Seeder
     {
         // $this->call([TransaksiSeeder::class]);
         Keuangan::insert([
-            'saldo_pemasukkan' => 4600000,
+            'saldo_pemasukkan' => 300000,
             'saldo_pengeluaran' => 100000,
             'tgl_rekapitulasi' => '2025-04-20',
             'total_penjualan' => 70,
-            'id_transaksi' => 2,
-        ]);
-
-        Keuangan::insert([
-            'saldo_pemasukkan' => 4600000,
-            'saldo_pengeluaran' => 100000,
-            'tgl_rekapitulasi' => '2025-04-20',
-            'total_penjualan' => 70,
-            'id_transaksi' => 1,
         ]);
 
         Keuangan::insert([
             'saldo_pemasukkan' => 560000,
-            'saldo_pengeluaran' => 50000,
-            'tgl_rekapitulasi' => '2025-04-28',
+            'saldo_pengeluaran' => 100000,
+            'tgl_rekapitulasi' => '2025-04-21',
             'total_penjualan' => 70,
-            'id_transaksi' => 2,
+        ]);
+
+        Keuangan::insert([
+            'saldo_pemasukkan' => 160000,
+            'saldo_pengeluaran' => 50000,
+            'tgl_rekapitulasi' => '2025-05-17',
+            'total_penjualan' => 70,
         ]);
     }
 }

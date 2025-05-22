@@ -22,11 +22,10 @@ class Keuangan extends Model
         'saldo_pengeluaran',
         'tgl_rekaptulasi',
         'total_penjualan',
-        'id_transaksi'
     ];
 
-    public function transaksi(): BelongsTo
+    public function transaksi(): HasMany
     {
-        return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id');
+        return $this->hasMany(Transaksi::class, 'id_transaksi', 'id');
     }
 }

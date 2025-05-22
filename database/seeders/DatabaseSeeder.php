@@ -21,8 +21,8 @@ class DatabaseSeeder extends Seeder
             DetailPenjadwalanSeeder::class,
             MetodePembayaranSeeder::class,
             StatusTransaksiSeeder::class,
-            TransaksiSeeder::class,
             KeuanganSeeder::class,
+            TransaksiSeeder::class,
             StokDistribusiSeeder::class,
             DetailTransaksiSeeder::class,
         ]);

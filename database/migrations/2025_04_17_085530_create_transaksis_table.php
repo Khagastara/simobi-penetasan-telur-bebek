@@ -17,16 +17,15 @@ return new class extends Migration
             $table->unsignedBigInteger('id_pengepul');
             $table->unsignedBigInteger('id_status_transaksi');
             $table->unsignedBigInteger('id_metode_pembayaran');
+            $table->unsignedBigInteger('id_keuangan');
 
             $table->foreign('id_pengepul')->on('pengepuls')->references('id');
             $table->foreign('id_status_transaksi')->on('status_transaksis')->references('id');
             $table->foreign('id_metode_pembayaran')->on('metode_pembayarans')->references('id');
+            $table->foreign('id_keuangan')->on('keuangans')->references('id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('transaksis');
