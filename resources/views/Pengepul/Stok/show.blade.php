@@ -1,4 +1,4 @@
-@extends('layouts.pengepul
+@extends('layouts.pengepul')
 
 @section('content')
 <div class="container">

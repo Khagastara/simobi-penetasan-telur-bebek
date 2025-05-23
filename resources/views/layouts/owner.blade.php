@@ -35,10 +35,8 @@
                 <i class="fas fa-exchange-alt mr-2"></i> Riwayat Transaksi
 
             <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
-                <i class="fas fa-exchange-alt mr-2"></i> Laporan Keuangan
+                <i class="fas fa-money-bill-wave mr-2"></i> Laporan Keuangan
             </a>
-            <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
-                <i class="fas fa-exchange-alt mr-2"></i> Keuangan
             <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
                 <i class="fas fa-user-circle mr-2"></i> Profil
             </a>

@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(SendScheduledNotifications::class)
-    ->everyMinute()
+    ->everyFiveMinutes()
     ->appendOutputTo(storage_path('logs/scheduler.log'));

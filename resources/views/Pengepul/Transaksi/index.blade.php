@@ -55,7 +55,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <a href="{{ route('pengepul.stok.index') }}" class="btn btn-primary">Buat Transaksi Baru</a>
+                        <a href="{{ route('pengepul.transaksi.create', ['stokId' => $stok->id]) }}" class="btn btn-primary">Buat Transaksi Baru</a>
                     </div>
                 </div>
             </div>

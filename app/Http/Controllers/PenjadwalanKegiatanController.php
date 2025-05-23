@@ -18,7 +18,35 @@ class PenjadwalanKegiatanController extends Controller
         $owner = Auth::user()->owner;
         $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
         $statusKegiatan = StatusKegiatan::all();
+
+        $this->updateLateActivities($penjadwalanKegiatans);
+        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
+
         return view('owner.penjadwalan.index', compact('penjadwalanKegiatans', 'statusKegiatan'));
+    }
+
+    private function updateLateActivities($penjadwalanKegiatans)
+    {
+        $gagalStatusId = StatusKegiatan::where('nama_status_kgtn', 'Gagal')->first()->id;
+        $currentDateTime = Carbon::now();
+
+        foreach ($penjadwalanKegiatans as $penjadwalan) {
+            foreach ($penjadwalan->detailPenjadwalan as $detail) {
+                if ($detail->statusKegiatan->nama_status_kgtn === 'To Do') {
+                    $scheduledDateTime = Carbon::parse($penjadwalan->tgl_penjadwalan->format('Y-m-d') . ' ' . $detail->waktu_kegiatan);
+                    $isLate = $currentDateTime->diffInMinutes($scheduledDateTime, false) < -30;
+
+                    if ($isLate) {
+                        $detail->update(['id_status_kegiatan' => $gagalStatusId]);
+                        Log::info('Auto-updated late activity to Gagal:', [
+                            'detail_id' => $detail->id,
+                            'scheduled_time' => $scheduledDateTime->format('Y-m-d H:i'),
+                            'current_time' => $currentDateTime->format('Y-m-d H:i')
+                        ]);
+                    }
+                }
+            }
+        }
     }
 
     public function create()
@@ -101,6 +129,19 @@ class PenjadwalanKegiatanController extends Controller
         }
 
         return view('owner.penjadwalan.show', compact('penjadwalanKegiatan'));
+    }
+
+    public function duration(Request $request, $id)
+    {
+        $detailPenjadwalan = DetailPenjadwalan::findOrFail($id);
+
+        if ($request->status === 'Selesai') {
+            $detailPenjadwalan->update(['id_status_kegiatan' => StatusKegiatan::where('nama_status_kgtn', 'Selesai')->first()->id]);
+        } elseif ($request->status === 'Gagal') {
+            $detailPenjadwalan->update(['id_status_kegiatan' => StatusKegiatan::where('nama_status_kgtn', 'Gagal')->first()->id]);
+        }
+
+        return redirect()->route('owner.penjadwalan.index')->with('success', 'Status kegiatan berhasil diperbarui.');
     }
 
     public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)
