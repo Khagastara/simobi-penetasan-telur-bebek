@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/penjadwalan', [PenjadwalanKegiatanController::class, 'index'])->name('owner.penjadwalan.index');
     Route::get('/owner/penjadwalan/{id}', [PenjadwalanKegiatanController::class, 'show'])->name('owner.penjadwalan.show');
+    Route::put('/penjadwalan/update-status/{id}', [PenjadwalanKegiatanController::class, 'duration'])->name('owner.penjadwalan.duration');
     Route::get('/penjadwalan/create', [PenjadwalanKegiatanController::class, 'create'])->name('owner.penjadwalan.create');
     Route::post('/penjadwalan', [PenjadwalanKegiatanController::class, 'store'])->name('owner.penjadwalan.store');
     Route::get('/penjadwalan/{id}/edit', [PenjadwalanKegiatanController::class, 'edit'])->name('owner.penjadwalan.edit');

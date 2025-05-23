@@ -18,6 +18,7 @@ class PenjadwalanKegiatanController extends Controller
         $owner = Auth::user()->owner;
         $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
         $statusKegiatan = StatusKegiatan::all();
+
         return view('owner.penjadwalan.index', compact('penjadwalanKegiatans', 'statusKegiatan'));
     }
 
@@ -101,6 +102,19 @@ class PenjadwalanKegiatanController extends Controller
         }
 
         return view('owner.penjadwalan.show', compact('penjadwalanKegiatan'));
+    }
+
+    public function duration(Request $request, $id)
+    {
+        $detailPenjadwalan = DetailPenjadwalan::findOrFail($id);
+
+        if ($request->status === 'Selesai') {
+            $detailPenjadwalan->update(['id_status_kegiatan' => StatusKegiatan::where('nama_status_kgtn', 'Selesai')->first()->id]);
+        } elseif ($request->status === 'Gagal') {
+            $detailPenjadwalan->update(['id_status_kegiatan' => StatusKegiatan::where('nama_status_kgtn', 'Gagal')->first()->id]);
+        }
+
+        return redirect()->route('owner.penjadwalan.index')->with('success', 'Status kegiatan berhasil diperbarui.');
     }
 
     public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)

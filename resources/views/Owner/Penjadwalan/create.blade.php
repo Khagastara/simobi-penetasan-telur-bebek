@@ -21,7 +21,7 @@
                     @csrf
                     <div>
                         <label for="tgl_penjadwalan" class="block text-sm font-medium text-[#877B66] mb-1">Tanggal Penjadwalan:</label>
-                        <input type="date" name="tgl_penjadwalan" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
+                        <input type="date" name="tgl_penjadwalan" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
                     </div>
 
                     <h3 class="text-lg font-semibold text-[#877B66] border-b pb-2">Detail Kegiatan</h3>
@@ -30,7 +30,7 @@
                         <div class="detail-item border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Kegiatan:</label>
-                                <input type="time" name="detail_penjadwalan[0][waktu_kegiatan]" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
+                                <input type="time" name="detail_penjadwalan[0][waktu_kegiatan]" value="{{ \Carbon\Carbon::now()->format('H:i') }}" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan:</label>
@@ -71,7 +71,7 @@
             newDetail.innerHTML = `
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Kegiatan:</label>
-                    <input type="time" name="detail_penjadwalan[${index}][waktu_kegiatan]" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
+                    <input type="time" name="detail_penjadwalan[${index}][waktu_kegiatan]" value="{{ \Carbon\Carbon::now()->format('H:i') }}" class="form-input w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan:</label>
@@ -81,11 +81,12 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status Kegiatan:</label>
                     <select name="detail_penjadwalan[${index}][id_status_kegiatan]" class="form-select w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
                         @foreach($statusKegiatan as $status)
-                            <option value="{{ $status->id }}">{{ $status->nama_status_kegiatan }}</option>
+                            <option value="{{ $status->id }}">{{ $status->nama_status_kgtn }}</option>
                         @endforeach
                     </select>
                 </div>
             `;
+
             container.appendChild(newDetail);
         });
     </script>

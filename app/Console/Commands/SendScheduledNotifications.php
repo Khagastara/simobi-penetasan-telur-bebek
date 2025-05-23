@@ -36,17 +36,15 @@ class SendScheduledNotifications extends Command
         $currentDate = $now->format('Y-m-d');
         $currentTime = $now->format('H:i');
 
+        $thirtyMinutesAgo = $now->copy()->subMinutes(30)->format('H:i');
+
         Log::info("Running scheduled notifications check at {$now}");
 
         $schedulesForToday = PenjadwalanKegiatan::where('tgl_penjadwalan', $currentDate)
-        ->with(['detailPenjadwalan' => function($query) use ($currentTime) {
-            $oneMinuteBefore = Carbon::now()->subMinute()->format('H:i');
-            $oneMinuteAfter = Carbon::now()->addMinute()->format('H:i');
-
-            $query->where('waktu_kegiatan', '>=', $oneMinuteBefore)
-                  ->where('waktu_kegiatan', '<=', $oneMinuteAfter);
-        }])
-        ->get();
+            ->with(['detailPenjadwalan' => function($query) use ($thirtyMinutesAgo, $currentTime) {
+                $query->whereBetween('waktu_kegiatan', [$thirtyMinutesAgo, $currentTime]);
+            }])
+            ->get();
 
         $notificationCount = 0;
 

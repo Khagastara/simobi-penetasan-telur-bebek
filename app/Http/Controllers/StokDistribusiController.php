@@ -44,7 +44,7 @@ class StokDistribusiController extends Controller
         if ($request->hasFile('gambar_stok')) {
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
-            $gambarStok->storeAs('public/images/stok', $namaGambar);
+            $gambarStok->move(public_path('images/stok'), $namaGambar);
             $gambarPath = 'images/stok/' . $namaGambar;
         }
 
@@ -106,7 +106,7 @@ class StokDistribusiController extends Controller
 
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
-            $gambarStok->storeAs('public/images/stok', $namaGambar);
+            $gambarStok->move(public_path('images/stok'), $namaGambar);
             $gambarPath = 'images/stok/' . $namaGambar;
 
             $stok->update([

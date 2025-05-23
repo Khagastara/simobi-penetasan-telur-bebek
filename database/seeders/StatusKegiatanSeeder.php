@@ -14,21 +14,18 @@ class StatusKegiatanSeeder extends Seeder
     public function run(): void
     {
         StatusKegiatan::insert([
-            // 'id' => 1,
+            'nama_status_kgtn' => 'To Do',
+            'deskripsi' => 'Kegiatan yang akan dilaksanakan',
+        ]);
+
+        StatusKegiatan::insert([
             'nama_status_kgtn' => 'Selesai',
             'deskripsi' => 'Kegiatan yang telah dilaksanakan dan sudah selesai',
         ]);
 
         StatusKegiatan::insert([
-            // 'id' => 2,
             'nama_status_kgtn' => 'Gagal',
             'deskripsi' => 'kegiatan yang gagal dilaksanakan',
-        ]);
-
-        StatusKegiatan::insert([
-            // 'id' => 3,
-            'nama_status_kgtn' => 'To Do',
-            'deskripsi' => 'Kegiatan yang akan dilaksanakan',
         ]);
     }
 }

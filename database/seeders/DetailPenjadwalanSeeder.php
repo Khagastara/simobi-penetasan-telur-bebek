@@ -19,7 +19,7 @@ class DetailPenjadwalanSeeder extends Seeder
             'waktu_kegiatan' => '07:00',
             'keterangan' => 'Mengecek kondisi telur',
             'id_penjadwalan' => 1,
-            'id_status_kegiatan' => 1,
+            'id_status_kegiatan' => 2,
         ]);
 
         DetailPenjadwalan::insert([
@@ -27,7 +27,7 @@ class DetailPenjadwalanSeeder extends Seeder
             'waktu_kegiatan' => '07:00',
             'keterangan' => 'Memberikan pakan',
             'id_penjadwalan' => 1,
-            'id_status_kegiatan' => 1,
+            'id_status_kegiatan' => 2,
         ]);
 
         DetailPenjadwalan::insert([
@@ -35,7 +35,7 @@ class DetailPenjadwalanSeeder extends Seeder
             'waktu_kegiatan' => '22:30',
             'keterangan' => 'Memberikan vitamin',
             'id_penjadwalan' => 1,
-            'id_status_kegiatan' => 2,
+            'id_status_kegiatan' => 3,
         ]);
     }
 }
