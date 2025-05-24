@@ -94,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('o/riwayat-transaksi', [TransaksiController::class, 'index'])->name('owner.transaksi.index');
     Route::get('o/riwayat-transaksi/{id}', [TransaksiController::class, 'show'])->name('owner.transaksi.show');
-    Route::put('o/riwayat-transaksi/{id}/update-status', [TransaksiController::class, 'updateStatus'])->name('transaksi.update-status');
+    Route::put('o/riwayat-transaksi/{id}/update-status', [TransaksiController::class, 'updateStatus'])->name('owner.transaksi.update-status');
 
     Route::get('/keuangan', [KeuanganController::class, 'index'])->name('owner.keuangan.index');
     Route::get('/keuangan/create', [KeuanganController::class, 'create'])->name('owner.keuangan.create');

@@ -2,19 +2,6 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-        <!-- Top Banner -->
-        <header class="topbar p-6 shadow-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#877B66]">Tambah Jadwal Pembiakan</h1>
-                    <p class="text-sm text-gray-700">Isi informasi jadwal dan detail kegiatan pembiakan</p>
-                </div>
-                <div class="text-right text-gray-800">
-                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
-                </div>
-        </header>
-
-        <!-- Main Content -->
         <section class="p-8">
             <div class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto">
                 <form action="{{ route('owner.penjadwalan.store') }}" method="POST" class="space-y-6">

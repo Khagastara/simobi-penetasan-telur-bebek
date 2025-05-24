@@ -20,6 +20,7 @@ class TransaksiController extends Controller
     public function index()
     {
         $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi'])
+            ->orderBy('tgl_transaksi', 'desc')
             ->get()
             ->map(function ($transaksi) {
                 $latestStatus = $transaksi->statusTransaksi()
@@ -30,11 +31,12 @@ class TransaksiController extends Controller
 
                 return [
                     'id' => $transaksi->id,
+                    'tgl_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
                     'username' => $transaksi->pengepul->nama,
                     'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
                     'kuantitas' => $detail ? $detail->kuantitas : 0,
                     'total_transaksi' => $detail ? $detail->sub_total : 0,
-                    'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
+                    'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
                 ];
             });
 
@@ -65,10 +67,24 @@ class TransaksiController extends Controller
 
         $statusOptions = [
             'Pembayaran Valid',
-            'Packing',
-            'Pengiriman',
+            'Dikemas',
+            'Dikirim',
             'Selesai'
         ];
+
+        if (request()->ajax()) {
+            return response()->json([
+                'id' => $transaksiDetail['id'],
+                'username' => $transaksiDetail['username'],
+                'nama_stok' => $transaksiDetail['nama_stok'],
+                'kuantitas' => $transaksiDetail['kuantitas'],
+                'total_transaksi' => $transaksiDetail['total_transaksi'],
+                'metode_pembayaran' => $transaksiDetail['metode_pembayaran'],
+                'tanggal_transaksi' => $transaksiDetail['tanggal_transaksi'],
+                'status' => $transaksiDetail['status'],
+                'statusOptions' => $statusOptions
+            ]);
+        }
 
         return view('owner.transaksi.show', compact('transaksiDetail', 'statusOptions'));
     }
@@ -78,17 +94,38 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|string|in:Pembayaran Valid,Packing,Pengiriman,Selesai',
+            'status' => 'required|string|in:Pembayaran Valid,Dikemas,Dikirim,Selesai',
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Status tidak valid'
+                ], 422);
+            }
             return redirect()->back()->with('error', 'Status tidak valid');
         }
 
-        StatusTransaksi::create([
-            'nama_status' => $request->status,
-            'id_transaksi' => $transaksi->id,
+        $statusMap = [
+            'Pembayaran Valid' => 1,
+            'Dikemas' => 2,
+            'Dikirim' => 3,
+            'Selesai' => 4,
+        ];
+
+        $statusId = $statusMap[$request->status];
+
+        DB::table('transaksis')->where('id', $id)->update([
+            'id_status_transaksi' => $statusId
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status berhasil diubah'
+            ]);
+        }
 
         return redirect()->route('owner.transaksi.show', $id)->with('success', 'Status berhasil diubah');
     }

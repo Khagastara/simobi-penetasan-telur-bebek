@@ -62,6 +62,15 @@ class StokDistribusiController extends Controller
     public function show($id)
     {
         $stok = StokDistribusi::findOrFail($id);
+
+        // Check if request is AJAX (for modal)
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $stok
+            ]);
+        }
+
         return view('owner.stok.show', compact('stok'));
     }
 
