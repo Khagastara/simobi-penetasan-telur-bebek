@@ -16,11 +16,14 @@ class PenjadwalanKegiatanController extends Controller
     public function index()
     {
         $owner = Auth::user()->owner;
-        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
+        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()
+        ->with('detailPenjadwalan.statusKegiatan')
+        ->orderBy('tgl_penjadwalan', 'desc')
+        ->get();
+        
         $statusKegiatan = StatusKegiatan::all();
 
         $this->updateLateActivities($penjadwalanKegiatans);
-        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
 
         return view('owner.penjadwalan.index', compact('penjadwalanKegiatans', 'statusKegiatan'));
     }

@@ -1,27 +1,17 @@
-{{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\Owner\Keuangan\index.blade.php --}}
 @extends('layouts.owner')
 
 @section('content')
 
 <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-    <!-- Top Banner -->
-    <header class="topbar p-6 shadow-md">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-semibold text-[#877B66]">Data Keuangan</h1>
-                <p class="text-sm text-gray-700">Daftar data keuangan yang telah tercatat</p>
-            </div>
-            <a href="{{ route('owner.keuangan.create') }}"
-                class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded shadow text-sm transition">
-                Tambah Data
-            </a>
-        </div>
-    </header>
-
-    <!-- Grafik -->
     <section class="p-8">
         <div class="bg-white p-6 rounded-xl shadow mb-6">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">Grafik Keuangan</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Grafik Keuangan</h2>
+                <a href="{{ route('owner.keuangan.create') }}"
+                    class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded shadow text-sm transition">
+                    Tambah Data
+                </a>
+            </div>
             <canvas id="keuanganChart" width="400" height="200"></canvas>
         </div>
 

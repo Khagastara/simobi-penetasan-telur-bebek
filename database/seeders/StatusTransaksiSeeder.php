@@ -20,22 +20,17 @@ class StatusTransaksiSeeder extends Seeder
 
         StatusTransaksi::insert([
             'id' => 2,
-            'nama_status' => 'Dikirim',
+            'nama_status' => 'Dikemas',
         ]);
 
         StatusTransaksi::insert([
             'id' => 3,
-            'nama_status' => 'Selesai',
+            'nama_status' => 'Dikirim',
         ]);
 
         StatusTransaksi::insert([
             'id' => 4,
-            'nama_status' => 'Dikemas',
-        ]);
-
-        StatusTransaksi::insert([
-            'id' => 5,
-            'nama_status' => 'Dikemas',
+            'nama_status' => 'Selesai',
         ]);
     }
 }
