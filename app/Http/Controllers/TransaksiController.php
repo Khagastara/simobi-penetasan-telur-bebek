@@ -157,13 +157,12 @@ class TransaksiController extends Controller
         return view('pengepul.transaksi.index', compact('transaksis'));
     }
 
-
     public function showPengepul($id)
     {
         $pengepul = Auth::user()->pengepul;
 
         $transaksi = Transaksi::with(['detailTransaksi.stokDistribusi', 'metodePembayaran', 'statusTransaksi'])
-            ->where('id_pengepul', $pengepul)
+            ->where('id_pengepul', $pengepul->id)
             ->findOrFail($id);
 
         $latestStatus = $transaksi->statusTransaksi()
@@ -182,6 +181,27 @@ class TransaksiController extends Controller
             'tanggal_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
             'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
         ];
+
+        if (request()->ajax()) {
+            $statusOptions = [
+                'Pembayaran Valid',
+                'Dikemas',
+                'Dikirim',
+                'Selesai'
+            ];
+
+            return response()->json([
+                'id' => $transaksiDetail['id'],
+                'username' => $transaksiDetail['username'],
+                'nama_stok' => $transaksiDetail['nama_stok'],
+                'kuantitas' => $transaksiDetail['kuantitas'],
+                'total_transaksi' => $transaksiDetail['total_transaksi'],
+                'metode_pembayaran' => $transaksiDetail['metode_pembayaran'],
+                'tanggal_transaksi' => $transaksiDetail['tanggal_transaksi'],
+                'status' => $transaksiDetail['status'],
+                'statusOptions' => $statusOptions
+            ]);
+        }
 
         return view('pengepul.transaksi.show', compact('transaksiDetail'));
     }
