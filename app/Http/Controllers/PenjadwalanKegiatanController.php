@@ -13,19 +13,56 @@ use Carbon\Carbon;
 
 class PenjadwalanKegiatanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $owner = Auth::user()->owner;
-        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()
-        ->with('detailPenjadwalan.statusKegiatan')
-        ->orderBy('tgl_penjadwalan', 'desc')
-        ->get();
-        
+
+        // Get filter parameters
+        $filterMonth = $request->get('month');
+        $filterYear = $request->get('year');
+
+        // Build query with filters
+        $query = $owner->penjadwalanKegiatan()
+            ->with('detailPenjadwalan.statusKegiatan')
+            ->orderBy('tgl_penjadwalan', 'desc');
+
+        // Apply month filter
+        if ($filterMonth) {
+            $query->whereMonth('tgl_penjadwalan', $filterMonth);
+        }
+
+        // Apply year filter
+        if ($filterYear) {
+            $query->whereYear('tgl_penjadwalan', $filterYear);
+        }
+
+        $penjadwalanKegiatans = $query->get();
+
         $statusKegiatan = StatusKegiatan::all();
 
         $this->updateLateActivities($penjadwalanKegiatans);
 
-        return view('owner.penjadwalan.index', compact('penjadwalanKegiatans', 'statusKegiatan'));
+        // Get available years and months for filter dropdowns
+        $availableYears = $owner->penjadwalanKegiatan()
+            ->selectRaw('YEAR(tgl_penjadwalan) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        $availableMonths = collect([
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ]);
+
+        return view('owner.penjadwalan.index', compact(
+            'penjadwalanKegiatans',
+            'statusKegiatan',
+            'availableYears',
+            'availableMonths',
+            'filterMonth',
+            'filterYear'
+        ));
     }
 
     private function updateLateActivities($penjadwalanKegiatans)
@@ -145,6 +182,29 @@ class PenjadwalanKegiatanController extends Controller
         }
 
         return redirect()->route('owner.penjadwalan.index')->with('success', 'Status kegiatan berhasil diperbarui.');
+    }
+
+    public function delete($id)
+    {
+        $penjadwalanKegiatan = PenjadwalanKegiatan::findOrFail($id);
+
+        if ($penjadwalanKegiatan->id_owner != Auth::user()->owner->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $penjadwalanKegiatan->detailPenjadwalan()->delete();
+
+            $penjadwalanKegiatan->delete();
+
+            return redirect()->route('owner.penjadwalan.index')->with('success', 'Jadwal berhasil dihapus');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete penjadwalan: ' . $e->getMessage(), [
+                'id' => $id
+            ]);
+
+            return redirect()->route('owner.penjadwalan.index')->with('error', 'Gagal menghapus jadwal');
+        }
     }
 
     public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)

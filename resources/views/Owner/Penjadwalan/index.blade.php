@@ -14,9 +14,65 @@
                 </script>
             @endif
 
-            <a href="{{ route('owner.penjadwalan.create') }}" class="inline-block mb-4 bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition">
-                <i class="fas fa-plus mr-2"></i> Tambah Jadwal
-            </a>
+            @if(session('error'))
+                <div class="bg-red-500 text-white px-4 py-2 rounded-lg shadow mb-4">
+                    {{ session('error') }}
+                </div>
+                <script>
+                    setTimeout(() => {
+                        document.querySelector('.bg-red-500').remove();
+                    }, 3000);
+                </script>
+            @endif
+
+            <!-- Filter Section -->
+            <div class="bg-white p-6 rounded-xl shadow mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Filter Jadwal</h3>
+                <form method="GET" action="{{ route('owner.penjadwalan.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Month Filter -->
+                    <div>
+                        <label for="month" class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
+                        <select name="month" id="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] focus:border-transparent">
+                            <option value="">Semua Bulan</option>
+                            @foreach($availableMonths as $monthNum => $monthName)
+                                <option value="{{ $monthNum }}" {{ $filterMonth == $monthNum ? 'selected' : '' }}>
+                                    {{ $monthName }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Year Filter -->
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
+                        <select name="year" id="year" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] focus:border-transparent">
+                            <option value="">Semua Tahun</option>
+                            @foreach($availableYears as $year)
+                                <option value="{{ $year }}" {{ $filterYear == $year ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Filter Buttons -->
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition">
+                            <i class="fas fa-filter mr-2"></i> Filter
+                        </button>
+                        <a href="{{ route('owner.penjadwalan.index') }}" class="bg-gray-500 text-white hover:bg-gray-600 px-4 py-2 rounded-lg shadow transition">
+                            <i class="fas fa-times mr-2"></i> Reset
+                        </a>
+                    </div>
+
+                    <!-- Add Schedule Button -->
+                    <div class="flex items-end">
+                        <a href="{{ route('owner.penjadwalan.create') }}" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition">
+                            <i class="fas fa-plus mr-2"></i> Tambah Jadwal
+                        </a>
+                    </div>
+                </form>
+            </div>
 
             <div class="overflow-x-auto bg-white p-6 rounded-xl shadow">
                 <table class="min-w-full divide-y divide-gray-300 text-sm text-left text-gray-700">
@@ -34,11 +90,18 @@
                         @forelse($penjadwalanKegiatans as $penjadwalan)
                             <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }}">
                                 <td class="px-4 py-3 text-center">
-                                    {{ $penjadwalan->tgl_penjadwalan->format('d-m-Y') }}
+                                    @php
+                                        \Carbon\Carbon::setLocale('id');
+                                        $formattedDate = \Carbon\Carbon::parse($penjadwalan->tgl_penjadwalan)->translatedFormat('j F Y');
+                                    @endphp
+                                    {{ $formattedDate }}
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     @foreach($penjadwalan->detailPenjadwalan as $detail)
-                                        <div class="mb-1">{{ $detail->waktu_kegiatan }}</div>
+                                        @php
+                                            $formattedTime = \Carbon\Carbon::parse($detail->waktu_kegiatan)->format('H:i');
+                                        @endphp
+                                        <div class="mb-1">{{ $formattedTime }}</div>
                                     @endforeach
                                 </td>
                                 <td class="px-4 py-3 text-center">
@@ -121,9 +184,18 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                        <a href="{{ route('owner.penjadwalan.edit', $penjadwalan->id) }}" class="bg-yellow-400 text-white hover:bg-yellow-500 px-3 py-1 rounded text-xs font-medium transition ml-1">
-                                            <i class="fas fa-edit mr-1"></i> Ubah
-                                        </a>
+                                        <div class="flex flex-col gap-1">
+                                            <a href="{{ route('owner.penjadwalan.edit', $penjadwalan->id) }}" class="bg-yellow-400 text-white hover:bg-yellow-500 px-3 py-1 rounded text-xs font-medium transition">
+                                                <i class="fas fa-edit mr-1"></i> Ubah
+                                            </a>
+                                            <form action="{{ route('owner.penjadwalan.delete', $penjadwalan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete()">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="w-full bg-red-500 text-white hover:bg-red-600 px-3 py-1 rounded text-xs font-medium transition">
+                                                    <i class="fas fa-trash mr-1"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -132,7 +204,13 @@
                             <tr class="bg-white">
                                 <td colspan="5" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-calendar-times text-4xl mb-2 text-gray-300"></i>
-                                    <p>Belum ada jadwal</p>
+                                    <p>
+                                        @if($filterMonth || $filterYear)
+                                            Tidak ada jadwal untuk filter yang dipilih
+                                        @else
+                                            Belum ada jadwal
+                                        @endif
+                                    </p>
                                 </td>
                             </tr>
                         @endforelse
@@ -153,6 +231,10 @@
             }
 
             return true;
+        }
+
+        function confirmDelete() {
+            return confirm('Apakah Anda yakin ingin menghapus jadwal ini? Tindakan ini tidak dapat dibatalkan.');
         }
     </script>
 @endsection
