@@ -86,6 +86,8 @@
         padding-right: 1rem;
         border-radius: 0.75rem; /* rounded-xl */
         transition: all 0.3s ease;
+        color: white; /* Set the text color to white */
+        text-decoration: none; /* Remove underline */
     }
 
     .sidebar a::before {
@@ -104,10 +106,10 @@
     .sidebar a:hover,
     .sidebar a.active-menu {
         background-color: #E2D686;
-        color: #000;
+        color: #000; /* Change text color on hover or active */
         font-weight: 500;
 
-        /* Buat hanya sisi kiri yang rounded */
+        /* Make only the left side rounded */
         border-top-right-radius: 0.75rem;
         border-bottom-right-radius: 0.75rem;
         border-top-left-radius: 0;
@@ -119,5 +121,6 @@
         width: 6px;
     }
 </style>
+
 </body>
 </html>
