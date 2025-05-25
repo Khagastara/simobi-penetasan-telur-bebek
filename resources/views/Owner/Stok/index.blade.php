@@ -38,17 +38,18 @@
                 <div id="cardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     @forelse ($stokDistribusi as $stok)
                         <div class="card-item bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
-                             data-stok-nama="{{ $stok->nama_stok }}"
-                             data-stok-harga="{{ $stok->harga_stok }}"
-                             data-stok-jumlah="{{ $stok->jumlah_stok }}"
-                             data-stok-deskripsi="{{ $stok->deskripsi_stok ?? '' }}"
-                             data-stok-gambar="{{ asset($stok->gambar_stok) }}"
-                             data-stok-created="{{ $stok->created_at ?? '' }}"
-                             data-stok-updated="{{ $stok->updated_at ?? '' }}">
+                            data-stok-id="{{ $stok->id }}"
+                            data-stok-nama="{{ $stok->nama_stok }}"
+                            data-stok-harga="{{ $stok->harga_stok }}"
+                            data-stok-jumlah="{{ $stok->jumlah_stok }}"
+                            data-stok-deskripsi="{{ $stok->deskripsi_stok ?? '' }}"
+                            data-stok-gambar="{{ asset($stok->gambar_stok) }}"
+                            data-stok-created="{{ $stok->created_at ?? '' }}"
+                            data-stok-updated="{{ $stok->updated_at ?? '' }}">
                             <div class="aspect-square overflow-hidden rounded-t-lg">
                                 <img src="{{ asset($stok->gambar_stok) }}"
-                                     alt="{{ $stok->nama_stok }}"
-                                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                    alt="{{ $stok->nama_stok }}"
+                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                             </div>
                             <div class="p-4">
                                 <h3 class="font-semibold text-gray-800 mb-1 truncate">{{ $stok->nama_stok }}</h3>
