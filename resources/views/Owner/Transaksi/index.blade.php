@@ -42,8 +42,9 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
+                    @php $rowIndex = 0; @endphp
                     @forelse ($transaksis as $index => $transaksi)
-                        <tr>
+                        <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }}">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
                             <td class="px-4 py-3">{{ $transaksi['tgl_transaksi'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['username'] }}</td>
@@ -61,6 +62,7 @@
                                 </button>
                             </td>
                         </tr>
+                        @php $rowIndex++; @endphp
                     @empty
                         <tr>
                             <td colspan="8" class="px-4 py-4 text-center text-gray-500">Tidak ada data transaksi</td>
