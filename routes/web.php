@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/penjadwalan/create', [PenjadwalanKegiatanController::class, 'create'])->name('owner.penjadwalan.create');
     Route::post('/penjadwalan', [PenjadwalanKegiatanController::class, 'store'])->name('owner.penjadwalan.store');
     Route::get('/penjadwalan/{id}/edit', [PenjadwalanKegiatanController::class, 'edit'])->name('owner.penjadwalan.edit');
+    Route::delete('/penjadwalan/{id}', [PenjadwalanKegiatanController::class, 'delete'])->name('owner.penjadwalan.delete');
     Route::put('/penjadwalan/{id}', [PenjadwalanKegiatanController::class, 'update'])->name('owner.penjadwalan.update');
 
     Route::get('/stok', [StokDistribusiController::class, 'index'])->name('owner.stok.index');
