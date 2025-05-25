@@ -108,18 +108,23 @@
         </div>
     </div>
 
-    <!-- Ensure Bootstrap CSS and JS are loaded -->
-    @push('styles')
+    <!-- Load Bootstrap CSS and JS directly in the section -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    @endpush
-
-    @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    @endpush
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
+        // Wait for Bootstrap to load completely
+        function waitForBootstrap(callback) {
+            if (typeof bootstrap !== 'undefined') {
+                callback();
+            } else {
+                setTimeout(() => waitForBootstrap(callback), 100);
+            }
+        }
+
+        // Initialize everything after Bootstrap is loaded
+        waitForBootstrap(function() {
+            console.log('Bootstrap loaded successfully');
 
             // Search functionality
             const searchInput = document.getElementById('searchInput');
@@ -129,7 +134,7 @@
                     const cards = document.querySelectorAll('.card-item');
 
                     cards.forEach(card => {
-                        const title = card.querySelector('h3').textContent.toLowerCase();
+                        const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
                         if (title.includes(searchTerm)) {
                             card.style.display = 'block';
                         } else {
@@ -141,10 +146,22 @@
 
             // Add click event listeners to all cards
             const cards = document.querySelectorAll('.card-item');
-            cards.forEach(card => {
-                card.addEventListener('click', function() {
+            console.log('Found', cards.length, 'cards');
+
+            cards.forEach((card, index) => {
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
                     const stokId = this.getAttribute('data-stok-id');
-                    console.log('Card clicked, stok ID:', stokId);
+                    console.log(`Card ${index} clicked, stok ID:`, stokId);
+
+                    if (!stokId) {
+                        console.error('No stok ID found on card');
+                        alert('ID stok tidak ditemukan pada kartu ini.');
+                        return;
+                    }
+
                     showStokDetail(stokId, this);
                 });
             });
@@ -155,13 +172,28 @@
             console.log('showStokDetail called with ID:', id);
 
             try {
-                // Show modal using Bootstrap 5 syntax
+                // Get modal element
                 const modalElement = document.getElementById('stokModal');
+                if (!modalElement) {
+                    console.error('Modal element not found');
+                    alert('Modal element tidak ditemukan.');
+                    return;
+                }
+
+                // Show modal immediately with fallback data
                 const modal = new bootstrap.Modal(modalElement);
                 modal.show();
 
-                // Reset modal content
-                document.getElementById('modalContent').innerHTML = `
+                // Reset modal content to loading state
+                const modalContent = document.getElementById('modalContent');
+                const editButton = document.getElementById('editButton');
+
+                if (!modalContent || !editButton) {
+                    console.error('Modal content elements not found');
+                    return;
+                }
+
+                modalContent.innerHTML = `
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -169,60 +201,55 @@
                         <p class="mt-2 text-muted">Memuat detail stok...</p>
                     </div>
                 `;
-                document.getElementById('editButton').style.display = 'none';
+                editButton.style.display = 'none';
 
-                // Get CSRF token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
+                // Show fallback data immediately
+                setTimeout(() => {
+                    createModalContentFromCard(cardElement);
+                    editButton.style.display = 'inline-block';
+                    editButton.onclick = () => {
+                        window.location.href = `/stok/${id}/edit`;
+                    };
+                }, 100);
 
-                // Try AJAX first
-                fetch(`/owner/stok/${id}`, {
+                // Try to fetch updated data from server
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                fetch(`/stok/${id}`, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
+                        ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken })
                     }
                 })
                 .then(response => {
                     console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (response.ok) {
+                        return response.json();
                     }
-                    return response.json();
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 })
                 .then(data => {
                     console.log('AJAX success, data:', data);
                     if (data.success && data.data) {
                         createModalContentFromData(data.data);
-                    } else {
-                        throw new Error('Invalid response format');
+                        console.log('Modal content updated with server data');
+                        // Update edit button URL with server data
+                        editButton.onclick = () => {
+                            window.location.href = `/stok/${data.data.id}/edit`;
+                        };
                     }
-
-                    // Show edit button
-                    const editButton = document.getElementById('editButton');
-                    editButton.style.display = 'inline-block';
-                    editButton.onclick = () => {
-                        window.location.href = `/owner/stok/${id}/edit`;
-                    };
                 })
                 .catch(error => {
-                    console.error('AJAX Error:', error);
-                    // Fallback: create content from card data
-                    createModalContentFromCard(cardElement);
-
-                    // Still show edit button on fallback
-                    const editButton = document.getElementById('editButton');
-                    editButton.style.display = 'inline-block';
-                    editButton.onclick = () => {
-                        window.location.href = `/owner/stok/${id}/edit`;
-                    };
+                    console.log('AJAX failed, using fallback data:', error.message);
+                    // Fallback data is already shown, so no need to do anything
                 });
 
             } catch (error) {
                 console.error('Modal Error:', error);
-                alert('Terjadi kesalahan saat membuka detail. Silakan coba lagi.');
+                alert('Terjadi kesalahan saat membuka detail. Error: ' + error.message);
             }
         }
 
@@ -253,10 +280,11 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="text-center">
-                                <img src="${stok.gambar_stok ? '/' + stok.gambar_stok : '/images/no-image.png'}"
+                                <img src="${stok.gambar_stok ? (stok.gambar_stok.startsWith('/') ? stok.gambar_stok : '/' + stok.gambar_stok) : '/images/no-image.png'}"
                                      alt="${stok.nama_stok}"
                                      class="img-fluid rounded shadow-sm"
-                                     style="max-height: 300px; width: 100%; object-fit: cover;">
+                                     style="max-height: 300px; width: 100%; object-fit: cover;"
+                                     onerror="this.src='/images/no-image.png'">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -346,7 +374,8 @@
                                 <img src="${stokGambar}"
                                      alt="${stokNama}"
                                      class="img-fluid rounded shadow-sm"
-                                     style="max-height: 300px; width: 100%; object-fit: cover;">
+                                     style="max-height: 300px; width: 100%; object-fit: cover;"
+                                     onerror="this.src='/images/no-image.png'">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -446,200 +475,14 @@
             border: none;
             background-color: #f8f9fa;
         }
-    </style>
-@endsectionjson();
-            })
-            .then(data => {
-                if (data.success && data.data) {
-                    createModalContentFromData(data.data);
-                } else {
-                    throw new Error('Invalid response format');
-                }
 
-                // Show edit button
-                const editButton = document.getElementById('editButton');
-                editButton.style.display = 'inline-block';
-                editButton.onclick = () => {
-                    window.location.href = `/owner/stok/${id}/edit`;
-                };
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Fallback: create content structure from card data
-                createModalContent(id);
-
-                // Still show edit button on fallback
-                const editButton = document.getElementById('editButton');
-                editButton.style.display = 'inline-block';
-                editButton.onclick = () => {
-                    window.location.href = `/owner/stok/${id}/edit`;
-                };
-            });
+        /* Ensure modal appears above everything */
+        .modal {
+            z-index: 1050;
         }
 
-        // Function to create modal content from server data
-        function createModalContentFromData(stok) {
-            const createdAt = stok.created_at ? new Date(stok.created_at).toLocaleDateString('id-ID', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : 'Tidak tersedia';
-
-            const updatedAt = stok.updated_at ? new Date(stok.updated_at).toLocaleDateString('id-ID', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : 'Tidak tersedia';
-
-            const totalValue = stok.harga_stok * stok.jumlah_stok;
-
-            const modalContent = `
-                <div class="modal-content-section">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="text-center">
-                                <img src="${stok.gambar_stok ? '/' + stok.gambar_stok : '/images/no-image.png'}"
-                                     alt="${stok.nama_stok}"
-                                     class="img-fluid rounded shadow-sm"
-                                     style="max-height: 300px; width: 100%; object-fit: cover;">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="stock-details">
-                                <h4 class="text-primary mb-3">${stok.nama_stok}</h4>
-
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Harga per stok</span>
-                                    <h5 class="text-success fw-bold mb-0">Rp ${parseInt(stok.harga_stok).toLocaleString('id-ID')}</h5>
-                                </div>
-
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Jumlah Stok Tersedia</span>
-                                    <h6 class="mb-0">${parseInt(stok.jumlah_stok).toLocaleString('id-ID')} unit</h6>
-                                </div>
-
-                                ${stok.deskripsi_stok ? `
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Deskripsi</span>
-                                    <p class="mb-0">${stok.deskripsi_stok}</p>
-                                </div>
-                                ` : ''}
-
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Total Nilai Stok</span>
-                                    <h6 class="text-info mb-0">Rp ${totalValue.toLocaleString('id-ID')}</h6>
-                                </div>
-
-                                <hr>
-
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <span class="badge bg-primary">ID: ${stok.id}</span>
-                                    ${stok.jumlah_stok > 0 ?
-                                        '<span class="badge bg-success">Tersedia</span>' :
-                                        '<span class="badge bg-danger">Stok Habis</span>'
-                                    }
-                                    ${stok.jumlah_stok < 10 && stok.jumlah_stok > 0 ?
-                                        '<span class="badge bg-warning">Stok Terbatas</span>' : ''
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">Informasi Tambahan</h6>
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <small class="text-muted">Dibuat pada:</small><br>
-                                            <span>${createdAt}</span>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <small class="text-muted">Terakhir diupdate:</small><br>
-                                            <span>${updatedAt}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('modalContent').innerHTML = modalContent;
-        }
-
-        // Alternative function to create modal content if fetch fails
-        function createModalContent(id) {
-            // Find the card data
-            const card = document.querySelector(`[onclick="showStokDetail(${id})"]`);
-            if (card) {
-                const img = card.querySelector('img');
-                const title = card.querySelector('h3').textContent;
-                const price = card.querySelector('.text-\\[\\#AFC97E\\]').textContent;
-
-                document.getElementById('modalContent').innerHTML = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <img src="${img.src}" alt="${title}" class="img-fluid rounded shadow">
-                        </div>
-                        <div class="col-md-6">
-                            <h4>${title}</h4>
-                            <p class="text-success fs-5 fw-bold">${price}</p>
-                            <hr>
-                            <p class="text-muted">Detail lengkap akan dimuat dari server...</p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-    </script>
-
-    <style>
-        .card-item {
-            transition: all 0.3s ease;
-        }
-
-        .card-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .aspect-square {
-            aspect-ratio: 1 / 1;
-        }
-
-        .modal-content {
-            border-radius: 15px;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #AFC97E 0%, #8fa866 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .modal-header .btn-close {
-            filter: brightness(0) invert(1);
-        }
-
-        .detail-item {
-            border-left: 3px solid #AFC97E;
-            padding-left: 12px;
-        }
-
-        .stock-details .badge {
-            font-size: 0.75em;
-        }
-
-        .modal-content-section .card {
-            border: none;
-            background-color: #f8f9fa;
+        .modal-backdrop {
+            z-index: 1040;
         }
     </style>
 @endsection
