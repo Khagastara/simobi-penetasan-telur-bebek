@@ -30,32 +30,6 @@ class Transaksi extends Model
         'tgl_transaksi' => 'datetime',
     ];
 
-    protected static function booted()
-    {
-        static::created(function ($transaksi) {
-            $tanggal = $transaksi->tgl_transaksi->format('d-m-Y');
-
-            $saldoPemasukkan = $transaksi->detailTransaksi->sum('sub_total');
-            $totalPenjualan = $transaksi->detailTransaksi->sum('kuantitas');
-
-            $keuangan = Keuangan::whereDate('tgl_rekapitulasi', $tanggal)->first();
-
-            if ($keuangan) {
-                $keuangan->update([
-                    'saldo_pemasukkan' => $keuangan->saldo_pemasukkan + $saldoPemasukkan,
-                    'total_penjualan' => $keuangan->total_penjualan + $totalPenjualan,
-                ]);
-            } else {
-                Keuangan::create([
-                    'tgl_rekapitulasi' => $tanggal,
-                    'saldo_pengeluaran' => 0,
-                    'saldo_pemasukkan' => $saldoPemasukkan,
-                    'total_penjualan' => $totalPenjualan,
-                ]);
-            }
-        });
-    }
-
     public function pengepul(): BelongsTo
     {
         return $this->belongsTo(Pengepul::class, 'id_pengepul', 'id');

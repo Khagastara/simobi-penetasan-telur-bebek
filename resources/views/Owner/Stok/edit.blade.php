@@ -38,7 +38,7 @@
                 <div class="mb-4">
                     <label for="gambar_stok" class="block font-semibold text-[#877B66] mb-1">Gambar Stok</label>
                     <div class="mb-2">
-                        <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
+                        <img src="{{ asset($stok->gambar_stok) }}"
                             alt="{{ $stok->nama_stok }}"
                             class="rounded-lg max-h-[150px]">
                     </div>

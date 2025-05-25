@@ -2,7 +2,6 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-        <!-- Main Content -->
         <section class="p-8">
             @if (session('success'))
                 <div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow mb-4">
@@ -18,7 +17,6 @@
                 </script>
             @endif
 
-            <!-- Cards Grid -->
             <div class="bg-white p-6 rounded-xl shadow">
                             <div class="flex justify-between items-center mb-6">
                 <div class="relative" style="width: 400">
@@ -72,7 +70,6 @@
         </section>
     </main>
 
-    <!-- Bootstrap Modal for Stock Detail -->
     <div class="modal fade" id="stokModal" tabindex="-1" aria-labelledby="stokModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -81,7 +78,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="modalContent">
-                    <!-- Content will be loaded here -->
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -97,12 +93,9 @@
         </div>
     </div>
 
-    <!-- Load Bootstrap CSS and JS directly in the section -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Wait for Bootstrap to load completely
         function waitForBootstrap(callback) {
             if (typeof bootstrap !== 'undefined') {
                 callback();
@@ -111,11 +104,9 @@
             }
         }
 
-        // Initialize everything after Bootstrap is loaded
         waitForBootstrap(function() {
             console.log('Bootstrap loaded successfully');
 
-            // Search functionality
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function(e) {
@@ -133,7 +124,6 @@
                 });
             }
 
-            // Add click event listeners to all cards
             const cards = document.querySelectorAll('.card-item');
             console.log('Found', cards.length, 'cards');
 
@@ -156,12 +146,10 @@
             });
         });
 
-        // Function to show stock detail in modal
         function showStokDetail(id, cardElement) {
             console.log('showStokDetail called with ID:', id);
 
             try {
-                // Get modal element
                 const modalElement = document.getElementById('stokModal');
                 if (!modalElement) {
                     console.error('Modal element not found');
@@ -169,11 +157,9 @@
                     return;
                 }
 
-                // Show modal immediately with fallback data
                 const modal = new bootstrap.Modal(modalElement);
                 modal.show();
 
-                // Reset modal content to loading state
                 const modalContent = document.getElementById('modalContent');
                 const editButton = document.getElementById('editButton');
 
@@ -192,7 +178,6 @@
                 `;
                 editButton.style.display = 'none';
 
-                // Show fallback data immediately
                 setTimeout(() => {
                     createModalContentFromCard(cardElement);
                     editButton.style.display = 'inline-block';
@@ -201,7 +186,6 @@
                     };
                 }, 100);
 
-                // Try to fetch updated data from server
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
                 fetch(`/stok/${id}`, {
@@ -225,7 +209,6 @@
                     if (data.success && data.data) {
                         createModalContentFromData(data.data);
                         console.log('Modal content updated with server data');
-                        // Update edit button URL with server data
                         editButton.onclick = () => {
                             window.location.href = `/stok/${data.data.id}/edit`;
                         };
@@ -233,7 +216,6 @@
                 })
                 .catch(error => {
                     console.log('AJAX failed, using fallback data:', error.message);
-                    // Fallback data is already shown, so no need to do anything
                 });
 
             } catch (error) {
@@ -242,7 +224,6 @@
             }
         }
 
-        // Function to create modal content from server data
         function createModalContentFromData(stok) {
             console.log('Creating modal content from server data');
 
@@ -343,7 +324,6 @@
             document.getElementById('modalContent').innerHTML = modalContent;
         }
 
-        // Fallback function to create modal content from card data
         function createModalContentFromCard(cardElement) {
             console.log('Creating modal content from card data (fallback)');
 
@@ -465,7 +445,6 @@
             background-color: #f8f9fa;
         }
 
-        /* Ensure modal appears above everything */
         .modal {
             z-index: 1050;
         }

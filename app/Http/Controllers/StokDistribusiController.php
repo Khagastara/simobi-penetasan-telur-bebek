@@ -109,10 +109,12 @@ class StokDistribusiController extends Controller
         }
 
         if ($request->hasFile('gambar_stok')) {
-            if ($stok->gambar_stok && Storage::exists('public/' . $stok->gambar_stok)) {
-                Storage::delete('public/images' . $stok->gambar_stok);
+
+            if ($stok->gambar_stok && file_exists(public_path($stok->gambar_stok))) {
+                unlink(public_path($stok->gambar_stok));
             }
 
+            // Save the new image
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
             $gambarStok->move(public_path('images/stok'), $namaGambar);
@@ -146,6 +148,14 @@ class StokDistribusiController extends Controller
     public function showPengepul($id)
     {
         $stok = StokDistribusi::findOrFail($id);
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $stok
+            ]);
+        }
+
         return view('pengepul.stok.show', compact('stok'));
     }
 }
