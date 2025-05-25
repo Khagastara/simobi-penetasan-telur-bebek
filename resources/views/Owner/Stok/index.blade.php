@@ -2,32 +2,6 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-        <!-- Top Banner -->
-        <header class="topbar p-6 shadow-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#877B66]">Data Stok Distribusi</h1>
-                    <p class="text-sm text-gray-700">Kelola data stok produk yang tersedia untuk distribusi</p>
-                </div>
-                <!-- Search Bar -->
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="Search items"
-                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E]">
-                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <a href="{{ route('owner.stok.create') }}" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Add Item
-                    </a>
-                </div>
-            </div>
-        </header>
-
         <!-- Main Content -->
         <section class="p-8">
             @if (session('success'))
@@ -46,10 +20,24 @@
 
             <!-- Cards Grid -->
             <div class="bg-white p-6 rounded-xl shadow">
+                            <div class="flex justify-between items-center mb-6">
+                <div class="relative" style="width: 400">
+                    <input type="text" id="searchInput" placeholder="Search items"
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] w-full">
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <a href="{{ route('owner.stok.create') }}" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition flex items-center ml-4">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add Item
+                </a>
+            </div>
                 <div id="cardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     @forelse ($stokDistribusi as $stok)
                         <div class="card-item bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
-                             data-stok-id="{{ $stok->id }}"
                              data-stok-nama="{{ $stok->nama_stok }}"
                              data-stok-harga="{{ $stok->harga_stok }}"
                              data-stok-jumlah="{{ $stok->jumlah_stok }}"
