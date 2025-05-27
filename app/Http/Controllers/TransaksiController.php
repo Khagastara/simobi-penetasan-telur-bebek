@@ -14,19 +14,54 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Notification;
 
 class TransaksiController extends Controller
 {
+    public function __construct()
+    {
+        // Initialize Midtrans configuration
+        $this->initializeMidtrans();
+    }
+
+    private function initializeMidtrans()
+    {
+        try {
+            Config::$serverKey = config('midtrans.serverKey');
+            Config::$clientKey = config('midtrans.clientKey');
+            Config::$isProduction = config('midtrans.isProduction', false);
+            Config::$isSanitized = config('midtrans.isSanitized', true);
+            Config::$is3ds = config('midtrans.is3ds', true);
+
+            if (empty(Config::$serverKey)) {
+                throw new \Exception('Midtrans server key is empty');
+            }
+
+            if (empty(Config::$clientKey)) {
+                throw new \Exception('Midtrans client key is empty');
+            }
+
+            Log::info('Midtrans configuration verified', [
+                'environment' => Config::$isProduction ? 'Production' : 'Sandbox',
+                'serverKeyPrefix' => substr(Config::$serverKey, 0, 6) . '...',
+                'clientKeyPrefix' => substr(Config::$clientKey, 0, 6) . '...',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Midtrans initialization failed: ' . $e->getMessage());
+            throw $e; // Re-throw to prevent silent failures
+        }
+    }
+
     public function index()
     {
         $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi'])
             ->orderBy('tgl_transaksi', 'desc')
             ->get()
             ->map(function ($transaksi) {
-                $latestStatus = $transaksi->statusTransaksi()
-                    ->orderBy('id', 'desc')
-                    ->first();
-
                 $detail = $transaksi->detailTransaksi->first();
 
                 return [
@@ -37,6 +72,8 @@ class TransaksiController extends Controller
                     'kuantitas' => $detail ? $detail->kuantitas : 0,
                     'total_transaksi' => $detail ? $detail->sub_total : 0,
                     'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
+                    'snap_token' => $transaksi->snap_token,
+                    'payment_status' => $transaksi->payment_status,
                 ];
             });
 
@@ -48,10 +85,6 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'metodePembayaran', 'statusTransaksi'])
             ->findOrFail($id);
 
-        $latestStatus = $transaksi->statusTransaksi()
-            ->orderBy('id', 'desc')
-            ->first();
-
         $detail = $transaksi->detailTransaksi->first();
 
         $transaksiDetail = [
@@ -62,7 +95,10 @@ class TransaksiController extends Controller
             'total_transaksi' => $detail ? $detail->sub_total : 0,
             'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode,
             'tanggal_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
-            'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
+            'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
+            'snap_token' => $transaksi->snap_token,
+            'payment_status' => $transaksi->payment_status,
+            'order_id' => $transaksi->order_id,
         ];
 
         $statusOptions = [
@@ -82,6 +118,8 @@ class TransaksiController extends Controller
                 'metode_pembayaran' => $transaksiDetail['metode_pembayaran'],
                 'tanggal_transaksi' => $transaksiDetail['tanggal_transaksi'],
                 'status' => $transaksiDetail['status'],
+                'snap_token' => $transaksiDetail['snap_token'],
+                'payment_status' => $transaksiDetail['payment_status'],
                 'statusOptions' => $statusOptions
             ]);
         }
@@ -151,6 +189,7 @@ class TransaksiController extends Controller
                     'kuantitas' => $detail ? $detail->kuantitas : 0,
                     'total_transaksi' => $detail ? $detail->sub_total : 0,
                     'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
+                    'snap_token' => $transaksi->snap_token,
                 ];
             });
 
@@ -180,6 +219,7 @@ class TransaksiController extends Controller
             'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode,
             'tanggal_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
             'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
+            'snap_token' => $transaksi->snap_token,
         ];
 
         if (request()->ajax()) {
@@ -199,6 +239,7 @@ class TransaksiController extends Controller
                 'metode_pembayaran' => $transaksiDetail['metode_pembayaran'],
                 'tanggal_transaksi' => $transaksiDetail['tanggal_transaksi'],
                 'status' => $transaksiDetail['status'],
+                'snap_token' => $transaksiDetail['snap_token'],
                 'statusOptions' => $statusOptions
             ]);
         }
@@ -214,6 +255,55 @@ class TransaksiController extends Controller
         return view('pengepul.transaksi.create', compact('stokDistribusi', 'metodePembayaran'));
     }
 
+    private function validateMidtransConfiguration()
+    {
+        $serverKey = config('midtrans.serverKey');
+        $clientKey = config('midtrans.clientKey');
+
+        if (empty($serverKey) || empty($clientKey)) {
+            throw new \Exception('Midtrans configuration is incomplete. Server key or client key is missing.');
+        }
+
+        // Basic validation for key format
+        if (strlen($serverKey) < 10) {
+            throw new \Exception('Server key appears to be invalid (too short).');
+        }
+
+        if (strlen($clientKey) < 10) {
+            throw new \Exception('Client key appears to be invalid (too short).');
+        }
+
+        return true;
+    }
+
+    private function isDigitalPayment($paymentMethodName)
+    {
+        $digitalPaymentKeywords = ['transfer', 'digital', 'pembayaran digital', 'online', 'e-wallet', 'credit card', 'debit'];
+        $paymentMethodLower = strtolower($paymentMethodName);
+
+        foreach ($digitalPaymentKeywords as $keyword) {
+            if (strpos($paymentMethodLower, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isCashPayment($paymentMethodName)
+    {
+        $cashPaymentKeywords = ['tunai', 'cash', 'pembayaran tunai', 'cod', 'bayar ditempat'];
+        $paymentMethodLower = strtolower($paymentMethodName);
+
+        foreach ($cashPaymentKeywords as $keyword) {
+            if (strpos($paymentMethodLower, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function store(Request $request, $stokId)
     {
         $validator = Validator::make($request->all(), [
@@ -222,7 +312,7 @@ class TransaksiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('error', 'kuantitas harus berisikan angka')->withInput();
+            return redirect()->back()->with('error', 'Kuantitas harus berisi angka dan metode pembayaran harus dipilih')->withInput();
         }
 
         $stokDistribusi = StokDistribusi::findOrFail($stokId);
@@ -236,12 +326,21 @@ class TransaksiController extends Controller
         DB::beginTransaction();
 
         try {
+            $metodePembayaran = MetodePembayaran::find($request->metode_pembayaran);
+
+            // Create the transaction record first
             $transaksi = Transaksi::create([
                 'tgl_transaksi' => now(),
                 'id_pengepul' => Auth::user()->pengepul->id,
                 'id_metode_pembayaran' => $request->metode_pembayaran,
+                'id_status_transaksi' => 1, // Default: Menunggu Pembayaran
+                'payment_status' => 'pending', // Default status
+                'snap_token' => null, // Will be set later if digital payment
+                'order_id' => null, // Will be set later if digital payment
             ]);
 
+
+            // Create transaction detail
             DetailTransaksi::create([
                 'kuantitas' => $request->kuantitas,
                 'sub_total' => $subTotal,
@@ -249,15 +348,32 @@ class TransaksiController extends Controller
                 'id_stok_distribusi' => $stokDistribusi->id,
             ]);
 
+            // Create status record
+            $initialStatus = 'Menunggu Pembayaran';
+            $initialStatusId = 1;
+
+            // Handle cash payment
+            if ($this->isCashPayment($metodePembayaran->nama_metode)) {
+                $initialStatus = 'Pembayaran Valid';
+                $initialStatusId = 2;
+                $transaksi->update([
+                    'id_status_transaksi' => $initialStatusId,
+                    'payment_status' => 'success'
+                ]);
+            }
+
             StatusTransaksi::create([
-                'nama_status' => 'Menunggu Pembayaran',
+                'nama_status' => $initialStatus,
                 'id_transaksi' => $transaksi->id,
             ]);
+
+            // Update stock
             $stokDistribusi->update([
                 'jumlah_stok' => $stokDistribusi->jumlah_stok - $request->kuantitas,
             ]);
 
-            Keuangan::create([
+            // Create financial record
+            $keuangan = Keuangan::create([
                 'tgl_rekapitulasi' => now()->toDateString(),
                 'saldo_pengeluaran' => 0,
                 'saldo_pemasukkan' => $subTotal,
@@ -265,17 +381,250 @@ class TransaksiController extends Controller
                 'id_transaksi' => $transaksi->id,
             ]);
 
+            $transaksi->update(['id_keuangan' => $keuangan->id]);
+
+            // Handle digital payment
+            if ($this->isDigitalPayment($metodePembayaran->nama_metode)) {
+                try {
+
+                    // Validate Midtrans configuration
+                    $this->validateMidtransConfiguration();
+
+                    // Re-initialize Midtrans config to ensure it's current
+                    $this->initializeMidtrans();
+
+                    $orderId = 'ORDER-' . $transaksi->id . '-' . time();
+
+                    $params = [
+                        'transaction_details' => [
+                            'order_id' => $orderId,
+                            'gross_amount' => $subTotal,
+                        ],
+                        'item_details' => [
+                            [
+                                'id' => (string) $stokDistribusi->id,
+                                'price' => (int) $stokDistribusi->harga_stok,
+                                'quantity' => (int) $request->kuantitas,
+                                'name' => $stokDistribusi->nama_stok,
+                            ]
+                        ],
+                        'customer_details' => [
+                            'first_name' => Auth::user()->pengepul->nama,
+                            'email' => Auth::user()->email,
+                            'phone' => Auth::user()->pengepul->no_telp ?? '08123456789',
+                        ],
+                        'callbacks' => [
+                            'finish' => route('pengepul.transaksi.show', $transaksi->id),
+                            'error' => route('pengepul.transaksi.show', $transaksi->id),
+                            'pending' => route('pengepul.transaksi.show', $transaksi->id),
+                        ]
+                    ];
+
+                    Log::info('Creating Midtrans transaction', [
+                        'order_id' => $orderId,
+                        'amount' => $subTotal,
+                        'customer' => Auth::user()->pengepul->nama,
+                        'isProduction' => Config::$isProduction
+                    ]);
+
+                    // Create Snap token
+                    $snapToken = Snap::getSnapToken($params);
+
+                    // Update transaction with snap token and order ID
+                    $transaksi->update([
+                        'snap_token' => $snapToken,
+                        'order_id' => $orderId
+                    ]);
+
+                    Log::info('Snap token created successfully', [
+                        'transaction_id' => $transaksi->id,
+                        'order_id' => $orderId,
+                        'token_length' => strlen($snapToken)
+                    ]);
+
+                } catch (\Exception $e) {
+                    Log::error('Midtrans Error Details', [
+                        'message' => $e->getMessage(),
+                        'code' => $e->getCode(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'transaction_id' => $transaksi->id,
+                        'server_key_exists' => !empty(config('midtrans.serverKey')),
+                        'server_key_length' => strlen(config('midtrans.serverKey') ?? ''),
+                        'client_key_exists' => !empty(config('midtrans.clientKey')),
+                        'is_production' => config('midtrans.isProduction', false),
+                    ]);
+
+                    DB::rollBack();
+
+                    // Provide specific error messages based on exception
+                    $errorMessage = 'Gagal membuat token pembayaran';
+
+                    if (strpos($e->getMessage(), 'unauthorized') !== false ||
+                        strpos($e->getMessage(), '401') !== false ||
+                        strpos($e->getMessage(), 'Unauthorized') !== false) {
+                        $errorMessage = 'Pembayaran digital sedang tidak tersedia. Konfigurasi server key tidak valid. Silakan coba metode pembayaran lain atau hubungi admin.';
+                    } elseif (strpos($e->getMessage(), 'configuration') !== false) {
+                        $errorMessage = 'Pembayaran digital sedang tidak tersedia. Konfigurasi pembayaran belum lengkap. Silakan coba metode pembayaran lain atau hubungi admin.';
+                    } elseif (strpos($e->getMessage(), 'network') !== false ||
+                              strpos($e->getMessage(), 'connection') !== false) {
+                        $errorMessage = 'Pembayaran digital sedang tidak tersedia karena masalah koneksi. Silakan coba lagi atau gunakan metode pembayaran lain.';
+                    }
+
+                    return redirect()->back()
+                        ->with('error', $errorMessage)
+                        ->withInput();
+                }
+            }
+
             DB::commit();
-            $metodePembayaran = MetodePembayaran::find($request->metode_pembayaran);
-            if ($metodePembayaran->nama_metode == 'Transfer') {
-                return redirect()->route('pengepul.stok.index')->with('success', 'Pesanan berhasil dibuat, silahkan melakukan pembayaran');
+
+            // Redirect based on payment method
+            if ($this->isDigitalPayment($metodePembayaran->nama_metode)) {
+                return redirect()->route('pengepul.transaksi.payment', $transaksi->id)
+                    ->with('success', 'Transaksi berhasil dibuat. Silakan lanjutkan pembayaran.');
             } else {
-                return redirect()->route('pengepul.stok.index')->with('success', 'Pesanan berhasil dibuat');
+                return redirect()->route('pengepul.transaksi.show', $transaksi->id)
+                    ->with('success', 'Transaksi berhasil dibuat.');
             }
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan. Silakan coba lagi.')->withInput();
+            Log::error('Transaction creation error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'user_id' => Auth::id(),
+                'stok_id' => $stokId,
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat membuat transaksi. Silakan coba lagi.')
+                ->withInput();
+        }
+
+
+    }
+
+    public function payment($id)
+    {
+        $pengepul = Auth::user()->pengepul;
+
+        $transaksi = Transaksi::with(['detailTransaksi.stokDistribusi', 'metodePembayaran'])
+            ->where('id_pengepul', $pengepul->id)
+            ->findOrFail($id);
+
+        $metodePembayaran = $transaksi->metodePembayaran;
+        if (!$this->isDigitalPayment($metodePembayaran->nama_metode)) {
+            return redirect()->route('pengepul.transaksi.show', $id)
+                ->with('error', 'Transaksi ini tidak memerlukan pembayaran digital');
+        }
+
+        if (!$transaksi->snap_token) {
+            return redirect()->route('pengepul.transaksi.show', $id)
+                ->with('error', 'Token pembayaran tidak ditemukan. Transaksi mungkin sudah selesai atau terjadi kesalahan.');
+        }
+
+        $detail = $transaksi->detailTransaksi->first();
+
+        $paymentData = [
+            'transaksi' => $transaksi,
+            'detail' => $detail,
+            'snap_token' => $transaksi->snap_token,
+            'total_amount' => $detail->sub_total,
+            'stok_name' => $detail->stokDistribusi->nama_stok,
+            'quantity' => $detail->kuantitas,
+        ];
+
+        return view('pengepul.transaksi.payment', compact('paymentData'));
+    }
+
+    public function handleCallback(Request $request)
+    {
+        try {
+            $notification = new Notification();
+
+            $transaction = $notification->transaction_status;
+            $type = $notification->payment_type;
+            $orderId = $notification->order_id;
+            $fraud = $notification->fraud_status ?? null;
+
+            Log::info('Midtrans callback received', [
+                'order_id' => $orderId,
+                'transaction_status' => $transaction,
+                'payment_type' => $type,
+                'fraud_status' => $fraud
+            ]);
+
+            // Extract transaction ID from order ID
+            $orderParts = explode('-', $orderId);
+            if (count($orderParts) < 2) {
+                Log::error('Invalid order ID format: ' . $orderId);
+                return response()->json(['status' => 'error', 'message' => 'Invalid order ID'], 400);
+            }
+
+            $transactionId = $orderParts[1];
+            $transaksi = Transaksi::findOrFail($transactionId);
+
+            // Update transaction status based on Midtrans response
+            if ($transaction == 'capture') {
+                if ($type == 'credit_card') {
+                    if ($fraud == 'challenge') {
+                        $this->updateTransactionStatus($transaksi, 'pending', 1);
+                    } else {
+                        $this->updateTransactionStatus($transaksi, 'success', 2);
+                    }
+                }
+            } elseif ($transaction == 'settlement') {
+                $this->updateTransactionStatus($transaksi, 'success', 2);
+            } elseif ($transaction == 'pending') {
+                $this->updateTransactionStatus($transaksi, 'pending', 1);
+            } elseif ($transaction == 'deny') {
+                $this->updateTransactionStatus($transaksi, 'failed', 1);
+            } elseif ($transaction == 'expire') {
+                $this->updateTransactionStatus($transaksi, 'expired', 1);
+            } elseif ($transaction == 'cancel') {
+                $this->updateTransactionStatus($transaksi, 'cancelled', 1);
+            }
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Exception $e) {
+            Log::error('Midtrans callback error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function updateTransactionStatus($transaksi, $paymentStatus, $statusTransaksiId)
+    {
+        $transaksi->update([
+            'payment_status' => $paymentStatus,
+            'id_status_transaksi' => $statusTransaksiId
+        ]);
+
+        Log::info('Transaction status updated', [
+            'transaction_id' => $transaksi->id,
+            'payment_status' => $paymentStatus,
+            'status_transaksi_id' => $statusTransaksiId
+        ]);
+    }
+
+    public function checkPaymentStatus($id)
+    {
+        try {
+            $transaksi = Transaksi::with('statusTransaksi')->findOrFail($id);
+
+            return response()->json([
+                'status' => 'success',
+                'payment_status' => $transaksi->payment_status,
+                'transaction_status' => $transaksi->statusTransaksi->nama_status ?? 'Unknown'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaction not found'
+            ], 404);
         }
     }
 }

@@ -14,15 +14,19 @@ return new class extends Migration
         Schema::create('transaksis', function (Blueprint $table) {
             $table->id();
             $table->dateTime('tgl_transaksi');
+            $table->string('snap_token')->nullable();
+            $table->string('order_id')->nullable();
+            $table->enum('payment_status', ['pending', 'success', 'failed', 'expired', 'cancelled'])->default('pending');
             $table->unsignedBigInteger('id_pengepul');
-            $table->unsignedBigInteger('id_status_transaksi');
+            $table->unsignedBigInteger('id_status_transaksi')->default(1);
             $table->unsignedBigInteger('id_metode_pembayaran');
-            $table->unsignedBigInteger('id_keuangan');
+            $table->unsignedBigInteger('id_keuangan')->nullable();
+            $table->timestamps();
 
-            $table->foreign('id_pengepul')->on('pengepuls')->references('id');
-            $table->foreign('id_status_transaksi')->on('status_transaksis')->references('id');
-            $table->foreign('id_metode_pembayaran')->on('metode_pembayarans')->references('id');
-            $table->foreign('id_keuangan')->on('keuangans')->references('id');
+            $table->foreign('id_pengepul')->references('id')->on('pengepuls')->onDelete('cascade');
+            $table->foreign('id_status_transaksi')->references('id')->on('status_transaksis');
+            $table->foreign('id_metode_pembayaran')->references('id')->on('metode_pembayarans');
+            $table->foreign('id_keuangan')->references('id')->on('keuangans')->onDelete('set null');
         });
     }
 

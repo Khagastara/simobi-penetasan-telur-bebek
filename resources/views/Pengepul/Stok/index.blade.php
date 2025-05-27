@@ -17,6 +17,20 @@
                 </script>
             @endif
 
+            @if (session('error'))
+                <div class="bg-red-500 text-white px-4 py-2 rounded-lg shadow mb-4">
+                    {{ session('error') }}
+                </div>
+                <script>
+                    setTimeout(() => {
+                        const errorAlert = document.querySelector('.bg-red-500');
+                        if (errorAlert) {
+                            errorAlert.remove();
+                        }
+                    }, 3000);
+                </script>
+            @endif
+
             <div class="bg-white p-6 rounded-xl shadow">
                 <div class="flex justify-between items-center mb-6">
                     <div class="relative" style="width: 400px;">
@@ -48,6 +62,9 @@
                                 <h3 class="font-semibold text-gray-800 mb-1 truncate">{{ $stok->nama_stok }}</h3>
                                 <p class="text-[#AFC97E] font-bold">Rp {{ number_format($stok->harga_stok, 0, ',', '.') }}</p>
                                 <p class="text-sm text-gray-500">/stok</p>
+                                <div class="mt-2">
+                                    <span class="text-xs text-gray-500">Tersedia: {{ $stok->jumlah_stok }} unit</span>
+                                </div>
                             </div>
                         </div>
                     @empty
@@ -65,12 +82,12 @@
         </section>
     </main>
 
-    <!-- Bootstrap Modal for Stock Detail -->
+    <!-- Enhanced Bootstrap Modal for Stock Detail and Purchase -->
     <div class="modal fade" id="stokModal" tabindex="-1" aria-labelledby="stokModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="stokModalLabel">Detail Stok Distribusi</h5>
+                    <h5 class="modal-title" id="stokModalLabel">Detail Stok & Pembelian</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="modalContent">
@@ -88,24 +105,72 @@
         </div>
     </div>
 
+    <!-- Purchase Form Modal -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="purchaseModalLabel">Konfirmasi Pembelian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="purchaseForm" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <img id="purchaseImage" src="" alt="" class="img-fluid rounded mb-3">
+                            </div>
+                            <div class="col-md-6">
+                                <h4 id="purchaseStockName"></h4>
+                                <p class="text-success fs-5 fw-bold" id="purchaseStockPrice"></p>
+                                <p class="text-muted" id="purchaseStockAvailable"></p>
+
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">Jumlah Pembelian:</label>
+                                    <div class="input-group">
+                                        <button type="button" class="btn btn-outline-secondary" id="decreaseQty">-</button>
+                                        <input type="number" class="form-control text-center" id="quantity" name="kuantitas" value="1" min="1">
+                                        <button type="button" class="btn btn-outline-secondary" id="increaseQty">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="metode_pembayaran" class="form-label">Metode Pembayaran:</label>
+                                    <select class="form-select" id="metode_pembayaran" name="metode_pembayaran" required>
+                                        <option value="">Pilih Metode Pembayaran</option>
+                                        @foreach(\App\Models\MetodePembayaran::all() as $metode)
+                                            <option value="{{ $metode->id }}">{{ $metode->nama_metode }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <strong>Total Harga: </strong><span id="totalPrice" class="text-success fs-5"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success" id="confirmPurchase">
+                            <i class="fas fa-shopping-cart"></i> Konfirmasi Pembelian
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Debug function
-        function debugBootstrap() {
-            console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
-            console.log('Bootstrap Modal available:', typeof bootstrap?.Modal !== 'undefined');
-            console.log('Cards found:', document.querySelectorAll('.card-item').length);
-            console.log('Modal element found:', document.getElementById('stokModal') !== null);
-        }
+        let currentStockData = null;
+        let currentQuantity = 1;
 
         // Ensure DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, starting initialization...');
-
-            // Wait a bit for Bootstrap to load
             setTimeout(() => {
-                debugBootstrap();
                 initializeComponents();
             }, 100);
         });
@@ -114,7 +179,6 @@
             // Search functionality
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
-                console.log('Search input found, adding event listener');
                 searchInput.addEventListener('input', function(e) {
                     const searchTerm = e.target.value.toLowerCase();
                     const cards = document.querySelectorAll('.card-item');
@@ -152,12 +216,14 @@
                     showStokDetail(stokId);
                 });
             });
+
+            // Purchase form handlers
+            initializePurchaseForm();
         }
 
         function showStokDetail(id) {
             console.log('showStokDetail called with ID:', id);
 
-            // Check if Bootstrap is available
             if (typeof bootstrap === 'undefined') {
                 console.error('Bootstrap is not loaded');
                 alert('Bootstrap tidak terload. Silakan refresh halaman.');
@@ -171,13 +237,9 @@
                 return;
             }
 
-            console.log('Creating Bootstrap modal...');
-
-            // Try creating modal with error handling
             let modal;
             try {
                 modal = new bootstrap.Modal(modalElement);
-                console.log('Modal created successfully');
             } catch (error) {
                 console.error('Error creating modal:', error);
                 alert('Error membuat modal: ' + error.message);
@@ -200,7 +262,6 @@
             // Show modal
             try {
                 modal.show();
-                console.log('Modal shown successfully');
             } catch (error) {
                 console.error('Error showing modal:', error);
                 alert('Error menampilkan modal: ' + error.message);
@@ -208,8 +269,6 @@
             }
 
             // Fetch data
-            console.log('Fetching data from:', `/stok-distribusi/${id}`);
-
             fetch(`/stok-distribusi/${id}`, {
                 method: 'GET',
                 headers: {
@@ -219,7 +278,6 @@
                 }
             })
             .then(response => {
-                console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -228,7 +286,9 @@
             .then(data => {
                 console.log('Response data:', data);
                 if (data.success && data.data) {
-                    createModalContentFromData(data.data);
+                    currentStockData = data.data;
+                    currentQuantity = 1; // Reset quantity
+                    createEnhancedModalContent(data.data);
                 } else {
                     throw new Error('Data tidak valid');
                 }
@@ -254,54 +314,165 @@
             });
         }
 
-        function createModalContentFromData(stok) {
+        function createEnhancedModalContent(stok) {
+            const totalPrice = stok.harga_stok * currentQuantity;
+
             const modalContent = `
-                <div class="modal-content-section">
+                <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6">
+                        <!-- Product Image -->
+                        <div class="col-lg-6 mb-4">
                             <div class="text-center">
                                 <img src="${stok.gambar_stok || '/images/no-image.png'}"
                                      alt="${stok.nama_stok}"
-                                     class="img-fluid rounded shadow-sm"
-                                     style="max-height: 300px; width: 100%; object-fit: cover;"
+                                     class="img-fluid rounded-3 shadow-sm"
+                                     style="max-height: 400px; width: 100%; object-fit: cover;"
                                      onerror="this.src='/images/no-image.png'">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="stock-details">
-                                <h4 class="text-primary mb-3">${stok.nama_stok}</h4>
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Harga per stok</span>
-                                    <h5 class="text-success fw-bold mb-0">Rp ${Number(stok.harga_stok).toLocaleString('id-ID')}</h5>
+
+                        <!-- Product Details -->
+                        <div class="col-lg-6">
+                            <div class="stock-details h-100 d-flex flex-column">
+                                <!-- Product Info -->
+                                <div class="mb-4">
+                                    <h3 class="text-primary mb-2">${stok.nama_stok}</h3>
+                                    <div class="price-section mb-3">
+                                        <h4 class="text-success fw-bold mb-1">Rp ${Number(stok.harga_stok).toLocaleString('id-ID')}</h4>
+                                        <small class="text-muted">per unit</small>
+                                    </div>
+                                    <div class="stock-info mb-3">
+                                        <span class="badge bg-info text-dark fs-6">
+                                            <i class="fas fa-box"></i> ${stok.jumlah_stok} unit tersedia
+                                        </span>
+                                    </div>
+                                    <div class="description mb-4">
+                                        <h6 class="text-muted mb-2">Deskripsi:</h6>
+                                        <p class="text-dark">${stok.deskripsi_stok || 'Tidak ada deskripsi'}</p>
+                                    </div>
                                 </div>
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Jumlah Stok Tersedia</span>
-                                    <h6 class="mb-0">${stok.jumlah_stok} unit</h6>
+
+                                <!-- Purchase Button -->
+                                <div class="mt-auto">
+                                    <div class="d-grid">
+                                        <button type="button"
+                                                class="btn btn-success btn-lg fw-bold"
+                                                onclick="openPurchaseModal()"
+                                                ${stok.jumlah_stok <= 0 ? 'disabled' : ''}>
+                                            <i class="fas fa-shopping-cart"></i>
+                                            ${stok.jumlah_stok <= 0 ? 'Stok Habis' : 'Beli Sekarang'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Deskripsi</span>
-                                    <p class="mb-0">${stok.deskripsi_stok || 'Tidak ada deskripsi'}</p>
-                                </div>
-                                ${stok.created_at ? `
-                                <div class="detail-item mb-3">
-                                    <span class="text-muted small">Ditambahkan pada</span>
-                                    <p class="mb-0">${new Date(stok.created_at).toLocaleDateString('id-ID', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}</p>
-                                </div>
-                                ` : ''}
                             </div>
                         </div>
                     </div>
                 </div>
             `;
+
             document.getElementById('modalContent').innerHTML = modalContent;
         }
+
+        function openPurchaseModal() {
+            if (!currentStockData) {
+                alert('Data stok tidak ditemukan');
+                return;
+            }
+
+            // Close detail modal
+            const detailModal = bootstrap.Modal.getInstance(document.getElementById('stokModal'));
+            if (detailModal) {
+                detailModal.hide();
+            }
+
+            // Populate purchase modal
+            document.getElementById('purchaseImage').src = currentStockData.gambar_stok || '/images/no-image.png';
+            document.getElementById('purchaseStockName').textContent = currentStockData.nama_stok;
+            document.getElementById('purchaseStockPrice').textContent = `Rp ${Number(currentStockData.harga_stok).toLocaleString('id-ID')} / unit`;
+            document.getElementById('purchaseStockAvailable').textContent = `Tersedia: ${currentStockData.jumlah_stok} unit`;
+
+            // Set form action
+            document.getElementById('purchaseForm').action = `/p/transaksi/store/${currentStockData.id}`;
+
+            // Reset quantity
+            document.getElementById('quantity').value = 1;
+            document.getElementById('quantity').max = currentStockData.jumlah_stok;
+
+            updateTotalPrice();
+
+            // Show purchase modal
+            const purchaseModal = new bootstrap.Modal(document.getElementById('purchaseModal'));
+            purchaseModal.show();
+        }
+
+        function initializePurchaseForm() {
+            // Quantity controls
+            document.getElementById('decreaseQty').addEventListener('click', function() {
+                const qtyInput = document.getElementById('quantity');
+                const currentQty = parseInt(qtyInput.value);
+                if (currentQty > 1) {
+                    qtyInput.value = currentQty - 1;
+                    updateTotalPrice();
+                }
+            });
+
+            document.getElementById('increaseQty').addEventListener('click', function() {
+                const qtyInput = document.getElementById('quantity');
+                const currentQty = parseInt(qtyInput.value);
+                const maxQty = parseInt(qtyInput.max);
+                if (currentQty < maxQty) {
+                    qtyInput.value = currentQty + 1;
+                    updateTotalPrice();
+                }
+            });
+
+            document.getElementById('quantity').addEventListener('input', function() {
+                const qty = parseInt(this.value);
+                const maxQty = parseInt(this.max);
+
+                if (qty < 1) {
+                    this.value = 1;
+                } else if (qty > maxQty) {
+                    this.value = maxQty;
+                }
+
+                updateTotalPrice();
+            });
+
+            // Form submission
+            document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+                const quantity = parseInt(document.getElementById('quantity').value);
+                const paymentMethod = document.getElementById('metode_pembayaran').value;
+
+                if (!paymentMethod) {
+                    e.preventDefault();
+                    alert('Silakan pilih metode pembayaran');
+                    return false;
+                }
+
+                if (quantity <= 0 || quantity > currentStockData.jumlah_stok) {
+                    e.preventDefault();
+                    alert('Jumlah pembelian tidak valid');
+                    return false;
+                }
+
+                // Show loading state
+                const submitBtn = document.getElementById('confirmPurchase');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Memproses...';
+            });
+        }
+
+        function updateTotalPrice() {
+            if (!currentStockData) return;
+
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const totalPrice = currentStockData.harga_stok * quantity;
+            document.getElementById('totalPrice').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+        }
     </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         .card-item {
@@ -330,26 +501,8 @@
             filter: brightness(0) invert(1);
         }
 
-        .detail-item {
-            border-left: 3px solid #AFC97E;
-            padding-left: 12px;
-        }
-
-        .stock-details .badge {
-            font-size: 0.75em;
-        }
-
-        .modal-content-section .card {
-            border: none;
-            background-color: #f8f9fa;
-        }
-
-        .modal {
-            z-index: 1050;
-        }
-
-        .modal-backdrop {
-            z-index: 1040;
+        .modal-xl {
+            max-width: 1200px;
         }
 
         /* Loading spinner animation */
@@ -361,6 +514,29 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        .stock-details {
+            min-height: 500px;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e6e 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .input-group .btn {
+            min-width: 40px;
+        }
+
+        #quantity {
+            max-width: 80px;
         }
     </style>
 @endsection
