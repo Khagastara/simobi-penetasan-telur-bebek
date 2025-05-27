@@ -20,8 +20,11 @@ class Transaksi extends Model
     public $timestamps = false;
     protected $fillable = [
         'tgl_transaksi',
-        'id_status_transaksi',
+        'snap_token',
+        'order_id',
+        'payment_status',
         'id_pengepul',
+        'id_status_transaksi',
         'id_metode_pembayaran',
         'id_keuangan'
     ];

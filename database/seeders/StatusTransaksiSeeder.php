@@ -15,22 +15,37 @@ class StatusTransaksiSeeder extends Seeder
     {
         StatusTransaksi::insert([
             'id' => 1,
-            'nama_status' => 'Pembayaran Valid',
+            'nama_status' => 'Menunggu Pembayaran',
         ]);
 
         StatusTransaksi::insert([
             'id' => 2,
-            'nama_status' => 'Dikemas',
+            'nama_status' => 'Pembayaran Valid',
         ]);
 
         StatusTransaksi::insert([
             'id' => 3,
-            'nama_status' => 'Dikirim',
+            'nama_status' => 'Dikemas',
         ]);
 
         StatusTransaksi::insert([
             'id' => 4,
+            'nama_status' => 'Dikirim',
+        ]);
+
+        StatusTransaksi::insert([
+            'id' => 5,
             'nama_status' => 'Selesai',
+        ]);
+
+        StatusTransaksi::insert([
+            'id' => 6,
+            'nama_status' => 'Ditolak',
+        ]);
+
+        StatusTransaksi::insert([
+            'id' => 7,
+            'nama_status' => 'Dibatalkan',
         ]);
     }
 }
