@@ -81,6 +81,7 @@
                             <th class="px-4 py-3 font-semibold text-center">Tanggal</th>
                             <th class="px-4 py-3 font-semibold text-center">Waktu</th>
                             <th class="px-4 py-3 font-semibold text-center">Detail Kegiatan</th>
+                            <th class="px-4 py-3 font-semibold text-center">Keterangan</th>
                             <th class="px-4 py-3 font-semibold text-center">Status Kegiatan</th>
                             <th class="px-4 py-3 font-semibold text-center">Aksi</th>
                         </tr>
@@ -184,6 +185,10 @@
                                                 </div>
                                             @endforeach
                                         </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items justify-center">
                                         <div class="flex flex-col gap-1">
                                             <a href="{{ route('owner.penjadwalan.edit', $penjadwalan->id) }}" class="bg-yellow-400 text-white hover:bg-yellow-500 px-3 py-1 rounded text-xs font-medium transition">
                                                 <i class="fas fa-edit mr-1"></i> Ubah

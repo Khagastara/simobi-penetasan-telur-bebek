@@ -66,6 +66,7 @@
 </div>
 
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.clientKey') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.getElementById('pay-button').addEventListener('click', function () {
@@ -78,12 +79,12 @@ document.getElementById('pay-button').addEventListener('click', function () {
         onSuccess: function(result) {
             loadingModal.hide();
             alert('Pembayaran berhasil!');
-            window.location.href = '{{ route('pengepul.transaksi.show', $paymentData['transaksi']->id) }}';
+            window.location.href = '{{ route('pengepul.transaksi.index', $paymentData['transaksi']->id) }}';
         },
         onPending: function(result) {
             loadingModal.hide();
             alert('Pembayaran pending. Silakan selesaikan pembayaran Anda.');
-            window.location.href = '{{ route('pengepul.transaksi.show', $paymentData['transaksi']->id) }}';
+            window.location.href = '{{ route('pengepul.transaksi.index', $paymentData['transaksi']->id) }}';
         },
         onError: function(result) {
             loadingModal.hide();
