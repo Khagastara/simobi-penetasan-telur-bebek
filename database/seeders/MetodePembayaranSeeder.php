@@ -15,12 +15,12 @@ class MetodePembayaranSeeder extends Seeder
     {
         MetodePembayaran::insert([
             // 'id' => 1,
-            'nama_metode' => 'tunai',
+            'nama_metode' => 'Pembayaran Tunai',
         ]);
 
         MetodePembayaran::insert([
             // 'id' => 2,
-            'nama_metode' => 'transfer',
+            'nama_metode' => 'Pembayaran Digital',
         ]);
     }
 }

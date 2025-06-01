@@ -35,6 +35,7 @@
                         <th class="px-4 py-2 font-semibold">Nama Stok</th>
                         <th class="px-4 py-2 font-semibold">Kuantitas</th>
                         <th class="px-4 py-2 font-semibold">Total Transaksi</th>
+                        <th class="px-4 py-2 font-semibold">Metode Pembayaran</th>
                         <th class="px-4 py-2 font-semibold">Status</th>
                         <th class="px-4 py-2 font-semibold">Aksi</th>
                     </tr>
@@ -47,6 +48,7 @@
                             <td class="px-4 py-3">{{ $transaksi['nama_stok'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['kuantitas'] }}</td>
                             <td class="px-4 py-3">Rp {{ number_format($transaksi['total_transaksi'], 0, ',', '.') }}</td>
+                            <td class="px-4 py-3">{{ $transaksi['metode_pembayaran'] }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-block px-2 py-1 rounded text-white text-xs bg-{{ getStatusBadgeColor($transaksi['status']) }}">
                                     {{ $transaksi['status'] }}
