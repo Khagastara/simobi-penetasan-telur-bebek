@@ -32,12 +32,12 @@ class LoginController extends Controller
             }
             elseif ($akun->pengepul) {
                 Auth::guard('pengepul')->login($akun->pengepul);
-                return redirect()->route('pengepul.dashboard');
+                return redirect()->route('pengepul.stok.index');
             }
         }
 
         return back()->withErrors([
             'username' => 'Username atau password salah',
-        ]);
+        ])->withInput();
     }
 }

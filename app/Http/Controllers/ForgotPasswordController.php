@@ -16,8 +16,9 @@ class ForgotPasswordController extends Controller
 
     public function showForgotPasswordForm()
     {
-        return view('Auth.forgot-password');
+        return view('Auth.forgot-password', ['step' => 'email']);
     }
+
     public function sendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -29,8 +30,31 @@ class ForgotPasswordController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first()
+                ]);
+            }
+
             return redirect()->back()
                 ->withErrors($validator)
+                ->withInput();
+        }
+
+        $lastSent = Cache::get('otp_last_sent_' . $request->email);
+        if ($lastSent && now()->diffInSeconds($lastSent) < 60) {
+            $remainingTime = 60 - now()->diffInSeconds($lastSent);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Tunggu {$remainingTime} detik sebelum mengirim ulang kode OTP"
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('error', "Tunggu {$remainingTime} detik sebelum mengirim ulang kode OTP")
                 ->withInput();
         }
 
@@ -38,15 +62,43 @@ class ForgotPasswordController extends Controller
         $email = $request->email;
 
         Cache::put('otp_' . $email, $otp, 600);
-        Mail::to($email)->send(new OtpMail($otp));
+        Cache::put('otp_last_sent_' . $email, now(), 600);
 
-        return redirect()->route('password.otp', ['email' => $email])
-            ->with('success', 'Kode OTP telah dikirim ke email Anda');
+        try {
+            Mail::to($email)->send(new OtpMail($otp));
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Kode OTP telah dikirim ke email Anda'
+                ]);
+            }
+
+            return view('Auth.forgot-password', [
+                'step' => 'otp',
+                'email' => $email
+            ])->with('success', 'Kode OTP telah dikirim ke email Anda');
+
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengirim email. Silakan coba lagi.'
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Gagal mengirim email. Silakan coba lagi.')
+                ->withInput();
+        }
     }
 
     public function showOtpForm(Request $request)
     {
-        return view('Auth.forgot-password', ['email' => $request->email]);
+        return view('Auth.forgot-password', [
+            'step' => 'otp',
+            'email' => $request->email
+        ]);
     }
 
     public function verifyOtp(Request $request)
@@ -62,8 +114,8 @@ class ForgotPasswordController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            ->withErrors($validator)
+            ->withInput();
         }
 
         $email = $request->email;
@@ -71,15 +123,24 @@ class ForgotPasswordController extends Controller
         $cachedOtp = Cache::get('otp_' . $email);
 
         if (!$cachedOtp || $cachedOtp != $otp) {
-            return redirect()->back()->with('error', 'Kode OTP tidak valid')->withInput();
+            return redirect()->back()
+                ->with('error', 'Kode OTP tidak valid atau sudah kedaluwarsa')
+                ->withInput();
         }
 
-        return redirect()->route('password.reset', ['email' => $email, 'token' => Str::random(60)]);
+        $token = Str::random(60);
+
+        return view('Auth.forgot-password', [
+            'step' => 'reset',
+            'email' => $email,
+            'token' => $token
+        ]);
     }
 
     public function showResetForm(Request $request)
     {
-        return view('Auth.reset-password', [
+        return view('Auth.forgot-password', [
+            'step' => 'reset',
             'email' => $request->email,
             'token' => $request->token,
         ]);
@@ -101,9 +162,7 @@ class ForgotPasswordController extends Controller
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
-                ->withInput()
-                ->with('email', $request->email)
-                ->with('token', $request->token);
+                ->withInput();
         }
 
         $akun = Akun::where('email', $request->email)->first();
@@ -111,8 +170,9 @@ class ForgotPasswordController extends Controller
         $akun->save();
 
         Cache::forget('otp_' . $request->email);
+        Cache::forget('otp_last_sent_' . $request->email);
 
         return redirect()->route('login')
-            ->with('success', 'Password berhasil diubah');
+            ->with('success', 'Password berhasil diubah. Silakan login dengan password baru Anda.');
     }
 }

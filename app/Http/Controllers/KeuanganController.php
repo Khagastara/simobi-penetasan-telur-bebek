@@ -24,7 +24,12 @@ class KeuanganController extends Controller
         $keuanganPemasukkan = $groupedKeuangans->pluck('saldo_pemasukkan')->toArray();
         $keuanganPengeluaran = $groupedKeuangans->pluck('saldo_pengeluaran')->toArray();
 
-        return view('owner.keuangan.index', compact('keuangans', 'keuanganLabels', 'keuanganPemasukkan', 'keuanganPengeluaran'));
+        $tanggalRekapitulasi = Transaksi::select('tgl_transaksi')
+            ->distinct()
+            ->orderBy('tgl_transaksi', 'desc')
+            ->get();
+
+        return view('owner.keuangan.index', compact('keuangans', 'keuanganLabels', 'keuanganPemasukkan', 'keuanganPengeluaran', 'tanggalRekapitulasi'));
     }
 
     public function create()
@@ -45,6 +50,12 @@ class KeuanganController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ]);
+            }
             return redirect()->back()->withErrors($validator)->withInput()->with('error', 'Saldo pengeluaran harus berisikan angka');
         }
 
@@ -57,6 +68,10 @@ class KeuanganController extends Controller
                 'id_transaksi' => $request->id_transaksi,
             ]
         );
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('owner.keuangan.index')->with('success', 'Data keuangan berhasil dibuat');
     }

@@ -46,8 +46,8 @@
                             data-stok-updated="{{ $stok->updated_at ?? '' }}">
                             <div class="aspect-square overflow-hidden rounded-t-lg">
                                 <img src="{{ asset($stok->gambar_stok) }}"
-                                     alt="{{ $stok->nama_stok }}"
-                                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                    alt="{{ $stok->nama_stok }}"
+                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                             </div>
                             <div class="p-4">
                                 <h3 class="font-semibold text-gray-800 mb-1 truncate">{{ $stok->nama_stok }}</h3>

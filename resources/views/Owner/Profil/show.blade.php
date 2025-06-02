@@ -1,19 +1,6 @@
 @extends('layouts.owner')
 
 @section('content')
-    <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-        <header class="topbar p-6 shadow-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#877B66]">Profil Owner</h1>
-                    <p class="text-sm text-gray-700">Informasi akun Anda</p>
-                </div>
-                <div class="text-right text-gray-800">
-                    <p class="font-semibold">Halo, <span class="italic">{{ $owner->nama }}</span></p>
-                </div>
-            </div>
-        </header>
-
         <section class="p-8">
             <div class="bg-white p-6 rounded-xl shadow max-w-3xl mx-auto space-y-4">
                 <p><strong>Nama:</strong> {{ $owner->nama }}</p>

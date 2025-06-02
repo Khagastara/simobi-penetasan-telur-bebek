@@ -93,7 +93,6 @@ class TransaksiController extends Controller
             'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
             'kuantitas' => $detail ? $detail->kuantitas : 0,
             'total_transaksi' => $detail ? $detail->sub_total : 0,
-            'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode,
             'tanggal_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
             'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
             'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
@@ -103,7 +102,7 @@ class TransaksiController extends Controller
         ];
 
         $statusOptions = [
-            'Pembayaran Valid',
+            'Pembayaran Lunas',
             'Dikemas',
             'Dikirim',
             'Selesai'
@@ -118,7 +117,6 @@ class TransaksiController extends Controller
                 'total_transaksi' => $transaksiDetail['total_transaksi'],
                 'metode_pembayaran' => $transaksiDetail['metode_pembayaran'],
                 'tanggal_transaksi' => $transaksiDetail['tanggal_transaksi'],
-                'metode_pembayaran' => $transaksiDetail['metode_pembayaran'],
                 'status' => $transaksiDetail['status'],
                 'snap_token' => $transaksiDetail['snap_token'],
                 'payment_status' => $transaksiDetail['payment_status'],
@@ -134,7 +132,7 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|string|in:Pembayaran Valid,Dikemas,Dikirim,Selesai',
+            'status' => 'required|string|in:Pembayaran Lunas,Dikemas,Dikirim,Selesai',
         ]);
 
         if ($validator->fails()) {
@@ -148,7 +146,7 @@ class TransaksiController extends Controller
         }
 
         $statusMap = [
-            'Pembayaran Valid' => 1,
+            'Pembayaran Lunas' => 1,
             'Dikemas' => 2,
             'Dikirim' => 3,
             'Selesai' => 4,
@@ -228,7 +226,7 @@ class TransaksiController extends Controller
 
         if (request()->ajax()) {
             $statusOptions = [
-                'Pembayaran Valid',
+                'Pembayaran Lunas',
                 'Dikemas',
                 'Dikirim',
                 'Selesai'
@@ -366,35 +364,39 @@ class TransaksiController extends Controller
             $paymentStatus = 'pending';
 
             if ($this->isCashPayment($metodePembayaran->nama_metode)) {
-                $initialStatus = 'Pembayaran Valid';
+                $initialStatus = 'Pembayaran Lunas';
                 $initialStatusId = 2;
                 $paymentStatus = 'success';
             }
 
-            // Update transaction status
             $transaksi->update([
                 'id_status_transaksi' => $initialStatusId,
                 'payment_status' => $paymentStatus
             ]);
 
-            // Record status change
-
-
-            // Update stock
             $stokDistribusi->decrement('jumlah_stok', $request->kuantitas);
 
-            // Create financial record
-            $keuangan = Keuangan::create([
-                'tgl_rekapitulasi' => now()->toDateString(),
-                'saldo_pengeluaran' => 0,
-                'saldo_pemasukkan' => $subTotal,
-                'total_penjualan' => $request->kuantitas,
-                'id_transaksi' => $transaksi->id,
-            ]);
+            $tanggalRekapitulasi = now()->toDateString();
+
+            $keuangan = Keuangan::where('tgl_rekapitulasi', $tanggalRekapitulasi)->first();
+
+            if ($keuangan) {
+                $keuangan->update([
+                    'saldo_pemasukkan' => $keuangan->saldo_pemasukkan + $subTotal,
+                    'total_penjualan' => $keuangan->total_penjualan + $request->kuantitas,
+                ]);
+            } else {
+                $keuangan = Keuangan::create([
+                    'tgl_rekapitulasi' => $tanggalRekapitulasi,
+                    'saldo_pengeluaran' => 0,
+                    'saldo_pemasukkan' => $subTotal,
+                    'total_penjualan' => $request->kuantitas,
+                    'id_transaksi' => $transaksi->id,
+                ]);
+            }
 
             $transaksi->update(['id_keuangan' => $keuangan->id]);
 
-            // Handle digital payment
             if ($this->isDigitalPayment($metodePembayaran->nama_metode)) {
                 try {
                     $this->validateMidtransConfiguration();
@@ -421,9 +423,9 @@ class TransaksiController extends Controller
                             'phone' => $user->pengepul->no_telp ?? '08123456789',
                         ],
                         'callbacks' => [
-                            'finish' => route('pengepul.transaksi.show', $transaksi->id),
-                            'error' => route('pengepul.transaksi.show', $transaksi->id),
-                            'pending' => route('pengepul.transaksi.show', $transaksi->id),
+                            'finish' => route('payment.return'),
+                            'error' => route('pengepul.transaksi.index', $transaksi->id),
+                            'pending' => route('pengepul.transaksi.index', $transaksi->id),
                         ]
                     ];
 
@@ -432,7 +434,7 @@ class TransaksiController extends Controller
                     $transaksi->update([
                         'snap_token' => $snapToken,
                         'order_id' => $orderId,
-                        'payment_status' => 'pending' // Reset to pending for digital payment
+                        'payment_status' => 'pending'
                     ]);
 
                 } catch (\Exception $e) {
@@ -448,7 +450,6 @@ class TransaksiController extends Controller
 
             DB::commit();
 
-            // Redirect based on payment method
             if ($this->isDigitalPayment($metodePembayaran->nama_metode)) {
                 return redirect()->route('pengepul.transaksi.payment', $transaksi->id)
                     ->with('success', 'Transaksi berhasil dibuat. Silakan lanjutkan pembayaran.');
@@ -470,7 +471,6 @@ class TransaksiController extends Controller
         }
     }
 
-    // Helper method for Midtrans error messages
     private function getMidtransErrorMessage(\Exception $e)
     {
         if (strpos($e->getMessage(), 'unauthorized') !== false ||
@@ -527,21 +527,33 @@ class TransaksiController extends Controller
     public function handleCallback(Request $request)
     {
         try {
-            $notification = new Notification();
 
-            $transaction = $notification->transaction_status;
-            $type = $notification->payment_type;
-            $orderId = $notification->order_id;
-            $fraud = $notification->fraud_status ?? null;
+            if ($request->isMethod('get')) {
+                $notification = [
+                    'transaction_status' => $request->transaction_status,
+                    'payment_type' => $request->payment_type,
+                    'order_id' => $request->order_id,
+                    'fraud_status' => $request->fraud_status ?? null,
+                ];
+            }
+            else {
+                $notification = new Notification();
+            }
+
+            $transaction = $notification->transaction_status ?? $notification['transaction_status'];
+            $type = $notification->payment_type ?? $notification['payment_type'];
+            $orderId = $notification->order_id ?? $notification['order_id'];
+            $fraud = $notification->fraud_status ?? $notification['fraud_status'] ?? null;
 
             Log::info('Midtrans callback received', [
                 'order_id' => $orderId,
                 'transaction_status' => $transaction,
                 'payment_type' => $type,
-                'fraud_status' => $fraud
+                'fraud_status' => $fraud,
+                'method' => $request->method()
             ]);
 
-            // Extract transaction ID from order ID
+            // Rest of your existing callback handling code...
             $orderParts = explode('-', $orderId);
             if (count($orderParts) < 2) {
                 Log::error('Invalid order ID format: ' . $orderId);
@@ -551,7 +563,6 @@ class TransaksiController extends Controller
             $transactionId = $orderParts[1];
             $transaksi = Transaksi::findOrFail($transactionId);
 
-            // Update transaction status based on Midtrans response
             if ($transaction == 'capture') {
                 if ($type == 'credit_card') {
                     if ($fraud == 'challenge') {
@@ -590,8 +601,50 @@ class TransaksiController extends Controller
         Log::info('Transaction status updated', [
             'transaction_id' => $transaksi->id,
             'payment_status' => $paymentStatus,
-            'status_transaksi_id' => $statusTransaksiId
+            'status_transaksi_id' => $statusTransaksiId,
+            'status_name' => $this->getStatusName($statusTransaksiId)
         ]);
+    }
+
+    private function getStatusName($statusId)
+    {
+        $statusNames = [
+            1 => 'Menunggu Pembayaran',
+            2 => 'Pembayaran Lunas',
+            3 => 'Dikemas',
+            4 => 'Dikirim',
+            5 => 'Selesai'
+        ];
+
+        return $statusNames[$statusId] ?? 'Unknown';
+    }
+
+    public function paymentReturn(Request $request)
+    {
+        $orderId = $request->get('order_id');
+        $statusCode = $request->get('status_code');
+        $transactionStatus = $request->get('transaction_status');
+
+        if ($orderId) {
+            $orderParts = explode('-', $orderId);
+            if (count($orderParts) >= 2) {
+                $transactionId = $orderParts[1];
+                $transaksi = Transaksi::find($transactionId);
+
+                if ($transaksi) {
+                    if ($transaksi->payment_status == 'success') {
+                        return redirect()->route('pengepul.transaksi.index', $transactionId)
+                            ->with('success', 'Pembayaran berhasil! Status transaksi telah diperbarui menjadi "Pembayaran Lunas".');
+                    } else {
+                        return redirect()->route('pengepul.transaksi.index', $transactionId)
+                            ->with('info', 'Pembayaran sedang diproses. Status akan diperbarui secara otomatis.');
+                    }
+                }
+            }
+        }
+
+        return redirect()->route('pengepul.transaksi.index')
+            ->with('error', 'Tidak dapat menemukan informasi transaksi.');
     }
 
     public function checkPaymentStatus($id)
