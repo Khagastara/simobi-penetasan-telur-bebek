@@ -18,10 +18,14 @@
 <body class="font-['Poppins'] bg-[#D4E6B5] min-h-screen flex">
 
 {{-- Sidebar --}}
-<aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
+<aside class="sidebar w-64 min-h-screen p-6 text-black shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
     {{-- Bagian Atas: Judul dan Menu --}}
     <div>
-        <h2 class="text-xl font-bold mb-8 text-white">SiMOBI Owner</h2>
+        <h2 class="text-xl font-bold mb-2 text-[#5B5447] flex items-center">
+            <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2"> 
+            SiMOBI Owner
+        </h2>
+        <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div> <!-- Yellow line -->
         <nav class="space-y-3">
             <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.dashboard') ? 'active-menu' : '' }}">
                 <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
@@ -34,7 +38,7 @@
             </a>
             <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
                 <i class="fas fa-exchange-alt mr-2"></i> Transaksi
-
+            </a>
             <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
                 <i class="fas fa-money-bill-wave mr-2"></i> Keuangan
             </a>
@@ -87,7 +91,7 @@
         padding-right: 1rem;
         border-radius: 0.75rem; /* rounded-xl */
         transition: all 0.3s ease;
-        color: white; /* Set the text color to white */
+        color: black; /* Set the text color to white */
         text-decoration: none; /* Remove underline */
     }
 

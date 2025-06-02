@@ -20,10 +20,13 @@
 <aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
     {{-- Bagian Atas: Judul dan Menu --}}
     <div>
-        <h2 class="text-xl font-bold mb-8 text-white">SiMOBI Pengepul</h2>
+        <h2 class="text-l font-bold mb-2 text-[#5B5447] flex items-center">
+            <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2"> 
+            SiMOBI Pengepul
+        </h2>
+        <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div> <!-- Yellow line -->
+        <br>
         <nav class="space-y-3">
-            <a href="{{ route('pengepul.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('pengepul.dashboard') ? 'active-menu' : '' }}">
-                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
             </a>
             <a href="{{ route('pengepul.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('pengepul.stok*') ? 'active-menu' : '' }}">
                 <i class="fas fa-warehouse mr-2"></i> Stok Distribusi
@@ -82,6 +85,7 @@
         padding-right: 1rem;
         border-radius: 0.75rem; /* rounded-xl */
         transition: all 0.3s ease;
+        color: black;
     }
 
     .sidebar a::before {

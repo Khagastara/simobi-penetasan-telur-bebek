@@ -65,8 +65,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('owner.dashboard');
 
     Route::get('/pengepul/dashboard', function () {
-        return view('pengepul.dashboard');
-    })->name('pengepul.dashboard');
+        return view('pengepul.stok.index');
+    })->name('pengepul.stok.index');
 });
 
 // Owner

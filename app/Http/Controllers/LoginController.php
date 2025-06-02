@@ -32,7 +32,7 @@ class LoginController extends Controller
             }
             elseif ($akun->pengepul) {
                 Auth::guard('pengepul')->login($akun->pengepul);
-                return redirect()->route('p.riwayat-transaksi');
+                return redirect()->route('pengepul.stok.index');
             }
         }
 
