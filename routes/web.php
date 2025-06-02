@@ -127,5 +127,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pengepul/transaksi/{id}/payment', [TransaksiController::class, 'payment'])->name('pengepul.transaksi.payment');
 });
 
-Route::post('/midtrans/callback', [TransaksiController::class, 'handleCallback'])->name('midtrans.callback');
+Route::match(['get', 'post'], '/midtrans/callback', [TransaksiController::class, 'handleCallback'])->name('midtrans.callback');
+Route::get('/payment/return', [TransaksiController::class, 'paymentReturn'])->name('payment.return');
 Route::get('/payment/status/{id}', [TransaksiController::class, 'checkPaymentStatus'])->name('payment.status');

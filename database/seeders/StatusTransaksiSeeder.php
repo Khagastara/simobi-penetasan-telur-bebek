@@ -20,7 +20,7 @@ class StatusTransaksiSeeder extends Seeder
 
         StatusTransaksi::insert([
             'id' => 2,
-            'nama_status' => 'Pembayaran Valid',
+            'nama_status' => 'Pembayaran Lunas',
         ]);
 
         StatusTransaksi::insert([
