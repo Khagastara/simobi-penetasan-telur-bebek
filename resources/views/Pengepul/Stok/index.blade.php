@@ -82,7 +82,6 @@
         </section>
     </main>
 
-    <!-- Enhanced Bootstrap Modal for Stock Detail and Purchase -->
     <div class="modal fade" id="stokModal" tabindex="-1" aria-labelledby="stokModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">

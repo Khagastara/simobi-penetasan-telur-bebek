@@ -3,12 +3,9 @@
 @section('content')
 
 <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-    <!-- Top Banner -->
     <header class="topbar p-6 shadow-md">
         <h1 class="text-2xl font-semibold text-[#877B66]">Detail Data Keuangan</h1>
     </header>
-
-    <!-- Main Content -->
     <section class="p-8">
         <div class="bg-white p-6 rounded-xl shadow">
             <div class="mb-4">

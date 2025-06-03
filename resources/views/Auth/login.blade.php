@@ -2,12 +2,9 @@
 
 @section('content')
 <div class="min-h-screen flex">
-    <!-- Left Side: Image -->
     <div class="w-1/2">
         <img src="{{ asset('images/icons/foto halaman login.jpg') }}" alt="Descriptive Alt Text" class="w-full h-screen object-cover">
     </div>
-
-    <!-- Right Side: Login Form -->
     <div class="w-1/2 flex items-center justify-center bg-[#D4E6B5]">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden p-8 w-full max-w-md">
             <div class="mb-6">
@@ -61,8 +58,6 @@
                     type="submit"
                     class="w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 bg-[#5B5447] text-[#F9F8F8] hover:bg-[#A8956F] hover:translate-y-[-1px] transition-all duration-200"> Login
                 </button>
-
-                <!-- Error messages container - moved below the login button -->
                 <div class="mt-4 text-center">
                     @if(session('error'))
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">

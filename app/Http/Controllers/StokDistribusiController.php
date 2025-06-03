@@ -63,7 +63,6 @@ class StokDistribusiController extends Controller
     {
         $stok = StokDistribusi::findOrFail($id);
 
-        // Check if request is AJAX (for modal)
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
@@ -114,7 +113,6 @@ class StokDistribusiController extends Controller
                 unlink(public_path($stok->gambar_stok));
             }
 
-            // Save the new image
             $gambarStok = $request->file('gambar_stok');
             $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
             $gambarStok->move(public_path('images/stok'), $namaGambar);

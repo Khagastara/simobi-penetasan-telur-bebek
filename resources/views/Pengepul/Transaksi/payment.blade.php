@@ -51,7 +51,6 @@
     </section>
 </main>
 
-<!-- Loading Modal -->
 <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -70,11 +69,9 @@
 
 <script>
 document.getElementById('pay-button').addEventListener('click', function () {
-    // Show loading modal
     const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
     loadingModal.show();
 
-    // Trigger Midtrans Snap
     snap.pay('{{ $paymentData['snap_token'] }}', {
         onSuccess: function(result) {
             loadingModal.hide();
@@ -98,13 +95,12 @@ document.getElementById('pay-button').addEventListener('click', function () {
     });
 });
 
-// Check payment status periodically
 function checkPaymentStatus() {
     fetch('{{ route('payment.status', $paymentData['transaksi']->id) }}')
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success' && data.payment_status === 'success') {
-                window.location.href = '{{ route('pengepul.transaksi.show', $paymentData['transaksi']->id) }}';
+                window.location.href = '{{ route('pengepul.transaksi.index', $paymentData['transaksi']->id) }}';
             }
         })
         .catch(error => {
@@ -112,7 +108,6 @@ function checkPaymentStatus() {
         });
 }
 
-// Check payment status every 5 seconds
 setInterval(checkPaymentStatus, 5000);
 </script>
 

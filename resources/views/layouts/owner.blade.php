@@ -1,4 +1,3 @@
-{{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\layouts\owner.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,15 +16,13 @@
 </head>
 <body class="font-['Poppins'] bg-[#D4E6B5] min-h-screen flex">
 
-{{-- Sidebar --}}
 <aside class="sidebar w-64 min-h-screen p-6 text-black shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
-    {{-- Bagian Atas: Judul dan Menu --}}
     <div>
         <h2 class="text-xl font-bold mb-2 text-[#5B5447] flex items-center">
-            <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2"> 
+            <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2">
             SiMOBI Owner
         </h2>
-        <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div> <!-- Yellow line -->
+        <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div>
         <nav class="space-y-3">
             <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.dashboard') ? 'active-menu' : '' }}">
                 <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
@@ -48,9 +45,7 @@
         </nav>
     </div>
 </aside>
-    {{-- Main Content --}}
     <main class="flex-1 flex flex-col">
-        {{-- Topbar --}}
         <header class="topbar p-6 shadow-md" style="background-color: #FFDF64;">
             <div class="flex items-center justify-between">
                 <div>
@@ -62,14 +57,11 @@
                 </div>
             </div>
         </header>
-
-        {{-- Page Content --}}
         <div class="p-8">
             @yield('content')
         </div>
     </main>
 
-    {{-- Optional: Success Message --}}
     @if(session('success'))
         <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
             {{ session('success') }}
@@ -81,7 +73,6 @@
         </script>
     @endif
 
-    {{-- Inline Styles --}}
 <style>
     .sidebar a {
         position: relative;
@@ -89,10 +80,10 @@
         align-items: center;
         padding-left: 1rem;
         padding-right: 1rem;
-        border-radius: 0.75rem; /* rounded-xl */
+        border-radius: 0.75rem;
         transition: all 0.3s ease;
-        color: black; /* Set the text color to white */
-        text-decoration: none; /* Remove underline */
+        color: black;
+        text-decoration: none;
     }
 
     .sidebar a::before {
@@ -111,10 +102,9 @@
     .sidebar a:hover,
     .sidebar a.active-menu {
         background-color: #E2D686;
-        color: #000; /* Change text color on hover or active */
+        color: #000;
         font-weight: 500;
 
-        /* Make only the left side rounded */
         border-top-right-radius: 0.75rem;
         border-bottom-right-radius: 0.75rem;
         border-top-left-radius: 0;

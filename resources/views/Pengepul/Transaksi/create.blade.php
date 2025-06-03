@@ -97,20 +97,15 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        // Harga stok
         const hargaStok = {{ $stokDistribusi->harga_stok }};
-
-        // Fungsi untuk menghitung total
         function hitungTotal() {
             const kuantitas = $('#kuantitas').val();
             const total = hargaStok * kuantitas;
             $('#total').val('Rp ' + total.toLocaleString('id-ID'));
         }
 
-        // Hitung total saat halaman dimuat
         hitungTotal();
 
-        // Hitung total ketika kuantitas berubah
         $('#kuantitas').on('input', function() {
             hitungTotal();
         });

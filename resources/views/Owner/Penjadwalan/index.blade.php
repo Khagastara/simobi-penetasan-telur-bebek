@@ -24,12 +24,9 @@
                     }, 3000);
                 </script>
             @endif
-
-            <!-- Filter Section -->
             <div class="bg-white p-6 rounded-xl shadow mb-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Filter Jadwal</h3>
                 <form method="GET" action="{{ route('owner.penjadwalan.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <!-- Month Filter -->
                     <div>
                         <label for="month" class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
                         <select name="month" id="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] focus:border-transparent">
@@ -41,8 +38,6 @@
                             @endforeach
                         </select>
                     </div>
-
-                    <!-- Year Filter -->
                     <div>
                         <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
                         <select name="year" id="year" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] focus:border-transparent">
@@ -54,8 +49,6 @@
                             @endforeach
                         </select>
                     </div>
-
-                    <!-- Filter Buttons -->
                     <div class="flex items-end gap-2">
                         <button type="submit" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition">
                             <i class="fas fa-filter mr-2"></i> Filter
@@ -64,8 +57,6 @@
                             <i class="fas fa-times mr-2"></i> Reset
                         </a>
                     </div>
-
-                    <!-- Add Schedule Button -->
                     <div class="flex items-end">
                         <a href="{{ route('owner.penjadwalan.create') }}" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition">
                             <i class="fas fa-plus mr-2"></i> Tambah Jadwal

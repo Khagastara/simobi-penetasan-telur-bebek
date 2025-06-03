@@ -3,18 +3,13 @@
 @section('content')
 
 <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-    <!-- Top Banner -->
     <header class="topbar p-6 shadow-md">
         <h1 class="text-2xl font-semibold text-[#877B66]">Tambah Data Keuangan</h1>
     </header>
-
-    <!-- Main Content -->
     <section class="p-8">
         <div class="bg-white p-6 rounded-xl shadow">
-            {{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\Owner\Keuangan\create.blade.php --}}
             <form action="{{ route('owner.keuangan.store') }}" method="POST">
                 @csrf
-                {{-- filepath: c:\laragon\www\simobi-penetasan-telur-bebek\resources\views\Owner\Keuangan\create.blade.php --}}
                 <div class="mb-4">
                     <label for="tgl_rekapitulasi" class="block text-sm font-medium text-gray-700">Tanggal Rekapitulasi</label>
                     <select name="tgl_rekapitulasi" id="tgl_rekapitulasi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]">

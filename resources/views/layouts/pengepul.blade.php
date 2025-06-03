@@ -21,7 +21,7 @@
     {{-- Bagian Atas: Judul dan Menu --}}
     <div>
         <h2 class="text-l font-bold mb-2 text-[#5B5447] flex items-center">
-            <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2"> 
+            <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2">
             SiMOBI Pengepul
         </h2>
         <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div> <!-- Yellow line -->
@@ -41,10 +41,7 @@
     </div>
 </aside>
 
-
-    {{-- Main Content --}}
     <main class="flex-1 flex flex-col">
-        {{-- Topbar --}}
         <header class="topbar p-6 shadow-md" style="background-color: #FFDF64;">
             <div class="flex items-center justify-between">
                 <div>
@@ -56,14 +53,10 @@
                 </div>
             </div>
         </header>
-
-        {{-- Page Content --}}
         <div class="p-8">
             @yield('content')
         </div>
     </main>
-
-    {{-- Optional: Success Message --}}
     @if(session('success'))
         <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
             {{ session('success') }}
@@ -75,7 +68,6 @@
         </script>
     @endif
 
-    {{-- Inline Styles --}}
 <style>
     .sidebar a {
         position: relative;
@@ -83,7 +75,7 @@
         align-items: center;
         padding-left: 1rem;
         padding-right: 1rem;
-        border-radius: 0.75rem; /* rounded-xl */
+        border-radius: 0.75rem;
         transition: all 0.3s ease;
         color: black;
     }
@@ -106,8 +98,6 @@
         background-color: #E2D686;
         color: #000;
         font-weight: 500;
-
-        /* Buat hanya sisi kiri yang rounded */
         border-top-right-radius: 0.75rem;
         border-bottom-right-radius: 0.75rem;
         border-top-left-radius: 0;
