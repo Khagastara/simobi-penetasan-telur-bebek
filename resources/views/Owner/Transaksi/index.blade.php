@@ -103,10 +103,8 @@ async function showTransactionDetail(id) {
     const modal = document.getElementById('transactionModal');
     const modalContent = document.getElementById('modalContent');
 
-    // Show modal
     modal.classList.remove('hidden');
 
-    // Show loading spinner
     modalContent.innerHTML = `
         <div class="flex justify-center items-center h-32">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -217,7 +215,6 @@ async function updateStatus(event, id) {
     const form = event.target;
     const formData = new FormData(form);
 
-    // Add method spoofing for PUT request
     formData.append('_method', 'PUT');
 
     try {
@@ -234,18 +231,14 @@ async function updateStatus(event, id) {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            // Show success message
             showSuccessMessage('Status berhasil diubah');
 
-            // Close modal
             closeModal();
 
-            // Reload page to reflect changes
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
         } else {
-            // Handle validation errors or other issues
             const message = result.message || 'Terjadi kesalahan saat mengupdate status';
             showErrorMessage(message);
         }
@@ -303,7 +296,6 @@ function showErrorMessage(message) {
     }, 3000);
 }
 
-// Close modal when clicking outside
 document.getElementById('transactionModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeModal();

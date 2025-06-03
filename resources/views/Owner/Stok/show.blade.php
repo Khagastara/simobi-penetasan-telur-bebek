@@ -2,7 +2,6 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-        <!-- Top Banner -->
         <header class="topbar p-6 shadow-md">
             <div class="flex items-center justify-between">
                 <div>
@@ -15,7 +14,6 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <section class="p-8">
             @if (session('success'))
                 <div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow mb-4">
@@ -54,7 +52,6 @@
                     </div>
                 </div>
 
-                <!-- Tombol di dalam card, posisi kiri-kanan -->
                 <div class="mt-6 flex justify-between">
                     <a href="{{ route('owner.stok.index') }}" class="inline-block bg-gray-400 text-white hover:bg-gray-500 px-4 py-2 rounded-lg shadow transition">
                         <i class="fas fa-arrow-left mr-1"></i> Kembali

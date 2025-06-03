@@ -2,12 +2,10 @@
 
 @section('content')
 <div class="min-h-screen flex">
-    <!-- Left Side: Image -->
     <div class="w-1/2">
         <img src="{{ asset('images/icons/foto halaman login.jpg') }}" alt="Descriptive Alt Text" class="w-full h-screen object-cover">
     </div>
 
-    <!-- Right Side: Password Recovery Form -->
     <div class="w-1/2 flex items-center justify-center bg-[#D4E6B5]">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden p-8 w-full max-w-md">
             @if(!isset($step) || $step == 'email')
@@ -33,7 +31,6 @@
             </div>
 
             @if(!isset($step) || $step == 'email')
-                <!-- Form Lupa Password -->
                 <form method="POST" action="{{ route('password.email') }}">
                     @csrf
 
@@ -57,7 +54,6 @@
                 </form>
 
             @elseif($step == 'otp')
-                <!-- Form Verifikasi OTP -->
                 <p class="text-center mb-4 text-sm text-gray-600">Kode OTP telah dikirim ke email: <strong>{{ $email }}</strong></p>
 
                 <form method="POST" action="{{ route('password.otp.verify') }}">
@@ -78,8 +74,6 @@
                             Verifikasi
                         </button>
                     </div>
-
-                    <!-- Resend OTP Section -->
                     <div class="text-center">
                         <p class="text-sm text-gray-600 mb-2">Tidak menerima kode?</p>
                         <button type="button" id="resendBtn" onclick="resendOtp()" class="text-[#5B5447] text-sm font-medium hover:text-[#A8956F] hover:underline disabled:text-gray-400 disabled:no-underline" disabled>
@@ -156,7 +150,6 @@ function startCountdown() {
 }
 
 function resendOtp() {
-    // Send AJAX request to resend OTP
     fetch('{{ route("password.email") }}', {
         method: 'POST',
         headers: {
@@ -170,7 +163,6 @@ function resendOtp() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Show success message
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-success mb-4 text-green-600 bg-green-50 border border-green-200 rounded p-3';
             alertDiv.textContent = 'Kode OTP baru telah dikirim ke email Anda';
@@ -182,10 +174,8 @@ function resendOtp() {
                 document.querySelector('h1').after(alertDiv);
             }
 
-            // Start countdown again
             startCountdown();
         } else {
-            // Show error message
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-danger mb-4 text-red-600 bg-red-50 border border-red-200 rounded p-3';
             alertDiv.textContent = data.message || 'Terjadi kesalahan saat mengirim kode OTP';

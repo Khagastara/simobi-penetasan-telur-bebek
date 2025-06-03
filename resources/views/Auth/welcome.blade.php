@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('header', 'Welcome to SIMOBI') <!-- Optional header section -->
+@section('header', 'Welcome to SIMOBI')
 
 @section('content')
     <h2>Welcome to the Dashboard</h2>

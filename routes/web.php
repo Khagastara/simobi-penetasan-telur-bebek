@@ -2,9 +2,9 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Mail;
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PengepulRegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ForgotPasswordController;
@@ -36,12 +36,11 @@ Route::get('/test-email', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('auth.login');
-});
+Route::get('/', function () {return view('auth.login');});
 
-Route::get('/send-notification', [NotificationController::class, 'sendNotification'])
-    ->name('send.notification');
+
+Route::get('register', [PengepulRegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [PengepulRegisterController::class, 'register'])->name('register.submit');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
@@ -59,20 +58,15 @@ Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm']
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])
     ->name('password.update');
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/owner/dashboard', function () {
-        return view('owner.dashboard');
-    })->name('owner.dashboard');
-
-    Route::get('/pengepul/dashboard', function () {
-        return view('pengepul.stok.index');
-    })->name('pengepul.stok.index');
-});
-
 // Owner
 Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
+    //Owner
+    Route::get('/owner/dashboard', [DashboardController::class, 'index'])->name('owner.dashboard');
+    Route::get('/financial-data', [DashboardController::class, 'getFinancialData'])->name('financial.data');
+    Route::get('/change-week', [DashboardController::class, 'changeWeek'])->name('dashboard.change-week');
+
     Route::get('o/profil', [OwnerProfilController::class, 'show'])->name('owner.profil.show');
     Route::get('o/profil/edit', [OwnerProfilController::class, 'edit'])->name('owner.profil.edit');
     Route::post('o/profil/update', [OwnerProfilController::class, 'update'])->name('owner.profil.update');
@@ -103,15 +97,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/keuangan/{id}', [KeuanganController::class, 'show'])->name('owner.keuangan.show');
     Route::get('/keuangan/{id}/edit', [KeuanganController::class, 'edit'])->name('owner.keuangan.edit');
     Route::put('/keuangan/{id}', [KeuanganController::class, 'update'])->name('owner.keuangan.update');
-});
 
-// Pengepul
-Route::get('/pengepuls/register', [PengepulRegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/pengepuls/register', [PengepulRegisterController::class, 'register'])->name('register.submit');
-
-Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');
-
-Route::middleware(['auth'])->group(function () {
+    //Pengepul
+    Route::get('/pengepul/dashboard', function () {return view('pengepul.stok.index');})->name('pengepul.stok.index');
     Route::get('p/profil', [PengepulProfilController::class, 'show'])->name('pengepul.profil.show');
     Route::get('p/profil/edit', [PengepulProfilController::class, 'edit'])->name('pengepul.profil.edit');
     Route::post('p/profil/update', [PengepulProfilController::class, 'update'])->name('pengepul.profil.update');
@@ -123,10 +111,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('p/riwayat-transaksi/{id}', [TransaksiController::class, 'showPengepul'])->name('pengepul.transaksi.show');
     Route::get('p/transaksi/create/{stokId}', [TransaksiController::class, 'create'])->name('pengepul.transaksi.create');
     Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.transaksi.store');
-
     Route::get('/pengepul/transaksi/{id}/payment', [TransaksiController::class, 'payment'])->name('pengepul.transaksi.payment');
 });
 
-Route::match(['get', 'post'], '/midtrans/callback', [TransaksiController::class, 'handleCallback'])->name('midtrans.callback');
-Route::get('/payment/return', [TransaksiController::class, 'paymentReturn'])->name('payment.return');
+Route::post('/payment/callback', [TransaksiController::class, 'handlePaymentCallback'])->name('payment.callback');
+Route::get('/payment/return', [TransaksiController::class, 'handlePaymentReturn'])->name('payment.return');
 Route::get('/payment/status/{id}', [TransaksiController::class, 'checkPaymentStatus'])->name('payment.status');
+
+Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');

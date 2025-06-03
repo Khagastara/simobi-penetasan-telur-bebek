@@ -51,7 +51,7 @@ class TransaksiController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Midtrans initialization failed: ' . $e->getMessage());
-            throw $e; // Re-throw to prevent silent failures
+            throw $e;
         }
     }
 
@@ -424,8 +424,8 @@ class TransaksiController extends Controller
                         ],
                         'callbacks' => [
                             'finish' => route('payment.return'),
-                            'error' => route('pengepul.transaksi.index', $transaksi->id),
-                            'pending' => route('pengepul.transaksi.index', $transaksi->id),
+                            'error' => route('pengepul.transaksi.show', $transaksi->id),
+                            'pending' => route('pengepul.transaksi.show', $transaksi->id),
                         ]
                     ];
 
@@ -510,6 +510,11 @@ class TransaksiController extends Controller
                 ->with('error', 'Token pembayaran tidak ditemukan. Transaksi mungkin sudah selesai atau terjadi kesalahan.');
         }
 
+        $transaksi->update([
+            'payment_status' => 'success',
+            'id_status_transaksi' => 2,
+        ]);
+
         $detail = $transaksi->detailTransaksi->first();
 
         $paymentData = [
@@ -527,23 +532,12 @@ class TransaksiController extends Controller
     public function handleCallback(Request $request)
     {
         try {
+            $notification = new Notification();
 
-            if ($request->isMethod('get')) {
-                $notification = [
-                    'transaction_status' => $request->transaction_status,
-                    'payment_type' => $request->payment_type,
-                    'order_id' => $request->order_id,
-                    'fraud_status' => $request->fraud_status ?? null,
-                ];
-            }
-            else {
-                $notification = new Notification();
-            }
-
-            $transaction = $notification->transaction_status ?? $notification['transaction_status'];
-            $type = $notification->payment_type ?? $notification['payment_type'];
-            $orderId = $notification->order_id ?? $notification['order_id'];
-            $fraud = $notification->fraud_status ?? $notification['fraud_status'] ?? null;
+            $transaction = $notification->transaction_status;
+            $type = $notification->payment_type;
+            $orderId = $notification->order_id;
+            $fraud = $notification->fraud_status ?? null;
 
             Log::info('Midtrans callback received', [
                 'order_id' => $orderId,
@@ -553,7 +547,7 @@ class TransaksiController extends Controller
                 'method' => $request->method()
             ]);
 
-            // Rest of your existing callback handling code...
+            // Memecah order_id
             $orderParts = explode('-', $orderId);
             if (count($orderParts) < 2) {
                 Log::error('Invalid order ID format: ' . $orderId);
@@ -563,6 +557,7 @@ class TransaksiController extends Controller
             $transactionId = $orderParts[1];
             $transaksi = Transaksi::findOrFail($transactionId);
 
+            // Penanganan status transaksi
             if ($transaction == 'capture') {
                 if ($type == 'credit_card') {
                     if ($fraud == 'challenge') {
@@ -633,10 +628,10 @@ class TransaksiController extends Controller
 
                 if ($transaksi) {
                     if ($transaksi->payment_status == 'success') {
-                        return redirect()->route('pengepul.transaksi.index', $transactionId)
+                        return redirect()->route('pengepul.transaksi.show', $transactionId)
                             ->with('success', 'Pembayaran berhasil! Status transaksi telah diperbarui menjadi "Pembayaran Lunas".');
                     } else {
-                        return redirect()->route('pengepul.transaksi.index', $transactionId)
+                        return redirect()->route('pengepul.transaksi.show', $transactionId)
                             ->with('info', 'Pembayaran sedang diproses. Status akan diperbarui secara otomatis.');
                     }
                 }
@@ -655,7 +650,8 @@ class TransaksiController extends Controller
             return response()->json([
                 'status' => 'success',
                 'payment_status' => $transaksi->payment_status,
-                'transaction_status' => $transaksi->statusTransaksi->nama_status ?? 'Unknown'
+                'transaction_status' => $transaksi->statusTransaksi->nama_status ?? 'Unknown',
+                'transaction_status_id' => $transaksi->id_status_transaksi
             ]);
 
         } catch (\Exception $e) {
