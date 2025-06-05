@@ -55,30 +55,29 @@ class TransaksiController extends Controller
         }
     }
 
-    public function index()
-    {
-        $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi', 'metodePembayaran'])
-            ->orderBy('tgl_transaksi', 'desc')
-            ->get()
-            ->map(function ($transaksi) {
-                $detail = $transaksi->detailTransaksi->first();
-
-                return [
-                    'id' => $transaksi->id,
-                    'tgl_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
-                    'username' => $transaksi->pengepul->nama,
-                    'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
-                    'kuantitas' => $detail ? $detail->kuantitas : 0,
-                    'total_transaksi' => $detail ? $detail->sub_total : 0,
-                    'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
-                    'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
-                    'snap_token' => $transaksi->snap_token,
-                    'payment_status' => $transaksi->payment_status,
-                ];
-            });
-
-        return view('owner.transaksi.index', compact('transaksis'));
-    }
+public function index()
+{
+    $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi', 'metodePembayaran'])
+        ->orderBy('tgl_transaksi', 'desc')
+        ->paginate(10); // Get paginated results
+    // Map the results after pagination
+    $transaksis->getCollection()->transform(function ($transaksi) {
+        $detail = $transaksi->detailTransaksi->first();
+        return [
+            'id' => $transaksi->id,
+            'tgl_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
+            'username' => $transaksi->pengepul->nama,
+            'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
+            'kuantitas' => $detail ? $detail->kuantitas : 0,
+            'total_transaksi' => $detail ? $detail->sub_total : 0,
+            'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
+            'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
+            'snap_token' => $transaksi->snap_token,
+            'payment_status' => $transaksi->payment_status,
+        ];
+    });
+    return view('owner.transaksi.index', compact('transaksis'));
+}
 
     public function show($id)
     {
@@ -168,34 +167,37 @@ class TransaksiController extends Controller
         return redirect()->route('owner.transaksi.show', $id)->with('success', 'Status berhasil diubah');
     }
 
-    public function indexPengepul()
-    {
-        $pengepul = Auth::user()->pengepul;
+public function indexPengepul()
+{
+    $pengepul = Auth::user()->pengepul;
 
-        $transaksis = Transaksi::with(['detailTransaksi.stokDistribusi', 'statusTransaksi'])
-            ->where('id_pengepul', $pengepul->id)
-            ->get()
-            ->map(function ($transaksi) use ($pengepul) {
-                $latestStatus = $transaksi->statusTransaksi()
-                    ->orderBy('id', 'desc')
-                    ->first();
+    $transaksis = Transaksi::with(['detailTransaksi.stokDistribusi', 'statusTransaksi'])
+        ->where('id_pengepul', $pengepul->id)
+        ->paginate(10); // Get paginated results
 
-                $detail = $transaksi->detailTransaksi->first();
+    // Map the results after pagination
+    $transaksis->getCollection()->transform(function ($transaksi) use ($pengepul) {
+        $latestStatus = $transaksi->statusTransaksi()
+            ->orderBy('id', 'desc')
+            ->first();
 
-                return [
-                    'id' => $transaksi->id,
-                    'username' => $pengepul->nama,
-                    'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
-                    'kuantitas' => $detail ? $detail->kuantitas : 0,
-                    'total_transaksi' => $detail ? $detail->sub_total : 0,
-                    'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
-                    'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
-                    'snap_token' => $transaksi->snap_token,
-                ];
-            });
+        $detail = $transaksi->detailTransaksi->first();
 
-        return view('pengepul.transaksi.index', compact('transaksis'));
-    }
+        return [
+            'id' => $transaksi->id,
+            'username' => $pengepul->nama,
+            'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
+            'kuantitas' => $detail ? $detail->kuantitas : 0,
+            'total_transaksi' => $detail ? $detail->sub_total : 0,
+            'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
+            'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
+            'snap_token' => $transaksi->snap_token,
+        ];
+    });
+
+    return view('pengepul.transaksi.index', compact('transaksis'));
+}
+
 
     public function showPengepul($id)
     {

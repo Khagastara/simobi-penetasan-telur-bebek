@@ -11,7 +11,7 @@ class KeuanganController extends Controller
 {
     public function index()
     {
-        $keuangans = Keuangan::all();
+        $keuangans = Keuangan::paginate(10);
 
         $groupedKeuangans = $keuangans->groupBy('tgl_rekapitulasi')->map(function ($items) {
             return [

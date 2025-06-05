@@ -36,7 +36,7 @@ class PenjadwalanKegiatanController extends Controller
             $query->whereYear('tgl_penjadwalan', $filterYear);
         }
 
-        $penjadwalanKegiatans = $query->get();
+        $penjadwalanKegiatans = $query->paginate(10);
 
         $statusKegiatan = StatusKegiatan::all();
 
