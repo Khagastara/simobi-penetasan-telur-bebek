@@ -212,6 +212,9 @@
                         @endforelse
                     </tbody>
                 </table>
+            <div class="mt-4">
+                {{ $penjadwalanKegiatans->links() }} <!-- Add this line for pagination links -->
+                </div>
             </div>
         </section>
     </main>

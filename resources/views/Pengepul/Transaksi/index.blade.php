@@ -68,6 +68,9 @@
                     @endforelse
                 </tbody>
             </table>
+            <div class="mt-4">
+                {{ $transaksis->links() }} <!-- Add this line for pagination links -->
+            </div>
         </div>
     </section>
 </main>
