@@ -58,7 +58,6 @@ Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm']
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])
     ->name('password.update');
 
-// Owner
 Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
@@ -113,9 +112,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.transaksi.store');
     Route::get('/pengepul/transaksi/{id}/payment', [TransaksiController::class, 'payment'])->name('pengepul.transaksi.payment');
 
-    Route::post('/payment/callback', [TransaksiController::class, 'handleCallback'])->name('payment.callback');
-    Route::get('/payment/return', [TransaksiController::class, 'handlePaymentReturn'])->name('payment.return');
-    Route::get('/payment/status/{id}', [TransaksiController::class, 'checkPaymentStatus'])->name('payment.status');
+    Route::post('/payment/update-status/{id}', [TransaksiController::class, 'updatePaymentStatusAjax'])
+    ->name('payment.update-status');
+    Route::get('/payment/check-status/{id}', [TransaksiController::class, 'checkPaymentStatus'])
+    ->name('payment.check-status');
 });
 
-Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');
+Route::post('/payment/callback', [TransaksiController::class, 'handlePaymentCallback'])
+    ->name('payment.callback');
+
+Route::get('/payment/return', function() {
+    return redirect()->route('pengepul.transaksi.index')
+    ->with('success', 'Pembayaran selesai. Silakan cek status transaksi Anda.');})->name('payment.return');
