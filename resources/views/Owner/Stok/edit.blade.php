@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="flex justify-between">
-                    <a href="{{ route('owner.stok.show', $stok->id) }}"
+                    <a href="{{ route('owner.stok.index', $stok->id) }}"
                         class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg shadow transition">
                         <i class="fas fa-arrow-left mr-1"></i> Kembali
                     </a>
