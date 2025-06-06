@@ -59,8 +59,8 @@ public function index()
 {
     $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi', 'metodePembayaran'])
         ->orderBy('tgl_transaksi', 'desc')
-        ->paginate(10); // Get paginated results
-    // Map the results after pagination
+        ->paginate(10);
+
     $transaksis->getCollection()->transform(function ($transaksi) {
         $detail = $transaksi->detailTransaksi->first();
         return [
@@ -173,9 +173,8 @@ public function index()
 
         $transaksis = Transaksi::with(['detailTransaksi.stokDistribusi', 'statusTransaksi'])
             ->where('id_pengepul', $pengepul->id)
-            ->paginate(10); // Get paginated results
+            ->paginate(10);
 
-        // Map the results after pagination
         $transaksis->getCollection()->transform(function ($transaksi) use ($pengepul) {
             $latestStatus = $transaksi->statusTransaksi()
                 ->orderBy('id', 'desc')
@@ -267,7 +266,6 @@ public function index()
             throw new \Exception('Midtrans configuration is incomplete. Server key or client key is missing.');
         }
 
-        // Basic validation for key format
         if (strlen($serverKey) < 10) {
             throw new \Exception('Server key appears to be invalid (too short).');
         }
@@ -309,7 +307,6 @@ public function index()
 
     public function store(Request $request, $stokId)
     {
-        // Validate input
         $validator = Validator::make($request->all(), [
             'kuantitas' => 'required|integer|min:1',
             'metode_pembayaran' => 'required|exists:metode_pembayarans,id',
@@ -321,17 +318,14 @@ public function index()
                 ->withInput();
         }
 
-        // Get stock data
         $stokDistribusi = StokDistribusi::findOrFail($stokId);
 
-        // Check stock availability
         if ($stokDistribusi->jumlah_stok < $request->kuantitas) {
             return redirect()->back()
                 ->with('error', 'Stok tidak mencukupi')
                 ->withInput();
         }
 
-        // Calculate subtotal
         $subTotal = $stokDistribusi->harga_stok * $request->kuantitas;
 
         DB::beginTransaction();
@@ -340,18 +334,16 @@ public function index()
             $metodePembayaran = MetodePembayaran::findOrFail($request->metode_pembayaran);
             $user = Auth::user();
 
-            // Create transaction
             $transaksi = Transaksi::create([
                 'tgl_transaksi' => now(),
                 'id_pengepul' => $user->pengepul->id,
                 'id_metode_pembayaran' => $metodePembayaran->id,
-                'id_status_transaksi' => 1, // Default: Menunggu Pembayaran
+                'id_status_transaksi' => 1,
                 'payment_status' => 'pending',
                 'snap_token' => null,
                 'order_id' => null,
             ]);
 
-            // Create transaction detail
             DetailTransaksi::create([
                 'kuantitas' => $request->kuantitas,
                 'sub_total' => $subTotal,
@@ -359,7 +351,6 @@ public function index()
                 'id_stok_distribusi' => $stokDistribusi->id,
             ]);
 
-            // Handle payment method type
             $initialStatus = 'Menunggu Pembayaran';
             $initialStatusId = 1;
             $paymentStatus = 'pending';
@@ -523,204 +514,213 @@ public function index()
             'quantity' => $detail->kuantitas,
         ];
 
-        // $transaksi->update([
-        //     'payment_status' => 'success',
-        //     'id_status_transaksi' => 2,
-        // ]);
+        // REMOVED: Premature payment status update
+        // Don't update status here - let Midtrans callback handle it
 
         return view('pengepul.transaksi.payment', compact('paymentData'));
     }
 
-    public function handleCallback(Request $request)
+    public function updatePaymentStatus($transaksiId, $paymentStatus = 'success', $statusTransaksiId = null)
     {
         try {
-            Log::info('Midtrans callback received', [
-                'method' => $request->method(),
-                'headers' => $request->headers->all(),
-                'body' => $request->all()
+            // Find the transaction
+            $transaksi = Transaksi::findOrFail($transaksiId);
+
+            // Validate payment status
+            $validPaymentStatuses = ['pending', 'success', 'failed', 'cancelled'];
+            if (!in_array($paymentStatus, $validPaymentStatuses)) {
+                throw new \InvalidArgumentException('Invalid payment status');
+            }
+
+            // Set default status_transaksi based on payment status
+            if ($statusTransaksiId === null) {
+                switch ($paymentStatus) {
+                    case 'success':
+                        $statusTransaksiId = 2; // Pembayaran Lunas
+                        break;
+                    case 'pending':
+                        $statusTransaksiId = 1; // Menunggu Pembayaran
+                        break;
+                    case 'failed':
+                    case 'cancelled':
+                        $statusTransaksiId = 1; // Back to Menunggu Pembayaran
+                        break;
+                    default:
+                        $statusTransaksiId = 1;
+                }
+            }
+
+            // Update the transaction
+            $transaksi->update([
+                'payment_status' => $paymentStatus,
+                'id_status_transaksi' => $statusTransaksiId,
             ]);
 
-            // Inisialisasi Midtrans untuk memastikan konfigurasi benar
+            Log::info('Payment status updated successfully', [
+                'transaksi_id' => $transaksiId,
+                'payment_status' => $paymentStatus,
+                'status_transaksi_id' => $statusTransaksiId
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Payment status updated successfully',
+                'transaksi' => $transaksi->fresh()
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update payment status', [
+                'transaksi_id' => $transaksiId,
+                'payment_status' => $paymentStatus,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Failed to update payment status: ' . $e->getMessage(),
+                'transaksi' => null
+            ];
+        }
+    }
+
+    public function markPaymentAsSuccess($transaksiId)
+    {
+        return $this->updatePaymentStatus($transaksiId, 'success', 2);
+    }
+
+    /**
+     * Mark payment as failed (convenience method)
+     *
+     * @param int $transaksiId
+     * @return array
+     */
+    public function markPaymentAsFailed($transaksiId)
+    {
+        return $this->updatePaymentStatus($transaksiId, 'failed', 1);
+    }
+
+    public function handlePaymentCallback(Request $request)
+    {
+        try {
+            // Initialize Midtrans
             $this->initializeMidtrans();
 
+            // Get notification from Midtrans
             $notification = new Notification();
 
-            $transaction = $notification->transaction_status;
-            $type = $notification->payment_type;
             $orderId = $notification->order_id;
-            $fraud = $notification->fraud_status ?? null;
-            $signatureKey = $notification->signature_key;
+            $transactionStatus = $notification->transaction_status;
+            $fraudStatus = $notification->fraud_status ?? null;
 
-            Log::info('Midtrans notification details', [
+            Log::info('Payment callback received', [
                 'order_id' => $orderId,
-                'transaction_status' => $transaction,
-                'payment_type' => $type,
-                'fraud_status' => $fraud,
-                'signature_key' => $signatureKey
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus
             ]);
 
-            // Validasi signature key untuk keamanan
-            $serverKey = config('midtrans.serverKey');
-            $hashed = hash('sha512', $orderId . $notification->status_code . $notification->gross_amount . $serverKey);
-
-            if ($hashed !== $signatureKey) {
-                Log::error('Invalid signature key', [
-                    'received' => $signatureKey,
-                    'expected' => $hashed
-                ]);
-                return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 400);
-            }
-
-            // Memecah order_id untuk mendapatkan transaction ID
-            $orderParts = explode('-', $orderId);
-            if (count($orderParts) < 2) {
-                Log::error('Invalid order ID format: ' . $orderId);
-                return response()->json(['status' => 'error', 'message' => 'Invalid order ID'], 400);
-            }
-
-            $transactionId = $orderParts[1];
-            $transaksi = Transaksi::find($transactionId);
+            // Find transaction by order_id
+            $transaksi = Transaksi::where('order_id', $orderId)->first();
 
             if (!$transaksi) {
-                Log::error('Transaction not found: ' . $transactionId);
+                Log::error('Transaction not found for order_id: ' . $orderId);
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
             }
 
-            Log::info('Processing transaction', [
-                'transaction_id' => $transactionId,
-                'current_payment_status' => $transaksi->payment_status,
-                'current_status_id' => $transaksi->id_status_transaksi
-            ]);
+            // Determine payment status based on Midtrans response
+            $paymentStatus = 'pending';
+            $statusTransaksiId = 1;
 
-            // Penanganan status transaksi
-            if ($transaction == 'capture') {
-                if ($type == 'credit_card') {
-                    if ($fraud == 'challenge') {
-                        $this->updateTransactionStatus($transaksi, 'pending', 1);
-                    } else {
-                        $this->updateTransactionStatus($transaksi, 'success', 2);
-                    }
+            if ($transactionStatus == 'capture') {
+                if ($fraudStatus == 'challenge') {
+                    $paymentStatus = 'pending';
+                    $statusTransaksiId = 1;
+                } else if ($fraudStatus == 'accept') {
+                    $paymentStatus = 'success';
+                    $statusTransaksiId = 2;
                 }
-            } elseif ($transaction == 'settlement') {
-                $this->updateTransactionStatus($transaksi, 'success', 2);
-            } elseif ($transaction == 'pending') {
-                $this->updateTransactionStatus($transaksi, 'pending', 1);
-            } elseif ($transaction == 'deny') {
-                $this->updateTransactionStatus($transaksi, 'failed', 1);
-            } elseif ($transaction == 'expire') {
-                $this->updateTransactionStatus($transaksi, 'expired', 1);
-            } elseif ($transaction == 'cancel') {
-                $this->updateTransactionStatus($transaksi, 'cancelled', 1);
+            } else if ($transactionStatus == 'settlement') {
+                $paymentStatus = 'success';
+                $statusTransaksiId = 2;
+            } else if ($transactionStatus == 'pending') {
+                $paymentStatus = 'pending';
+                $statusTransaksiId = 1;
+            } else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                $paymentStatus = 'failed';
+                $statusTransaksiId = 1;
             }
 
-            return response()->json(['status' => 'success']);
+            // Update payment status
+            $result = $this->updatePaymentStatus($transaksi->id, $paymentStatus, $statusTransaksiId);
+
+            if ($result['success']) {
+                return response()->json(['status' => 'success', 'message' => 'Payment status updated']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => $result['message']], 500);
+            }
 
         } catch (\Exception $e) {
-            Log::error('Midtrans callback error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
-            ]);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Payment callback error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Callback processing failed'], 500);
         }
     }
 
-    private function updateTransactionStatus($transaksi, $paymentStatus, $statusTransaksiId)
+    public function updatePaymentStatusAjax(Request $request, $id)
     {
         try {
-            DB::beginTransaction();
-
-            $oldPaymentStatus = $transaksi->payment_status;
-            $oldStatusId = $transaksi->id_status_transaksi;
-
-            $transaksi->update([
-                'payment_status' => $paymentStatus,
-                'id_status_transaksi' => $statusTransaksiId
+            $validator = Validator::make($request->all(), [
+                'payment_status' => 'required|in:success,pending,failed,cancelled',
+                'payment_result' => 'nullable|array'
             ]);
 
-            // Refresh model untuk memastikan data terbaru
-            $transaksi->refresh();
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid payment status'
+                ], 422);
+            }
 
-            DB::commit();
+            $result = $this->updatePaymentStatus($id, $request->payment_status);
 
-            Log::info('Transaction status updated successfully', [
-                'transaction_id' => $transaksi->id,
-                'old_payment_status' => $oldPaymentStatus,
-                'new_payment_status' => $transaksi->payment_status,
-                'old_status_id' => $oldStatusId,
-                'new_status_id' => $transaksi->id_status_transaksi,
-                'status_name' => $this->getStatusName($statusTransaksiId)
-            ]);
+            return response()->json($result);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating transaction status: ' . $e->getMessage(), [
-                'transaction_id' => $transaksi->id,
-                'payment_status' => $paymentStatus,
-                'status_id' => $statusTransaksiId,
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
+            Log::error('Payment status update error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update payment status'
+            ], 500);
         }
-    }
-
-    private function getStatusName($statusId)
-    {
-        $statusNames = [
-            1 => 'Menunggu Pembayaran',
-            2 => 'Pembayaran Lunas',
-            3 => 'Dikemas',
-            4 => 'Dikirim',
-            5 => 'Selesai'
-        ];
-
-        return $statusNames[$statusId] ?? 'Unknown';
-    }
-
-    public function paymentReturn(Request $request)
-    {
-        $orderId = $request->get('order_id');
-        $statusCode = $request->get('status_code');
-        $transactionStatus = $request->get('transaction_status');
-
-        if ($orderId) {
-            $orderParts = explode('-', $orderId);
-            if (count($orderParts) >= 2) {
-                $transactionId = $orderParts[1];
-                $transaksi = Transaksi::find($transactionId);
-
-                if ($transaksi) {
-                    if ($transaksi->payment_status == 'success') {
-                        return redirect()->route('pengepul.transaksi.show', $transactionId)
-                            ->with('success', 'Pembayaran berhasil! Status transaksi telah diperbarui menjadi "Pembayaran Lunas".');
-                    } else {
-                        return redirect()->route('pengepul.transaksi.show', $transactionId)
-                            ->with('info', 'Pembayaran sedang diproses. Status akan diperbarui secara otomatis.');
-                    }
-                }
-            }
-        }
-
-        return redirect()->route('pengepul.transaksi.index')
-            ->with('error', 'Tidak dapat menemukan informasi transaksi.');
     }
 
     public function checkPaymentStatus($id)
     {
         try {
-            $transaksi = Transaksi::with('statusTransaksi')->findOrFail($id);
+            $transaksi = Transaksi::findOrFail($id);
+
+            // Check if this is the authenticated user's transaction
+            $pengepul = Auth::user()->pengepul;
+            if ($transaksi->id_pengepul !== $pengepul->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
 
             return response()->json([
-                'status' => 'success',
+                'success' => true,
                 'payment_status' => $transaksi->payment_status,
                 'transaction_status' => $transaksi->statusTransaksi->nama_status ?? 'Unknown',
-                'transaction_status_id' => $transaksi->id_status_transaksi
+                'order_id' => $transaksi->order_id
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Payment status check error: ' . $e->getMessage());
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'Transaction not found'
-            ], 404);
+                'success' => false,
+                'message' => 'Failed to check payment status'
+            ], 500);
         }
     }
 }
