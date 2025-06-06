@@ -32,7 +32,7 @@
                         <input type="hidden" name="direction" value="prev">
                         <input type="hidden" name="current_date" value="{{ request('date', now()->format('Y-m-d')) }}">
                         <button type="submit" class="bg-white p-2 rounded-lg shadow hover:shadow-lg transition-all">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
                         </button>
@@ -41,7 +41,7 @@
                         <input type="hidden" name="direction" value="next">
                         <input type="hidden" name="current_date" value="{{ request('date', now()->format('Y-m-d')) }}">
                         <button type="submit" class="bg-white p-2 rounded-lg shadow hover:shadow-lg transition-all">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </button>
@@ -53,8 +53,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mr-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-yellow-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient1)" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FCD34D;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                         </svg>
                     </div>
@@ -70,7 +76,7 @@
                                     <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
                                 </svg>
                             @endif
-                            <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($dashboardData['selisih_keuangan'], 0, ',', '.') }}</p>
+                            <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['selisih_keuangan'], 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -78,28 +84,40 @@
 
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mr-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-blue-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient2)" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
                         </svg>
                     </div>
                     <div>
                         <h3 class="text-gray-600 text-sm mb-1">Total Pemasukan</h3>
-                        <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($dashboardData['total_pemasukan'], 0, ',', '.') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['total_pemasukan'], 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex items-center justify-center mr-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-pink-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-red-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient3)" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#EF4444;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
                         </svg>
                     </div>
                     <div>
                         <h3 class="text-gray-600 text-sm mb-1">Total Pengeluaran</h3>
-                        <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($dashboardData['total_pengeluaran'], 0, ',', '.') }}</p>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['total_pengeluaran'], 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -108,8 +126,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl flex items-center justify-center mr-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-orange-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-purple-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient4)" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="gradient4" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                     </div>
@@ -124,8 +148,14 @@
                 <a href="{{ route('owner.profil.show') }}"
                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-[#AFC97E]">
                     <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 bg-[#AFC97E] rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-200 to-lime-200 rounded-lg flex items-center justify-center mr-3 border border-green-300">
+                            <svg class="w-5 h-5" fill="none" stroke="url(#gradient5)" viewBox="0 0 24 24">
+                                <defs>
+                                    <linearGradient id="gradient5" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#84CC16;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                         </div>
@@ -137,8 +167,14 @@
                 <a href="{{ route('owner.penjadwalan.index') }}"
                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-[#E2D686]">
                     <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 bg-[#E2D686] rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 bg-gradient-to-br from-yellow-200 to-amber-200 rounded-lg flex items-center justify-center mr-3 border border-yellow-300">
+                            <svg class="w-5 h-5" fill="none" stroke="url(#gradient6)" viewBox="0 0 24 24">
+                                <defs>
+                                    <linearGradient id="gradient6" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#D97706;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                         </div>
@@ -150,8 +186,14 @@
                 <a href="{{ route('owner.transaksi.index') }}"
                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-[#877B66]">
                     <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 bg-[#877B66] rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 bg-gradient-to-br from-gray-300 to-stone-300 rounded-lg flex items-center justify-center mr-3 border border-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="url(#gradient7)" viewBox="0 0 24 24">
+                                <defs>
+                                    <linearGradient id="gradient7" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#6B7280;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                         </div>

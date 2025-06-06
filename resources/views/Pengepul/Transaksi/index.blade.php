@@ -6,6 +6,7 @@
         return match($status) {
             'Menunggu Pembayaran' => 'warning',
             'Pembayaran Valid' => 'info',
+            'Pembayaran Lunas' => 'lime-500',
             'Packing' => 'primary',
             'Pengiriman' => 'secondary',
             'Selesai' => 'success',
@@ -30,8 +31,9 @@
         <div class="overflow-x-auto bg-white p-6 rounded-xl shadow">
             <table class="min-w-full divide-y divide-gray-300 text-sm text-left text-gray-700">
                 <thead class="bg-[#FFDF64] text-[#877B66]">
-                    <tr>
+                    <tr class="text-center">
                         <th class="px-4 py-2 font-semibold">No</th>
+                        <th class="px-4 py-2 font-semibold">Tanggal Transaksi</th>
                         <th class="px-4 py-2 font-semibold">Nama Stok</th>
                         <th class="px-4 py-2 font-semibold">Kuantitas</th>
                         <th class="px-4 py-2 font-semibold">Total Transaksi</th>
@@ -43,39 +45,58 @@
                 <tbody class="divide-y divide-gray-200">
                     @php $rowIndex = 0; @endphp
                     @forelse ($transaksis as $index => $transaksi)
-                        <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }}">
+                        <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }} text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
+                            <td class="px-4 py-3">{{ $transaksi['tanggal_transaksi']}}</td>
                             <td class="px-4 py-3">{{ $transaksi['nama_stok'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['kuantitas'] }}</td>
                             <td class="px-4 py-3">Rp {{ number_format($transaksi['total_transaksi'], 0, ',', '.') }}</td>
                             <td class="px-4 py-3">{{ $transaksi['metode_pembayaran'] }}</td>
                             <td class="px-4 py-3">
-                                <span class="inline-block px-2 py-1 rounded text-white text-xs bg-{{ getStatusBadgeColor($transaksi['status']) }}">
-                                    {{ $transaksi['status'] }}
-                                </span>
+                                @if($transaksi['status'] == 'Pembayaran Lunas')
+                                    <span class="inline-block px-2 py-1 rounded text-white text-xs bg-lime-500">
+                                        {{ $transaksi['status'] }}
+                                    </span>
+                                @elseif ($transaksi['status'] == 'Dibatalkan')
+                                    <span class="inline-block px-2 py-1 rounded text-white text-xs bg-red-500">
+                                        {{ $transaksi['status'] }}
+                                    </span>
+                                @else
+                                    <span class="inline-block px-2 py-1 rounded text-white text-xs bg-{{ getStatusBadgeColor($transaksi['status']) }}">
+                                        {{ $transaksi['status'] }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-4 py-3">
-                                <button onclick="showTransactionDetail({{ $transaksi['id'] }})" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded shadow text-xs">
-                                    Detail
-                                </button>
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="showTransactionDetail({{ $transaksi['id'] }})" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded shadow text-xs">
+                                        Detail
+                                    </button>
+                                </div>
+                                <div class="flex justify-center gap-2">
+                                    @if($transaksi['status'] == 'Menunggu Pembayaran')
+                                    <a href="{{ route('pengepul.transaksi.payment', $transaksi['id']) }}" class="inline-block bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow text-xs">
+                                        Bayar
+                                    </a>
+                                @endif
+                                </div>
                             </td>
                         </tr>
                         @php $rowIndex++; @endphp
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-4 text-center text-gray-500">Tidak ada data transaksi</td>
+                            <td colspan="8" class="px-4 py-4 text-center text-gray-500">Tidak ada data transaksi</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
             <div class="mt-4">
-                {{ $transaksis->links() }} <!-- Add this line for pagination links -->
+                {{ $transaksis->links() }}
             </div>
         </div>
     </section>
 </main>
 
-<!-- Modal -->
 <div id="transactionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -89,7 +110,6 @@
             </div>
             <div class="p-6">
                 <div id="modalContent">
-                    <!-- Content will be loaded here -->
                     <div class="flex justify-center items-center h-32">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                     </div>
@@ -104,10 +124,8 @@ async function showTransactionDetail(id) {
     const modal = document.getElementById('transactionModal');
     const modalContent = document.getElementById('modalContent');
 
-    // Show modal
     modal.classList.remove('hidden');
 
-    // Show loading spinner
     modalContent.innerHTML = `
         <div class="flex justify-center items-center h-32">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -200,6 +218,8 @@ function getStatusColor(status) {
             return 'yellow-500';
         case 'Pembayaran Valid':
             return 'blue-400';
+        case 'Pembayaran Lunas':
+            return 'lime-500';
         case 'Dikemas':
             return 'blue-600';
         case 'Dikirim':
@@ -237,7 +257,6 @@ function showErrorMessage(message) {
     }, 3000);
 }
 
-// Close modal when clicking outside
 document.getElementById('transactionModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeModal();
