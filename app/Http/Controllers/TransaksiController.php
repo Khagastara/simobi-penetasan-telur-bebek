@@ -55,29 +55,29 @@ class TransaksiController extends Controller
         }
     }
 
-public function index()
-{
-    $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi', 'metodePembayaran'])
-        ->orderBy('tgl_transaksi', 'desc')
-        ->paginate(10);
+    public function index()
+    {
+        $transaksis = Transaksi::with(['pengepul', 'detailTransaksi.stokDistribusi', 'statusTransaksi', 'metodePembayaran'])
+            ->orderBy('tgl_transaksi', 'desc')
+            ->paginate(10);
 
-    $transaksis->getCollection()->transform(function ($transaksi) {
-        $detail = $transaksi->detailTransaksi->first();
-        return [
-            'id' => $transaksi->id,
-            'tgl_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
-            'username' => $transaksi->pengepul->nama,
-            'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
-            'kuantitas' => $detail ? $detail->kuantitas : 0,
-            'total_transaksi' => $detail ? $detail->sub_total : 0,
-            'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
-            'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
-            'snap_token' => $transaksi->snap_token,
-            'payment_status' => $transaksi->payment_status,
-        ];
-    });
-    return view('owner.transaksi.index', compact('transaksis'));
-}
+        $transaksis->getCollection()->transform(function ($transaksi) {
+            $detail = $transaksi->detailTransaksi->first();
+            return [
+                'id' => $transaksi->id,
+                'tgl_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
+                'username' => $transaksi->pengepul->nama,
+                'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
+                'kuantitas' => $detail ? $detail->kuantitas : 0,
+                'total_transaksi' => $detail ? $detail->sub_total : 0,
+                'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
+                'status' => $transaksi->statusTransaksi ? $transaksi->statusTransaksi->nama_status : 'Menunggu Pembayaran',
+                'snap_token' => $transaksi->snap_token,
+                'payment_status' => $transaksi->payment_status,
+            ];
+        });
+        return view('owner.transaksi.index', compact('transaksis'));
+    }
 
     public function show($id)
     {
@@ -100,12 +100,7 @@ public function index()
             'order_id' => $transaksi->order_id,
         ];
 
-        $statusOptions = [
-            'Pembayaran Lunas',
-            'Dikemas',
-            'Dikirim',
-            'Selesai'
-        ];
+        $statusOptions = StatusTransaksi::all()->pluck('nama_status')->toArray();
 
         if (request()->ajax()) {
             return response()->json([
@@ -128,43 +123,81 @@ public function index()
 
     public function updateStatus(Request $request, $id)
     {
-        $transaksi = Transaksi::findOrFail($id);
+        try {
+            $transaksi = Transaksi::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|string|in:Pembayaran Lunas,Dikemas,Dikirim,Selesai',
-        ]);
+            $availableStatuses = StatusTransaksi::pluck('nama_status', 'id')->toArray();
+            $statusNames = array_values($availableStatuses);
 
-        if ($validator->fails()) {
+            $validator = Validator::make($request->all(), [
+                'status' => 'required|string|in:' . implode(',', $statusNames),
+            ]);
+
+            if ($validator->fails()) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Status tidak valid. Status yang tersedia: ' . implode(', ', $statusNames)
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Status tidak valid');
+            }
+
+            $statusId = null;
+            foreach ($availableStatuses as $id => $name) {
+                if ($name === $request->status) {
+                    $statusId = $id;
+                    break;
+                }
+            }
+
+            if (!$statusId) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Status tidak ditemukan'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Status tidak ditemukan');
+            }
+
+            $transaksi->update([
+                'id_status_transaksi' => $statusId
+            ]);
+
+            Log::info('Transaction status updated', [
+                'transaction_id' => $id,
+                'old_status' => $transaksi->statusTransaksi->nama_status ?? 'Unknown',
+                'new_status' => $request->status,
+                'updated_by' => Auth::user()->id
+            ]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Status berhasil diubah',
+                    'new_status' => $request->status
+                ]);
+            }
+
+            return redirect()->route('owner.transaksi.show', $id)->with('success', 'Status berhasil diubah');
+
+        } catch (\Exception $e) {
+            Log::error('Error updating transaction status: ' . $e->getMessage(), [
+                'transaction_id' => $id,
+                'requested_status' => $request->status ?? 'unknown',
+                'trace' => $e->getTraceAsString()
+            ]);
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Status tidak valid'
-                ], 422);
+                    'message' => 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage()
+                ], 500);
             }
-            return redirect()->back()->with('error', 'Status tidak valid');
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengubah status');
         }
-
-        $statusMap = [
-            'Pembayaran Lunas' => 1,
-            'Dikemas' => 2,
-            'Dikirim' => 3,
-            'Selesai' => 4,
-        ];
-
-        $statusId = $statusMap[$request->status];
-
-        DB::table('transaksis')->where('id', $id)->update([
-            'id_status_transaksi' => $statusId
-        ]);
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Status berhasil diubah'
-            ]);
-        }
-
-        return redirect()->route('owner.transaksi.show', $id)->with('success', 'Status berhasil diubah');
     }
 
     public function indexPengepul()
@@ -173,6 +206,7 @@ public function index()
 
         $transaksis = Transaksi::with(['detailTransaksi.stokDistribusi', 'statusTransaksi'])
             ->where('id_pengepul', $pengepul->id)
+            ->orderBy('tgl_transaksi', 'desc')
             ->paginate(10);
 
         $transaksis->getCollection()->transform(function ($transaksi) use ($pengepul) {
@@ -188,6 +222,7 @@ public function index()
                 'nama_stok' => $detail ? $detail->stokDistribusi->nama_stok : 'N/A',
                 'kuantitas' => $detail ? $detail->kuantitas : 0,
                 'total_transaksi' => $detail ? $detail->sub_total : 0,
+                'tanggal_transaksi' => $transaksi->tgl_transaksi->format('d-m-Y H:i:s'),
                 'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode ?? 'N/A',
                 'status' => $latestStatus ? $latestStatus->nama_status : 'Menunggu Pembayaran',
                 'snap_token' => $transaksi->snap_token,
@@ -202,7 +237,7 @@ public function index()
         $pengepul = Auth::user()->pengepul;
 
         $transaksi = Transaksi::with(['detailTransaksi.stokDistribusi', 'metodePembayaran', 'statusTransaksi'])
-            ->where('id_pengepul', $pengepul->id)
+            ->where('tgl_transaksi', $pengepul->id)
             ->findOrFail($id);
 
         $latestStatus = $transaksi->statusTransaksi()
@@ -226,10 +261,7 @@ public function index()
 
         if (request()->ajax()) {
             $statusOptions = [
-                'Pembayaran Lunas',
-                'Dikemas',
-                'Dikirim',
-                'Selesai'
+                'Pembayaran Lunas'
             ];
 
             return response()->json([
@@ -356,8 +388,8 @@ public function index()
             $paymentStatus = 'pending';
 
             if ($this->isCashPayment($metodePembayaran->nama_metode)) {
-                $initialStatus = 'Pembayaran Lunas';
-                $initialStatusId = 2;
+                $initialStatus = 'Menunggu';
+                $initialStatusId = 3;
                 $paymentStatus = 'success';
             }
 
@@ -448,8 +480,9 @@ public function index()
                     ->with('success', 'Transaksi berhasil dibuat. Silakan lanjutkan pembayaran.');
             }
 
-            return redirect()->route('pengepul.transaksi.show', $transaksi->id)
-                ->with('success', 'Transaksi berhasil dibuat.');
+            // For cash payments, redirect to transaction index
+            return redirect()->route('pengepul.transaksi.index')
+                ->with('success', 'Transaksi berhasil dibuat dan sedang menunggu konfirmasi.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -514,43 +547,36 @@ public function index()
             'quantity' => $detail->kuantitas,
         ];
 
-        // REMOVED: Premature payment status update
-        // Don't update status here - let Midtrans callback handle it
-
         return view('pengepul.transaksi.payment', compact('paymentData'));
     }
 
     public function updatePaymentStatus($transaksiId, $paymentStatus = 'success', $statusTransaksiId = null)
     {
         try {
-            // Find the transaction
             $transaksi = Transaksi::findOrFail($transaksiId);
 
-            // Validate payment status
             $validPaymentStatuses = ['pending', 'success', 'failed', 'cancelled'];
             if (!in_array($paymentStatus, $validPaymentStatuses)) {
                 throw new \InvalidArgumentException('Invalid payment status');
             }
 
-            // Set default status_transaksi based on payment status
             if ($statusTransaksiId === null) {
                 switch ($paymentStatus) {
                     case 'success':
-                        $statusTransaksiId = 2; // Pembayaran Lunas
+                        $statusTransaksiId = 2;
                         break;
                     case 'pending':
-                        $statusTransaksiId = 1; // Menunggu Pembayaran
+                        $statusTransaksiId = 1;
                         break;
                     case 'failed':
                     case 'cancelled':
-                        $statusTransaksiId = 1; // Back to Menunggu Pembayaran
+                        $statusTransaksiId = 1;
                         break;
                     default:
                         $statusTransaksiId = 1;
                 }
             }
 
-            // Update the transaction
             $transaksi->update([
                 'payment_status' => $paymentStatus,
                 'id_status_transaksi' => $statusTransaksiId,
@@ -588,12 +614,6 @@ public function index()
         return $this->updatePaymentStatus($transaksiId, 'success', 2);
     }
 
-    /**
-     * Mark payment as failed (convenience method)
-     *
-     * @param int $transaksiId
-     * @return array
-     */
     public function markPaymentAsFailed($transaksiId)
     {
         return $this->updatePaymentStatus($transaksiId, 'failed', 1);
@@ -602,10 +622,7 @@ public function index()
     public function handlePaymentCallback(Request $request)
     {
         try {
-            // Initialize Midtrans
             $this->initializeMidtrans();
-
-            // Get notification from Midtrans
             $notification = new Notification();
 
             $orderId = $notification->order_id;
@@ -618,7 +635,6 @@ public function index()
                 'fraud_status' => $fraudStatus
             ]);
 
-            // Find transaction by order_id
             $transaksi = Transaksi::where('order_id', $orderId)->first();
 
             if (!$transaksi) {
@@ -626,7 +642,6 @@ public function index()
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
             }
 
-            // Determine payment status based on Midtrans response
             $paymentStatus = 'pending';
             $statusTransaksiId = 1;
 
@@ -646,10 +661,9 @@ public function index()
                 $statusTransaksiId = 1;
             } else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
                 $paymentStatus = 'failed';
-                $statusTransaksiId = 1;
+                $statusTransaksiId = 4;
             }
 
-            // Update payment status
             $result = $this->updatePaymentStatus($transaksi->id, $paymentStatus, $statusTransaksiId);
 
             if ($result['success']) {
@@ -698,7 +712,6 @@ public function index()
         try {
             $transaksi = Transaksi::findOrFail($id);
 
-            // Check if this is the authenticated user's transaction
             $pengepul = Auth::user()->pengepul;
             if ($transaksi->id_pengepul !== $pengepul->id) {
                 return response()->json([

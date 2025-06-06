@@ -18,7 +18,7 @@
         <div class="overflow-x-auto bg-white p-6 rounded-xl shadow">
             <table class="min-w-full divide-y divide-gray-300 text-sm text-left text-gray-700">
                 <thead class="bg-[#FFDF64] text-[#877B66]">
-                    <tr>
+                    <tr class="text-center">
                         <th class="px-4 py-2 font-semibold">No</th>
                         <th class="px-4 py-2 font-semibold">Tanggal Rekapitulasi</th>
                         <th class="px-4 py-2 font-semibold">Saldo Pemasukkan</th>
@@ -29,11 +29,11 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @forelse ($keuangans as $index => $keuangan)
-                        <tr>
+                        <tr class="text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
                             <td class="px-4 py-3">{{ $keuangan->tgl_rekapitulasi }}</td>
-                            <td class="px-4 py-3">Rp {{ number_format($keuangan->saldo_pemasukkan, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3">Rp {{ number_format($keuangan->saldo_pengeluaran, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3">Rp{{ number_format($keuangan->saldo_pemasukkan, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3">Rp{{ number_format($keuangan->saldo_pengeluaran, 0, ',', '.') }}</td>
                             <td class="px-4 py-3">{{ $keuangan->total_penjualan }}</td>
                             <td class="px-4 py-3">
                                 <button onclick="openDetailModal({{ $keuangan->id }}, '{{ $keuangan->tgl_rekapitulasi }}', {{ $keuangan->saldo_pemasukkan }}, {{ $keuangan->saldo_pengeluaran }}, {{ $keuangan->total_penjualan }})"
