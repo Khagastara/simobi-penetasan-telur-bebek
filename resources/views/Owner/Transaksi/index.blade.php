@@ -30,13 +30,14 @@
         <div class="overflow-x-auto bg-white p-6 rounded-xl shadow">
             <table class="min-w-full divide-y divide-gray-300 text-sm text-left text-gray-700">
                 <thead class="bg-[#FFDF64] text-[#877B66]">
-                    <tr>
+                    <tr class="text-center">
                         <th class="px-4 py-2 font-semibold">No</th>
                         <th class="px-4 py-2 font-semibold">Tanggal Transaksi</th>
                         <th class="px-4 py-2 font-semibold">Username</th>
                         <th class="px-4 py-2 font-semibold">Nama Stok</th>
                         <th class="px-4 py-2 font-semibold">Kuantitas</th>
                         <th class="px-4 py-2 font-semibold">Total Transaksi</th>
+                        <th class="px-4 py-2 font-semibold">Metode Pembayaran</th>
                         <th class="px-4 py-2 font-semibold">Status</th>
                         <th class="px-4 py-2 font-semibold">Aksi</th>
                     </tr>
@@ -44,13 +45,14 @@
                 <tbody class="divide-y divide-gray-200">
                     @php $rowIndex = 0; @endphp
                     @forelse ($transaksis as $index => $transaksi)
-                        <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }}">
+                        <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }} text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
                             <td class="px-4 py-3">{{ $transaksi['tgl_transaksi'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['username'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['nama_stok'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['kuantitas'] }}</td>
                             <td class="px-4 py-3">Rp {{ number_format($transaksi['total_transaksi'], 0, ',', '.') }}</td>
+                            <td class="px-4 py-3">{{ $transaksi['metode_pembayaran'] }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-block px-2 py-1 rounded text-white text-xs bg-{{ getStatusBadgeTailwindColor($transaksi['status']) }}">
                                     {{ $transaksi['status'] }}

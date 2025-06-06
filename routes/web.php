@@ -112,10 +112,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('p/transaksi/create/{stokId}', [TransaksiController::class, 'create'])->name('pengepul.transaksi.create');
     Route::post('p/transaksi/store/{stokId}', [TransaksiController::class, 'store'])->name('pengepul.transaksi.store');
     Route::get('/pengepul/transaksi/{id}/payment', [TransaksiController::class, 'payment'])->name('pengepul.transaksi.payment');
-});
 
-Route::post('/payment/callback', [TransaksiController::class, 'handlePaymentCallback'])->name('payment.callback');
-Route::get('/payment/return', [TransaksiController::class, 'handlePaymentReturn'])->name('payment.return');
-Route::get('/payment/status/{id}', [TransaksiController::class, 'checkPaymentStatus'])->name('payment.status');
+    Route::post('/payment/callback', [TransaksiController::class, 'handleCallback'])->name('payment.callback');
+    Route::get('/payment/return', [TransaksiController::class, 'handlePaymentReturn'])->name('payment.return');
+    Route::get('/payment/status/{id}', [TransaksiController::class, 'checkPaymentStatus'])->name('payment.status');
+});
 
 Route::post('/logout', [OwnerProfilController::class, 'logout'])->name('logout');

@@ -134,7 +134,7 @@ class StokDistribusiController extends Controller
             ]);
         }
 
-        return redirect()->route('owner.stok.show', $stok->id)->with('success', 'data stok distribusi berhasil diubah');
+        return redirect()->route('owner.stok.index', $stok->id)->with('success', 'data stok distribusi berhasil diubah');
     }
 
     public function indexPengepul()

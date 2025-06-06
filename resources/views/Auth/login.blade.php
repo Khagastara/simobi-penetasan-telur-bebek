@@ -20,7 +20,7 @@
                         type="text"
                         id="username"
                         name="username"
-                        placeholder="Masukkan Email"
+                        placeholder="Masukkan Username"
                         class="w-full px-4 py-2 border border-[#74A620] rounded-xl focus:outline-none focus:ring-0 focus:border-[#E2D686] focus:shadow-[0_0_0_3px_rgba(226,214,134,0.4)] transition duration-200"
                         value="{{ old('username') }}"
                         required
