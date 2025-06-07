@@ -26,22 +26,22 @@
         <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div>
         <nav class="space-y-3">
             <a href="{{ route('owner.dashboard') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.dashboard') ? 'active-menu' : '' }}">
-                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                <img src="{{ asset('images/icons/iconDashboard.png') }}" alt="Stok Distribusi" class="inline-block w-5 h-5 mr-2 align-text-bottom" /> Dashboard
             </a>
             <a href="{{ route('owner.penjadwalan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.penjadwalan*') ? 'active-menu' : '' }}">
-                <i class="fas fa-egg mr-2"></i> Penjadwalan
+                <img src="{{ asset('images/icons/iconPembiakan.png') }}" alt="Stok Distribusi" class="inline-block w-5 h-5 mr-2 align-text-bottom" /> Penjadwalan
             </a>
             <a href="{{ route('owner.stok.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.stok*') ? 'active-menu' : '' }}">
-                <i class="fas fa-warehouse mr-2"></i> Stok Distribusi
+                <img src="{{ asset('images/icons/iconStok.png') }}" alt="Stok Distribusi" class="inline-block w-5 h-5 mr-2 align-text-bottom" /> Stok Distribusi
             </a>
             <a href="{{ route('owner.transaksi.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.transaksi*') ? 'active-menu' : '' }}">
-                <i class="fas fa-exchange-alt mr-2"></i> Transaksi
+                <img src="{{ asset('images/icons/iconTransaksi.png') }}" alt="Stok Distribusi" class="inline-block w-5 h-5 mr-2 align-text-bottom" /> Transaksi
             </a>
             <a href="{{ route('owner.keuangan.index') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.keuangan*') ? 'active-menu' : '' }}">
-                <i class="fas fa-money-bill-wave mr-2"></i> Keuangan
+                <img src="{{ asset('images/icons/iconKeuangan.png') }}" alt="Stok Distribusi" class="inline-block w-5 h-5 mr-2 align-text-bottom" />Keuangan
             </a>
             <a href="{{ route('owner.profil.show') }}" class="block px-4 py-2 rounded hover:text-black {{ request()->routeIs('owner.profil*') ? 'active-menu' : '' }}">
-                <i class="fas fa-user-circle mr-2"></i> Profil
+                <img src="{{ asset('images/icons/iconProfil.png') }}" alt="Stok Distribusi" class="inline-block w-5 h-5 mr-2 align-text-bottom" />Profil
             </a>
         </nav>
     </div>
