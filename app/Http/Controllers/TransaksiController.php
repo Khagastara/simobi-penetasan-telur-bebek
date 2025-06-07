@@ -387,9 +387,10 @@ class TransaksiController extends Controller
             $initialStatusId = 1;
             $paymentStatus = 'pending';
 
+            // Cek apakah pembayaran tunai
             if ($this->isCashPayment($metodePembayaran->nama_metode)) {
                 $initialStatus = 'Menunggu';
-                $initialStatusId = 3;
+                $initialStatusId = 1;
                 $paymentStatus = 'success';
             }
 
@@ -400,27 +401,20 @@ class TransaksiController extends Controller
 
             $stokDistribusi->decrement('jumlah_stok', $request->kuantitas);
 
-            $tanggalRekapitulasi = now()->toDateString();
+            // UNTUK PEMBAYARAN TUNAI - Langsung update/create Keuangan
+            if ($this->isCashPayment($metodePembayaran->nama_metode)) {
+                $this->updateOrCreateKeuangan($transaksi, $subTotal, $request->kuantitas);
 
-            $keuangan = Keuangan::where('tgl_rekapitulasi', $tanggalRekapitulasi)->first();
-
-            if ($keuangan) {
-                $keuangan->update([
-                    'saldo_pemasukkan' => $keuangan->saldo_pemasukkan + $subTotal,
-                    'total_penjualan' => $keuangan->total_penjualan + $request->kuantitas,
-                ]);
-            } else {
-                $keuangan = Keuangan::create([
-                    'tgl_rekapitulasi' => $tanggalRekapitulasi,
-                    'saldo_pengeluaran' => 0,
-                    'saldo_pemasukkan' => $subTotal,
-                    'total_penjualan' => $request->kuantitas,
-                    'id_transaksi' => $transaksi->id,
+                Log::info('Keuangan updated for cash payment', [
+                    'transaksi_id' => $transaksi->id,
+                    'sub_total' => $subTotal,
+                    'kuantitas' => $request->kuantitas,
+                    'metode_pembayaran' => $metodePembayaran->nama_metode
                 ]);
             }
+            // UNTUK PEMBAYARAN DIGITAL - Keuangan akan di-update di handlePaymentCallback setelah pembayaran berhasil
 
-            $transaksi->update(['id_keuangan' => $keuangan->id]);
-
+            // UNTUK PEMBAYARAN DIGITAL - Setup Midtrans
             if ($this->isDigitalPayment($metodePembayaran->nama_metode)) {
                 try {
                     $this->validateMidtransConfiguration();
@@ -497,6 +491,121 @@ class TransaksiController extends Controller
         }
     }
 
+    private function updateOrCreateKeuangan($transaksi, $subTotal, $kuantitas)
+    {
+        try {
+            // Pastikan data input valid
+            if (!$transaksi || !is_numeric($subTotal) || !is_numeric($kuantitas)) {
+                throw new \Exception('Invalid input data: transaksi, subTotal, or kuantitas is invalid');
+            }
+
+            // Konversi ke tipe data yang benar
+            $subTotal = (float) $subTotal;
+            $kuantitas = (int) $kuantitas;
+
+            $tanggalRekapitulasi = now()->toDateString();
+
+            Log::info('Starting updateOrCreateKeuangan', [
+                'transaksi_id' => $transaksi->id,
+                'sub_total' => $subTotal,
+                'kuantitas' => $kuantitas,
+                'tanggal_rekapitulasi' => $tanggalRekapitulasi
+            ]);
+
+            // Cek apakah sudah ada record Keuangan untuk tanggal ini
+            $keuangan = Keuangan::where('tgl_rekapitulasi', $tanggalRekapitulasi)->first();
+
+            if ($keuangan) {
+                // Update existing record
+                Log::info('Updating existing Keuangan record', [
+                    'keuangan_id' => $keuangan->id,
+                    'current_saldo_pemasukkan' => $keuangan->saldo_pemasukkan,
+                    'current_total_penjualan' => $keuangan->total_penjualan,
+                    'adding_sub_total' => $subTotal,
+                    'adding_kuantitas' => $kuantitas
+                ]);
+
+                $newSaldoPemasukkan = $keuangan->saldo_pemasukkan + $subTotal;
+                $newTotalPenjualan = $keuangan->total_penjualan + $kuantitas;
+
+                $updated = $keuangan->update([
+                    'saldo_pemasukkan' => $newSaldoPemasukkan,
+                    'total_penjualan' => $newTotalPenjualan,
+                ]);
+
+                if (!$updated) {
+                    throw new \Exception('Failed to update existing Keuangan record');
+                }
+
+                Log::info('Successfully updated existing Keuangan', [
+                    'keuangan_id' => $keuangan->id,
+                    'new_saldo_pemasukkan' => $newSaldoPemasukkan,
+                    'new_total_penjualan' => $newTotalPenjualan
+                ]);
+
+            } else {
+                // Create new record
+                Log::info('Creating new Keuangan record', [
+                    'tanggal_rekapitulasi' => $tanggalRekapitulasi,
+                    'saldo_pemasukkan' => $subTotal,
+                    'total_penjualan' => $kuantitas
+                ]);
+
+                $keuangan = Keuangan::create([
+                    'tgl_rekapitulasi' => $tanggalRekapitulasi,
+                    'saldo_pengeluaran' => 0,
+                    'saldo_pemasukkan' => $subTotal,
+                    'total_penjualan' => $kuantitas,
+                    'id_transaksi' => $transaksi->id,
+                ]);
+
+                if (!$keuangan) {
+                    throw new \Exception('Failed to create new Keuangan record');
+                }
+
+                Log::info('Successfully created new Keuangan', [
+                    'keuangan_id' => $keuangan->id,
+                    'saldo_pemasukkan' => $keuangan->saldo_pemasukkan,
+                    'total_penjualan' => $keuangan->total_penjualan
+                ]);
+            }
+
+            // Refresh data untuk memastikan data tersimpan
+            $keuangan = $keuangan->fresh();
+
+            // Update id_keuangan di transaksi jika belum ada
+            if (!$transaksi->id_keuangan) {
+                $transaksi->update(['id_keuangan' => $keuangan->id]);
+                Log::info('Updated transaksi with keuangan_id', [
+                    'transaksi_id' => $transaksi->id,
+                    'keuangan_id' => $keuangan->id
+                ]);
+            }
+
+            // Verify final data
+            $finalKeuangan = Keuangan::find($keuangan->id);
+            Log::info('Final Keuangan verification', [
+                'keuangan_id' => $finalKeuangan->id,
+                'final_saldo_pemasukkan' => $finalKeuangan->saldo_pemasukkan,
+                'final_total_penjualan' => $finalKeuangan->total_penjualan,
+                'tgl_rekapitulasi' => $finalKeuangan->tgl_rekapitulasi
+            ]);
+
+            return $keuangan;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to updateOrCreateKeuangan', [
+                'transaksi_id' => $transaksi ? $transaksi->id : 'null',
+                'sub_total' => $subTotal ?? 'null',
+                'kuantitas' => $kuantitas ?? 'null',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e; // Re-throw untuk handling di level atas
+        }
+    }
+
     private function getMidtransErrorMessage(\Exception $e)
     {
         if (strpos($e->getMessage(), 'unauthorized') !== false ||
@@ -553,11 +662,27 @@ class TransaksiController extends Controller
     public function updatePaymentStatus($transaksiId, $paymentStatus = 'success', $statusTransaksiId = null)
     {
         try {
-            $transaksi = Transaksi::findOrFail($transaksiId);
+            $transaksi = Transaksi::with(['detailTransaksi', 'metodePembayaran'])
+                ->findOrFail($transaksiId);
 
             $validPaymentStatuses = ['pending', 'success', 'failed', 'cancelled'];
             if (!in_array($paymentStatus, $validPaymentStatuses)) {
                 throw new \InvalidArgumentException('Invalid payment status');
+            }
+
+            // Skip jika status sudah sama dengan yang diminta
+            if ($transaksi->payment_status === $paymentStatus) {
+                Log::info('Payment status already set', [
+                    'transaksi_id' => $transaksiId,
+                    'current_status' => $transaksi->payment_status,
+                    'requested_status' => $paymentStatus
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => 'Payment status already set',
+                    'transaksi' => $transaksi
+                ];
             }
 
             if ($statusTransaksiId === null) {
@@ -577,28 +702,89 @@ class TransaksiController extends Controller
                 }
             }
 
-            $transaksi->update([
-                'payment_status' => $paymentStatus,
-                'id_status_transaksi' => $statusTransaksiId,
-            ]);
+            DB::beginTransaction();
 
-            Log::info('Payment status updated successfully', [
-                'transaksi_id' => $transaksiId,
-                'payment_status' => $paymentStatus,
-                'status_transaksi_id' => $statusTransaksiId
-            ]);
+            try {
+                $transaksi->update([
+                    'payment_status' => $paymentStatus,
+                    'id_status_transaksi' => $statusTransaksiId,
+                ]);
 
-            return [
-                'success' => true,
-                'message' => 'Payment status updated successfully',
-                'transaksi' => $transaksi->fresh()
-            ];
+                // Update keuangan hanya jika pembayaran berhasil DAN metode pembayaran adalah digital
+                if ($paymentStatus === 'success' && $this->isDigitalPayment($transaksi->metodePembayaran->nama_metode)) {
+                    $detail = $transaksi->detailTransaksi->first();
+
+                    if ($detail) {
+                        try {
+                            $this->updateOrCreateKeuangan($transaksi, $detail->sub_total, $detail->kuantitas);
+
+                            Log::info('Keuangan berhasil diupdate untuk pembayaran digital', [
+                                'transaksi_id' => $transaksiId,
+                                'sub_total' => $detail->sub_total,
+                                'kuantitas' => $detail->kuantitas,
+                                'metode_pembayaran' => $transaksi->metodePembayaran->nama_metode,
+                                'payment_status' => $paymentStatus
+                            ]);
+                        } catch (\Exception $keuanganError) {
+                            Log::error('Error updating keuangan after payment success', [
+                                'transaksi_id' => $transaksiId,
+                                'error' => $keuanganError->getMessage(),
+                                'trace' => $keuanganError->getTraceAsString()
+                            ]);
+
+                            // Jangan rollback payment update, hanya log error
+                            // Keuangan bisa diupdate manual atau melalui proses terpisah
+                        }
+                    } else {
+                        Log::warning('Detail transaksi tidak ditemukan untuk update keuangan', [
+                            'transaksi_id' => $transaksiId
+                        ]);
+                    }
+                }
+
+                // Kembalikan stok jika pembayaran gagal atau dibatalkan
+                if (in_array($paymentStatus, ['failed', 'cancelled'])) {
+                    $detail = $transaksi->detailTransaksi->first();
+                    if ($detail) {
+                        $stokDistribusi = StokDistribusi::find($detail->id_stok_distribusi);
+                        if ($stokDistribusi) {
+                            $stokDistribusi->increment('jumlah_stok', $detail->kuantitas);
+                            Log::info('Stok dikembalikan karena pembayaran gagal/dibatalkan', [
+                                'transaksi_id' => $transaksiId,
+                                'stok_id' => $stokDistribusi->id,
+                                'kuantitas' => $detail->kuantitas,
+                                'payment_status' => $paymentStatus
+                            ]);
+                        }
+                    }
+                }
+
+                DB::commit();
+
+                Log::info('Payment status updated successfully', [
+                    'transaksi_id' => $transaksiId,
+                    'old_payment_status' => $transaksi->getOriginal('payment_status'),
+                    'new_payment_status' => $paymentStatus,
+                    'status_transaksi_id' => $statusTransaksiId
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => 'Payment status updated successfully',
+                    'transaksi' => $transaksi->fresh()
+                ];
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
 
         } catch (\Exception $e) {
             Log::error('Failed to update payment status', [
                 'transaksi_id' => $transaksiId,
                 'payment_status' => $paymentStatus,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return [
@@ -632,7 +818,8 @@ class TransaksiController extends Controller
             Log::info('Payment callback received', [
                 'order_id' => $orderId,
                 'transaction_status' => $transactionStatus,
-                'fraud_status' => $fraudStatus
+                'fraud_status' => $fraudStatus,
+                'notification_data' => $request->all()
             ]);
 
             $transaksi = Transaksi::where('order_id', $orderId)->first();
@@ -642,6 +829,16 @@ class TransaksiController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
             }
 
+            // Skip jika transaksi sudah sukses
+            if ($transaksi->payment_status === 'success') {
+                Log::info('Transaction already processed as success', [
+                    'transaksi_id' => $transaksi->id,
+                    'order_id' => $orderId
+                ]);
+                return response()->json(['status' => 'success', 'message' => 'Transaction already processed']);
+            }
+
+            // Tentukan status pembayaran berdasarkan response Midtrans
             $paymentStatus = 'pending';
             $statusTransaksiId = 1;
 
@@ -653,28 +850,46 @@ class TransaksiController extends Controller
                     $paymentStatus = 'success';
                     $statusTransaksiId = 2;
                 }
-            } else if ($transactionStatus == 'settlement') {
+            }
+            else if ($transactionStatus == 'settlement') {
                 $paymentStatus = 'success';
                 $statusTransaksiId = 2;
-            } else if ($transactionStatus == 'pending') {
+            }
+            else if ($transactionStatus == 'pending') {
                 $paymentStatus = 'pending';
                 $statusTransaksiId = 1;
-            } else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+            }
+            else if (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
                 $paymentStatus = 'failed';
                 $statusTransaksiId = 4;
             }
 
+            // Gunakan method updatePaymentStatus yang sudah diperbaiki
             $result = $this->updatePaymentStatus($transaksi->id, $paymentStatus, $statusTransaksiId);
 
             if ($result['success']) {
-                return response()->json(['status' => 'success', 'message' => 'Payment status updated']);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Payment processed successfully',
+                    'payment_status' => $paymentStatus
+                ]);
             } else {
-                return response()->json(['status' => 'error', 'message' => $result['message']], 500);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $result['message']
+                ], 500);
             }
 
         } catch (\Exception $e) {
-            Log::error('Payment callback error: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Callback processing failed'], 500);
+            Log::error('Payment callback processing failed: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Callback processing failed: ' . $e->getMessage()
+            ], 500);
         }
     }
 
