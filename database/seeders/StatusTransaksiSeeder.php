@@ -25,11 +25,6 @@ class StatusTransaksiSeeder extends Seeder
 
         StatusTransaksi::insert([
             'id' => 3,
-            'nama_status' => 'Menunggu',
-        ]);
-
-        StatusTransaksi::insert([
-            'id' => 4,
             'nama_status' => 'Dibatalkan',
         ]);
     }
