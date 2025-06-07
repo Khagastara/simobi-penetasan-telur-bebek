@@ -13,12 +13,80 @@ use Carbon\Carbon;
 
 class PenjadwalanKegiatanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $owner = Auth::user()->owner;
-        $penjadwalanKegiatans = $owner->penjadwalanKegiatan()->with('detailPenjadwalan.statusKegiatan')->get();
+
+        // Get filter parameters
+        $filterMonth = $request->get('month');
+        $filterYear = $request->get('year');
+
+        // Build query with filters
+        $query = $owner->penjadwalanKegiatan()
+            ->with('detailPenjadwalan.statusKegiatan')
+            ->orderBy('tgl_penjadwalan', 'desc');
+
+        // Apply month filter
+        if ($filterMonth) {
+            $query->whereMonth('tgl_penjadwalan', $filterMonth);
+        }
+
+        // Apply year filter
+        if ($filterYear) {
+            $query->whereYear('tgl_penjadwalan', $filterYear);
+        }
+
+        $penjadwalanKegiatans = $query->paginate(10);
+
         $statusKegiatan = StatusKegiatan::all();
-        return view('owner.penjadwalan.index', compact('penjadwalanKegiatans', 'statusKegiatan'));
+
+        $this->updateLateActivities($penjadwalanKegiatans);
+
+        // Get available years and months for filter dropdowns
+        $availableYears = $owner->penjadwalanKegiatan()
+            ->selectRaw('YEAR(tgl_penjadwalan) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        $availableMonths = collect([
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ]);
+
+        return view('owner.penjadwalan.index', compact(
+            'penjadwalanKegiatans',
+            'statusKegiatan',
+            'availableYears',
+            'availableMonths',
+            'filterMonth',
+            'filterYear'
+        ));
+    }
+
+    private function updateLateActivities($penjadwalanKegiatans)
+    {
+        $gagalStatusId = StatusKegiatan::where('nama_status_kgtn', 'Gagal')->first()->id;
+        $currentDateTime = Carbon::now();
+
+        foreach ($penjadwalanKegiatans as $penjadwalan) {
+            foreach ($penjadwalan->detailPenjadwalan as $detail) {
+                if ($detail->statusKegiatan->nama_status_kgtn === 'To Do') {
+                    $scheduledDateTime = Carbon::parse($penjadwalan->tgl_penjadwalan->format('Y-m-d') . ' ' . $detail->waktu_kegiatan);
+                    $isLate = $currentDateTime->diffInMinutes($scheduledDateTime, false) < -30;
+
+                    if ($isLate) {
+                        $detail->update(['id_status_kegiatan' => $gagalStatusId]);
+                        Log::info('Auto-updated late activity to Gagal:', [
+                            'detail_id' => $detail->id,
+                            'scheduled_time' => $scheduledDateTime->format('Y-m-d H:i'),
+                            'current_time' => $currentDateTime->format('Y-m-d H:i')
+                        ]);
+                    }
+                }
+            }
+        }
     }
 
     public function create()
@@ -96,12 +164,47 @@ class PenjadwalanKegiatanController extends Controller
     {
         $penjadwalanKegiatan = PenjadwalanKegiatan::with('detailPenjadwalan')->findOrFail($id);
 
-        // Check if the current user is authorized to view this
         if ($penjadwalanKegiatan->id_owner != Auth::user()->owner->id) {
             abort(403, 'Unauthorized action.');
         }
 
         return view('owner.penjadwalan.show', compact('penjadwalanKegiatan'));
+    }
+
+    public function duration(Request $request, $id)
+    {
+        $detailPenjadwalan = DetailPenjadwalan::findOrFail($id);
+
+        if ($request->status === 'Selesai') {
+            $detailPenjadwalan->update(['id_status_kegiatan' => StatusKegiatan::where('nama_status_kgtn', 'Selesai')->first()->id]);
+        } elseif ($request->status === 'Gagal') {
+            $detailPenjadwalan->update(['id_status_kegiatan' => StatusKegiatan::where('nama_status_kgtn', 'Gagal')->first()->id]);
+        }
+
+        return redirect()->route('owner.penjadwalan.index')->with('success', 'Status kegiatan berhasil diperbarui.');
+    }
+
+    public function delete($id)
+    {
+        $penjadwalanKegiatan = PenjadwalanKegiatan::findOrFail($id);
+
+        if ($penjadwalanKegiatan->id_owner != Auth::user()->owner->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $penjadwalanKegiatan->detailPenjadwalan()->delete();
+
+            $penjadwalanKegiatan->delete();
+
+            return redirect()->route('owner.penjadwalan.index')->with('success', 'Jadwal berhasil dihapus');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete penjadwalan: ' . $e->getMessage(), [
+                'id' => $id
+            ]);
+
+            return redirect()->route('owner.penjadwalan.index')->with('error', 'Gagal menghapus jadwal');
+        }
     }
 
     public function sendNotification(PenjadwalanKegiatan $penjadwalanKegiatan, DetailPenjadwalan $detailPenjadwalan)
@@ -135,7 +238,6 @@ class PenjadwalanKegiatanController extends Controller
                 'owner_id' => $penjadwalanKegiatan->id_owner
             ]);
 
-            // Return response in a format that works for both HTTP and CLI contexts
             if (request()->expectsJson()) {
                 return response()->json($response);
             }
@@ -151,7 +253,7 @@ class PenjadwalanKegiatanController extends Controller
                 return response()->json(['error' => 'Failed to send notification'], 500);
             }
 
-            throw $e; // Rethrow for CLI handling
+            throw $e;
         }
     }
 }

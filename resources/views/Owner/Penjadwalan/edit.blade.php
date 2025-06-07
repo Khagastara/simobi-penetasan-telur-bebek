@@ -2,18 +2,6 @@
 
 @section('content')
     <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-        <!-- Top Banner -->
-        <header class="topbar p-6 shadow-md">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#877B66]">Edit Jadwal Pembiakan</h1>
-                    <p class="text-sm text-gray-700">Ubah detail jadwal penetasan telur bebek</p>
-                </div>
-                <div class="text-right text-gray-800">
-                    <p class="font-semibold">Halo, <span class="italic">{{ Auth::user()->owner->nama }}</span></p>
-                </div>
-            </div>
-        </header>
         <section class="p-8">
             @if ($errors->any())
                 <div class="bg-red-500 text-white px-4 py-2 rounded-lg shadow mb-4">

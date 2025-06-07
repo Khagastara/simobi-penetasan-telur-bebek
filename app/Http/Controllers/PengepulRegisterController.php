@@ -17,7 +17,6 @@ class PengepulRegisterController extends Controller
 
     public function register(Request $request)
     {
-        // Validate the request
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'no_hp' => 'required|string|max:15|unique:pengepuls,no_hp',
@@ -30,14 +29,12 @@ class PengepulRegisterController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // Create the Akun
         $akun = Akun::create([
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Create the Pengepul
         Pengepul::create([
             'nama' => $request->nama,
             'no_hp' => $request->no_hp,

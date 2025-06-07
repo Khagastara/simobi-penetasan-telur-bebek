@@ -14,7 +14,7 @@
                         <ul class="dropdown-menu" aria-labelledby="statusDropdown">
                             @foreach($statusOptions as $status)
                                 <li>
-                                    <form action="{{ route('transaksi.update-status', $transaksiDetail['id']) }}" method="POST">
+                                    <form action="{{ route('owner.transaksi.update-status', $transaksiDetail['id']) }}" method="POST">
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="status" value="{{ $status }}">

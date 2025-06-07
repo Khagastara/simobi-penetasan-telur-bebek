@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('status_transaksis', function (Blueprint $table) {
             $table->id();
             $table->string('nama_status');
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('status_transaksis');

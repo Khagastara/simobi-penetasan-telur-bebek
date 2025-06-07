@@ -2,7 +2,6 @@
 
 @section('content')
 <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
-    <!-- Topbar -->
     <header class="topbar p-6 shadow-md">
         <div class="flex items-center justify-between">
             <div>
@@ -15,7 +14,6 @@
         </div>
     </header>
 
-    <!-- Content -->
     <section class="p-8">
         @if (session('error'))
             <div class="bg-red-500 text-white px-4 py-2 rounded-lg shadow mb-4">
@@ -38,7 +36,7 @@
                 <div class="mb-4">
                     <label for="gambar_stok" class="block font-semibold text-[#877B66] mb-1">Gambar Stok</label>
                     <div class="mb-2">
-                        <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
+                        <img src="{{ asset($stok->gambar_stok) }}"
                             alt="{{ $stok->nama_stok }}"
                             class="rounded-lg max-h-[150px]">
                     </div>
@@ -70,9 +68,8 @@
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring focus:ring-[#AFC97E]">{{ old('deskripsi_stok', $stok->deskripsi_stok) }}</textarea>
                 </div>
 
-                <!-- Tombol bawah -->
                 <div class="flex justify-between">
-                    <a href="{{ route('owner.stok.show', $stok->id) }}"
+                    <a href="{{ route('owner.stok.index', $stok->id) }}"
                         class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg shadow transition">
                         <i class="fas fa-arrow-left mr-1"></i> Kembali
                     </a>

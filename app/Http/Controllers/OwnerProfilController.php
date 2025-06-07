@@ -27,7 +27,6 @@ class OwnerProfilController extends Controller
     {
         $owner = Auth::user()->owner;
 
-        // Validate the request
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'no_hp' => 'required|string|max:15|unique:owners,no_hp,' . $owner->id . ',id',

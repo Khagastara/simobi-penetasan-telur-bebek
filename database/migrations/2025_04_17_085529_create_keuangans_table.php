@@ -17,9 +17,6 @@ return new class extends Migration
             $table->integer('saldo_pengeluaran');
             $table->date('tgl_rekapitulasi')->default(now());;
             $table->integer('total_penjualan');
-            $table->unsignedBigInteger('id_transaksi');
-
-            $table->foreign('id_transaksi')->on('transaksis')->references('id');
         });
     }
 

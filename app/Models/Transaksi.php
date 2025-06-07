@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use app\Models\Keuangan;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -19,30 +20,18 @@ class Transaksi extends Model
     public $timestamps = false;
     protected $fillable = [
         'tgl_transaksi',
-        'id_status_transaksi',
+        'snap_token',
+        'order_id',
+        'payment_status',
         'id_pengepul',
+        'id_status_transaksi',
         'id_metode_pembayaran',
+        'id_keuangan'
     ];
 
     protected $casts = [
         'tgl_transaksi' => 'datetime',
     ];
-
-    protected static function booted()
-    {
-        static::created(function ($transaksi) {
-            $saldoPemasukkan = $transaksi->detailTransaksi->sum('sub_total');
-
-            // Buat data keuangan baru
-            \App\Models\Keuangan::create([
-                'tgl_rekapitulasi' => $transaksi->tgl_transaksi->format('Y-m-d'),
-                'saldo_pengeluaran' => 0,
-                'saldo_pemasukkan' => $saldoPemasukkan,
-                'total_penjualan' => $transaksi->detailTransaksi->sum('kuantitas'),
-                'id_transaksi' => $transaksi->id,
-            ]);
-        });
-    }
 
     public function pengepul(): BelongsTo
     {
@@ -64,8 +53,9 @@ class Transaksi extends Model
         return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id');
     }
 
-    public function keuangan(): HasMany
+    public function keuangan(): BelongsTo
     {
-        return $this->hasmany(Keuangan::class, 'id_transaksi', 'id');
+        return $this->belongsTo(Keuangan::class, 'id_keuangan', 'id');
+
     }
 }

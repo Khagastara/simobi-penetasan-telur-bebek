@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pengepul')
 
 @section('content')
 <div class="container">
@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Detail Transaksi #{{ $transaksiDetail['id'] }}</span>
-                    <a href="{{ route('transaksi.pengepul.index') }}" class="btn btn-sm btn-secondary">Kembali</a>
+                    <a href="{{ route('pengepul.transaksi.index') }}" class="btn btn-sm btn-secondary">Kembali</a>
                 </div>
 
                 <div class="card-body">

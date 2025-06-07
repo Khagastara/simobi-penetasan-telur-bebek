@@ -6,135 +6,209 @@ use App\Models\Keuangan;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class KeuanganController extends Controller
 {
-    /**
-     * Display a listing of the keuangan data.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $keuangans = Keuangan::all();
+        // Ambil tanggal saat ini atau dari request
+        $currentDate = $request->get('current_date', now()->format('Y-m-d'));
+        $date = Carbon::parse($currentDate);
 
-        // Kelompokkan data berdasarkan tanggal
-        $groupedKeuangans = $keuangans->groupBy('tgl_rekapitulasi')->map(function ($items) {
-            return [
-                'saldo_pemasukkan' => $items->sum('saldo_pemasukkan'),
-                'saldo_pengeluaran' => $items->sum('saldo_pengeluaran'),
-            ];
-        });
+        // Tentukan periode mingguan saat ini (Senin sampai Minggu)
+        $startOfWeek = $date->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek = $date->copy()->endOfWeek(Carbon::SUNDAY);
+
+        // Handle navigasi periode (prev/next)
+        if ($request->get('direction') === 'prev') {
+            $startOfWeek = $startOfWeek->subWeek();
+            $endOfWeek = $endOfWeek->subWeek();
+        } elseif ($request->get('direction') === 'next') {
+            $startOfWeek = $startOfWeek->addWeek();
+            $endOfWeek = $endOfWeek->addWeek();
+        }
+
+        // Format periode untuk tampilan
+        $periodeStart = $startOfWeek->format('d M Y');
+        $periodeEnd = $endOfWeek->format('d M Y');
+
+        // Tanggal untuk navigasi (tanggal tengah minggu untuk konsistensi)
+        $navigationDate = $startOfWeek->copy()->addDays(3)->format('Y-m-d');
+
+        // Ambil data keuangan untuk periode mingguan
+        $keuangans = Keuangan::whereBetween('tgl_rekapitulasi', [
+            $startOfWeek->format('Y-m-d'),
+            $endOfWeek->format('Y-m-d')
+        ])->orderBy('tgl_rekapitulasi', 'asc')->get();
 
         // Siapkan data untuk grafik
-        $keuanganLabels = $groupedKeuangans->keys()->toArray(); // Tanggal sebagai label sumbu X
-        $keuanganPemasukkan = $groupedKeuangans->pluck('saldo_pemasukkan')->toArray(); // Total saldo pemasukkan
-        $keuanganPengeluaran = $groupedKeuangans->pluck('saldo_pengeluaran')->toArray(); // Total saldo pengeluaran
+        $keuanganLabels = [];
+        $keuanganPemasukkan = [];
+        $keuanganPengeluaran = [];
 
-        return view('owner.keuangan.index', compact('keuangans', 'keuanganLabels', 'keuanganPemasukkan', 'keuanganPengeluaran'));
-    }
+        // Generate data untuk setiap hari dalam minggu
+        for ($i = 0; $i < 7; $i++) {
+            $currentDay = $startOfWeek->copy()->addDays($i);
+            $dayData = $keuangans->where('tgl_rekapitulasi', $currentDay->format('Y-m-d'))->first();
 
-    /**
-     * Show the form for creating a new keuangan entry.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function create()
-    {
-        $transaksis = Transaksi::select('id', 'tgl_transaksi')
+            $keuanganLabels[] = $currentDay->format('d/m');
+            $keuanganPemasukkan[] = $dayData ? $dayData->saldo_pemasukkan : 0;
+            $keuanganPengeluaran[] = $dayData ? $dayData->saldo_pengeluaran : 0;
+        }
+
+        // Hitung total untuk periode
+        $totalPemasukan = $keuangans->sum('saldo_pemasukkan');
+        $totalPengeluaran = $keuangans->sum('saldo_pengeluaran');
+
+        // Ambil tanggal rekapitulasi untuk dropdown (jika diperlukan)
+        $tanggalRekapitulasi = Transaksi::select('tgl_transaksi')
+            ->distinct()
             ->orderBy('tgl_transaksi', 'desc')
             ->get();
 
-        return view('owner.keuangan.create', compact('transaksis'));
+        return view('owner.keuangan.index', compact(
+            'keuangans',
+            'keuanganLabels',
+            'keuanganPemasukkan',
+            'keuanganPengeluaran',
+            'tanggalRekapitulasi',
+            'periodeStart',
+            'periodeEnd',
+            'totalPemasukan',
+            'totalPengeluaran',
+            'navigationDate'
+        ));
     }
 
-    /**
-     * Store a newly created keuangan entry in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
+    public function create()
+    {
+        $tanggalRekapitulasi = Transaksi::select('tgl_transaksi')
+            ->distinct()
+            ->orderBy('tgl_transaksi', 'desc')
+            ->get();
+
+        return view('owner.keuangan.create', compact('tanggalRekapitulasi'));
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'tgl_rekapitulasi' => 'required|date',
-            'saldo_pengeluaran' => 'required|integer',
+            'saldo_pengeluaran' => 'required|integer|min:0',
+        ], [
+            'saldo_pengeluaran.required' => 'Saldo pengeluaran wajib diisi',
+            'saldo_pengeluaran.integer' => 'Saldo pengeluaran harus berupa angka',
+            'saldo_pengeluaran.min' => 'Saldo pengeluaran tidak boleh kurang dari 0',
+            'tgl_rekapitulasi.required' => 'Tanggal rekapitulasi wajib diisi',
+            'tgl_rekapitulasi.date' => 'Format tanggal tidak valid',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput()->with('error', 'Saldo pengeluaran harus berisikan angka');
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ]);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        Keuangan::create([
+        // Cek apakah sudah ada data untuk tanggal tersebut
+        $existingKeuangan = Keuangan::where('tgl_rekapitulasi', $request->tgl_rekapitulasi)->first();
+
+        if ($existingKeuangan) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['tgl_rekapitulasi' => ['Data keuangan untuk tanggal ini sudah ada']]
+                ]);
+            }
+            return redirect()->back()->withErrors(['tgl_rekapitulasi' => 'Data keuangan untuk tanggal ini sudah ada'])->withInput();
+        }
+
+        $keuangan = Keuangan::create([
             'tgl_rekapitulasi' => $request->tgl_rekapitulasi,
             'saldo_pengeluaran' => $request->saldo_pengeluaran,
             'saldo_pemasukkan' => $this->calculateSaldoPemasukkan($request->tgl_rekapitulasi),
             'total_penjualan' => $this->calculateTotalPenjualan($request->tgl_rekapitulasi),
-            'id_transaksi' => $request->id_transaksi,
         ]);
 
-        return redirect()->route('owner.keuangan.index')->with('success', 'Data keuangan berhasil dibuat');
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data keuangan berhasil ditambahkan'
+            ]);
+        }
+
+        return redirect()->route('owner.keuangan.index')
+            ->with('success', 'Data keuangan berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified keuangan entry.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
-     */
     public function show($id)
     {
         $keuangan = Keuangan::findOrFail($id);
         return view('owner.keuangan.show', compact('keuangan'));
     }
 
-    /**
-     * Show the form for editing the specified keuangan entry.
-     *
-     * @param  int  $id
-     * @return \Illuminate\View\View
-     */
     public function edit($id)
     {
         $keuangan = Keuangan::findOrFail($id);
         return view('owner.keuangan.edit', compact('keuangan'));
     }
 
-    /**
-     * Update the specified keuangan entry in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'tgl_rekapitulasi' => 'required|date',
-            'saldo_pengeluaran' => 'required|integer',
+            'saldo_pengeluaran' => 'required|integer|min:0',
+        ], [
+            'saldo_pengeluaran.required' => 'Saldo pengeluaran wajib diisi',
+            'saldo_pengeluaran.integer' => 'Saldo pengeluaran harus berupa angka',
+            'saldo_pengeluaran.min' => 'Saldo pengeluaran tidak boleh kurang dari 0',
+            'tgl_rekapitulasi.required' => 'Tanggal rekapitulasi wajib diisi',
+            'tgl_rekapitulasi.date' => 'Format tanggal tidak valid',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput()->with('error', 'Saldo pengeluaran harus berisikan angka');
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $keuangan = Keuangan::findOrFail($id);
+
+        // Cek apakah ada data lain dengan tanggal yang sama (kecuali data yang sedang diedit)
+        $existingKeuangan = Keuangan::where('tgl_rekapitulasi', $request->tgl_rekapitulasi)
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($existingKeuangan) {
+            return redirect()->back()
+                ->withErrors(['tgl_rekapitulasi' => 'Data keuangan untuk tanggal ini sudah ada'])
+                ->withInput();
+        }
+
         $keuangan->update([
             'tgl_rekapitulasi' => $request->tgl_rekapitulasi,
             'saldo_pengeluaran' => $request->saldo_pengeluaran,
             'saldo_pemasukkan' => $this->calculateSaldoPemasukkan($request->tgl_rekapitulasi),
             'total_penjualan' => $this->calculateTotalPenjualan($request->tgl_rekapitulasi),
-            'id_transaksi' => $request->id_transaksi,
         ]);
 
-        return redirect()->route('owner.keuangan.show', $id)->with('success', 'Data keuangan berhasil diubah');
+        return redirect()->route('owner.keuangan.index')
+            ->with('success', 'Data keuangan berhasil diperbarui');
+    }
+
+    public function destroy($id)
+    {
+        $keuangan = Keuangan::findOrFail($id);
+        $keuangan->delete();
+
+        return redirect()->route('owner.keuangan.index')
+            ->with('success', 'Data keuangan berhasil dihapus');
     }
 
     /**
-     * Calculate saldo pemasukkan based on transactions.
-     *
-     * @param  string  $date
-     * @return int
+     * Hitung saldo pemasukkan berdasarkan transaksi pada tanggal tertentu
      */
     private function calculateSaldoPemasukkan($date)
     {
@@ -147,10 +221,7 @@ class KeuanganController extends Controller
     }
 
     /**
-     * Calculate total penjualan based on transactions.
-     *
-     * @param  string  $date
-     * @return int
+     * Hitung total penjualan berdasarkan kuantitas pada tanggal tertentu
      */
     private function calculateTotalPenjualan($date)
     {
@@ -163,25 +234,25 @@ class KeuanganController extends Controller
     }
 
     /**
-     * Generate grafik penjualan data.
-     *
-     * @param  string  $date
-     * @return string
+     * Ambil data keuangan untuk periode tertentu (untuk API atau AJAX)
      */
-    private function generateGrafikPenjualan($date)
+    public function getKeuanganByPeriod(Request $request)
     {
-        $transactions = Transaksi::whereDate('tgl_transaksi', $date)
-            ->with('detailTransaksi')
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $keuangans = Keuangan::whereBetween('tgl_rekapitulasi', [$startDate, $endDate])
+            ->orderBy('tgl_rekapitulasi', 'asc')
             ->get();
 
-        $data = $transactions->map(function ($transaksi) {
-            return [
-                'tanggal' => $transaksi->tgl_transaksi->format('Y-m-d'),
-                'saldo_pemasukkan' => $transaksi->detailTransaksi->sum('sub_total'),
-                'saldo_pengeluaran' => 0, // Placeholder, adjust if needed
-            ];
-        });
-
-        return json_encode($data);
+        return response()->json([
+            'success' => true,
+            'data' => $keuangans,
+            'summary' => [
+                'total_pemasukan' => $keuangans->sum('saldo_pemasukkan'),
+                'total_pengeluaran' => $keuangans->sum('saldo_pengeluaran'),
+                'selisih' => $keuangans->sum('saldo_pemasukkan') - $keuangans->sum('saldo_pengeluaran')
+            ]
+        ]);
     }
 }
