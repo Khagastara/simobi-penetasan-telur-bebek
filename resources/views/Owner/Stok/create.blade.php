@@ -23,7 +23,6 @@
         <div class="bg-white p-6 rounded-xl shadow-md max-w-3xl mx-auto">
             <form action="{{ route('owner.stok.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-
                 <div class="mb-4">
                     <label for="nama_stok" class="block font-semibold text-[#877B66] mb-1">Nama Stok <span class="text-red-500">*</span></label>
                     <input type="text" name="nama_stok" id="nama_stok"
