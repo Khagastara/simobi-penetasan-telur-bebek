@@ -12,15 +12,12 @@ class KeuanganController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil tanggal saat ini atau dari request
         $currentDate = $request->get('current_date', now()->format('Y-m-d'));
         $date = Carbon::parse($currentDate);
 
-        // Tentukan periode mingguan saat ini (Senin sampai Minggu)
         $startOfWeek = $date->copy()->startOfWeek(Carbon::MONDAY);
         $endOfWeek = $date->copy()->endOfWeek(Carbon::SUNDAY);
 
-        // Handle navigasi periode (prev/next)
         if ($request->get('direction') === 'prev') {
             $startOfWeek = $startOfWeek->subWeek();
             $endOfWeek = $endOfWeek->subWeek();
@@ -29,25 +26,20 @@ class KeuanganController extends Controller
             $endOfWeek = $endOfWeek->addWeek();
         }
 
-        // Format periode untuk tampilan
         $periodeStart = $startOfWeek->format('d M Y');
         $periodeEnd = $endOfWeek->format('d M Y');
 
-        // Tanggal untuk navigasi (tanggal tengah minggu untuk konsistensi)
         $navigationDate = $startOfWeek->copy()->addDays(3)->format('Y-m-d');
 
-        // Ambil data keuangan untuk periode mingguan
         $keuangans = Keuangan::whereBetween('tgl_rekapitulasi', [
             $startOfWeek->format('Y-m-d'),
             $endOfWeek->format('Y-m-d')
         ])->orderBy('tgl_rekapitulasi', 'asc')->get();
 
-        // Siapkan data untuk grafik
         $keuanganLabels = [];
         $keuanganPemasukkan = [];
         $keuanganPengeluaran = [];
 
-        // Generate data untuk setiap hari dalam minggu
         for ($i = 0; $i < 7; $i++) {
             $currentDay = $startOfWeek->copy()->addDays($i);
             $dayData = $keuangans->where('tgl_rekapitulasi', $currentDay->format('Y-m-d'))->first();
@@ -57,11 +49,9 @@ class KeuanganController extends Controller
             $keuanganPengeluaran[] = $dayData ? $dayData->saldo_pengeluaran : 0;
         }
 
-        // Hitung total untuk periode
         $totalPemasukan = $keuangans->sum('saldo_pemasukkan');
         $totalPengeluaran = $keuangans->sum('saldo_pengeluaran');
 
-        // Ambil tanggal rekapitulasi untuk dropdown (jika diperlukan)
         $tanggalRekapitulasi = Transaksi::select('tgl_transaksi')
             ->distinct()
             ->orderBy('tgl_transaksi', 'desc')
@@ -114,7 +104,6 @@ class KeuanganController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Cek apakah sudah ada data untuk tanggal tersebut
         $existingKeuangan = Keuangan::where('tgl_rekapitulasi', $request->tgl_rekapitulasi)->first();
 
         if ($existingKeuangan) {
@@ -176,7 +165,6 @@ class KeuanganController extends Controller
 
         $keuangan = Keuangan::findOrFail($id);
 
-        // Cek apakah ada data lain dengan tanggal yang sama (kecuali data yang sedang diedit)
         $existingKeuangan = Keuangan::where('tgl_rekapitulasi', $request->tgl_rekapitulasi)
             ->where('id', '!=', $id)
             ->first();
@@ -233,9 +221,6 @@ class KeuanganController extends Controller
             });
     }
 
-    /**
-     * Ambil data keuangan untuk periode tertentu (untuk API atau AJAX)
-     */
     public function getKeuanganByPeriod(Request $request)
     {
         $startDate = $request->get('start_date');
