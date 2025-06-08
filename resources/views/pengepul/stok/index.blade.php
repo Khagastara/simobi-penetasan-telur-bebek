@@ -166,7 +166,6 @@
         let currentStockData = null;
         let currentQuantity = 1;
 
-        // Ensure DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, starting initialization...');
             setTimeout(() => {
@@ -175,7 +174,6 @@
         });
 
         function initializeComponents() {
-            // Search functionality
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function(e) {
@@ -193,7 +191,6 @@
                 });
             }
 
-            // Add click event listeners to all cards
             const cards = document.querySelectorAll('.card-item');
             console.log(`Found ${cards.length} cards, adding click listeners`);
 
@@ -216,7 +213,6 @@
                 });
             });
 
-            // Purchase form handlers
             initializePurchaseForm();
         }
 
@@ -245,7 +241,6 @@
                 return;
             }
 
-            // Show loading state
             const modalContent = document.getElementById('modalContent');
             if (modalContent) {
                 modalContent.innerHTML = `
@@ -258,7 +253,6 @@
                 `;
             }
 
-            // Show modal
             try {
                 modal.show();
             } catch (error) {
@@ -267,7 +261,6 @@
                 return;
             }
 
-            // Fetch data
             fetch(`/stok-distribusi/${id}`, {
                 method: 'GET',
                 headers: {
@@ -286,7 +279,7 @@
                 console.log('Response data:', data);
                 if (data.success && data.data) {
                     currentStockData = data.data;
-                    currentQuantity = 1; // Reset quantity
+                    currentQuantity = 1;
                     createEnhancedModalContent(data.data);
                 } else {
                     throw new Error('Data tidak valid');
@@ -316,17 +309,23 @@
         function createEnhancedModalContent(stok) {
             const totalPrice = stok.harga_stok * currentQuantity;
 
+            let imageSrc = stok.gambar_stok;
+
+            if (!imageSrc || imageSrc === '' || imageSrc === null) {
+                imageSrc = '{{ asset("images/stok/no-image.png") }}';
+            }
+
             const modalContent = `
                 <div class="container-fluid">
                     <div class="row">
                         <!-- Product Image -->
                         <div class="col-lg-6 mb-4">
                             <div class="text-center">
-                                <img src="${stok.gambar_stok || '/images/no-image.png'}"
-                                     alt="${stok.nama_stok}"
-                                     class="img-fluid rounded-3 shadow-sm"
-                                     style="max-height: 400px; width: 100%; object-fit: cover;"
-                                     onerror="this.src='/images/no-image.png'">
+                                <img src="${imageSrc}"
+                                    alt="${stok.nama_stok}"
+                                    class="img-fluid rounded-3 shadow-sm"
+                                    style="max-height: 400px; width: 100%; object-fit: cover;"
+                                    onerror="this.src='{{ asset("images/stok/no-image.png") }}'">
                             </div>
                         </div>
 
@@ -378,34 +377,38 @@
                 return;
             }
 
-            // Close detail modal
             const detailModal = bootstrap.Modal.getInstance(document.getElementById('stokModal'));
             if (detailModal) {
                 detailModal.hide();
             }
 
-            // Populate purchase modal
-            document.getElementById('purchaseImage').src = currentStockData.gambar_stok || '/images/no-image.png';
+            let imageSrc = currentStockData.gambar_stok;
+            if (!imageSrc || imageSrc === '' || imageSrc === null) {
+                imageSrc = '{{ asset("images/stok/no-image.png") }}';
+            }
+
+            const purchaseImage = document.getElementById('purchaseImage');
+            purchaseImage.src = imageSrc;
+            purchaseImage.onerror = function() {
+                this.src = '{{ asset("images/stok/no-image.png") }}';
+            };
+
             document.getElementById('purchaseStockName').textContent = currentStockData.nama_stok;
             document.getElementById('purchaseStockPrice').textContent = `Rp ${Number(currentStockData.harga_stok).toLocaleString('id-ID')} / unit`;
             document.getElementById('purchaseStockAvailable').textContent = `Tersedia: ${currentStockData.jumlah_stok} unit`;
 
-            // Set form action
             document.getElementById('purchaseForm').action = `/p/transaksi/store/${currentStockData.id}`;
 
-            // Reset quantity
             document.getElementById('quantity').value = 1;
             document.getElementById('quantity').max = currentStockData.jumlah_stok;
 
             updateTotalPrice();
 
-            // Show purchase modal
             const purchaseModal = new bootstrap.Modal(document.getElementById('purchaseModal'));
             purchaseModal.show();
         }
 
         function initializePurchaseForm() {
-            // Quantity controls
             document.getElementById('decreaseQty').addEventListener('click', function() {
                 const qtyInput = document.getElementById('quantity');
                 const currentQty = parseInt(qtyInput.value);
@@ -438,7 +441,6 @@
                 updateTotalPrice();
             });
 
-            // Form submission
             document.getElementById('purchaseForm').addEventListener('submit', function(e) {
                 const quantity = parseInt(document.getElementById('quantity').value);
                 const paymentMethod = document.getElementById('metode_pembayaran').value;
@@ -455,7 +457,6 @@
                     return false;
                 }
 
-                // Show loading state
                 const submitBtn = document.getElementById('confirmPurchase');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Memproses...';

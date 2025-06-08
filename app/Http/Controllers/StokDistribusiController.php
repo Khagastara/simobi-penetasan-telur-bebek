@@ -148,9 +148,26 @@ class StokDistribusiController extends Controller
         $stok = StokDistribusi::findOrFail($id);
 
         if (request()->ajax()) {
+            $imagePath = $stok->gambar_stok;
+
+            if (!empty($imagePath)) {
+                $imagePath = asset($imagePath);
+            } else {
+                $imagePath = asset('images/stok/no-image.png');
+            }
+
             return response()->json([
                 'success' => true,
-                'data' => $stok
+                'data' => [
+                    'id' => $stok->id,
+                    'nama_stok' => $stok->nama_stok,
+                    'jumlah_stok' => $stok->jumlah_stok,
+                    'harga_stok' => $stok->harga_stok,
+                    'deskripsi_stok' => $stok->deskripsi_stok,
+                    'gambar_stok' => $imagePath,
+                    'created_at' => $stok->created_at,
+                    'updated_at' => $stok->updated_at
+                ]
             ]);
         }
 
