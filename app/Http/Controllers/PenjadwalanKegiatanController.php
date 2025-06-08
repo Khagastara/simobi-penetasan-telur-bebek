@@ -17,21 +17,21 @@ class PenjadwalanKegiatanController extends Controller
     {
         $owner = Auth::user()->owner;
 
-        // Get filter parameters
         $filterMonth = $request->get('month');
         $filterYear = $request->get('year');
 
-        // Build query with filters
+        // Modified query to avoid duplicates
         $query = $owner->penjadwalanKegiatan()
-            ->with('detailPenjadwalan.statusKegiatan')
-            ->orderBy('tgl_penjadwalan', 'desc');
+            ->with(['detailPenjadwalan' => function($query) {
+                $query->orderBy('waktu_kegiatan', 'desc');
+            }, 'detailPenjadwalan.statusKegiatan'])
+            ->orderBy('tgl_penjadwalan', 'desc')
+            ->orderBy('id', 'desc');
 
-        // Apply month filter
         if ($filterMonth) {
             $query->whereMonth('tgl_penjadwalan', $filterMonth);
         }
 
-        // Apply year filter
         if ($filterYear) {
             $query->whereYear('tgl_penjadwalan', $filterYear);
         }
@@ -52,7 +52,7 @@ class PenjadwalanKegiatanController extends Controller
         $availableMonths = collect([
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            9 => 'September', 10 => 'Oktober', 11 => 'Novemver', 12 => 'Desember'
         ]);
 
         return view('owner.penjadwalan.index', compact(
