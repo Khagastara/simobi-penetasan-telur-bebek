@@ -16,7 +16,7 @@ class ForgotPasswordController extends Controller
 
     public function showForgotPasswordForm()
     {
-        return view('Auth.forgot-password', ['step' => 'email']);
+        return view('auth.forgot-password', ['step' => 'email']);
     }
 
     public function sendOtp(Request $request)
@@ -74,7 +74,7 @@ class ForgotPasswordController extends Controller
                 ]);
             }
 
-            return view('Auth.forgot-password', [
+            return view('auth.forgot-password', [
                 'step' => 'otp',
                 'email' => $email
             ])->with('success', 'Kode OTP telah dikirim ke email Anda');
@@ -95,7 +95,7 @@ class ForgotPasswordController extends Controller
 
     public function showOtpForm(Request $request)
     {
-        return view('Auth.forgot-password', [
+        return view('auth.forgot-password', [
             'step' => 'otp',
             'email' => $request->email
         ]);
@@ -130,7 +130,7 @@ class ForgotPasswordController extends Controller
 
         $token = Str::random(60);
 
-        return view('Auth.forgot-password', [
+        return view('auth.forgot-password', [
             'step' => 'reset',
             'email' => $email,
             'token' => $token
@@ -139,7 +139,7 @@ class ForgotPasswordController extends Controller
 
     public function showResetForm(Request $request)
     {
-        return view('Auth.forgot-password', [
+        return view('auth.forgot-password', [
             'step' => 'reset',
             'email' => $request->email,
             'token' => $request->token,
