@@ -31,6 +31,6 @@ class Owner extends Authenticatable
 
     public function penjadwalanKegiatan(): HasMany
     {
-        return $this->hasMany(penjadwalanKegiatan::class, 'id_owner', 'id');
+        return $this->hasMany(PenjadwalanKegiatan::class, 'id_owner', 'id');
     }
 }
