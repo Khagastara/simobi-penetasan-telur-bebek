@@ -17,21 +17,17 @@ class PenjadwalanKegiatanController extends Controller
     {
         $owner = Auth::user()->owner;
 
-        // Get filter parameters
         $filterMonth = $request->get('month');
         $filterYear = $request->get('year');
 
-        // Build query with filters
         $query = $owner->penjadwalanKegiatan()
             ->with('detailPenjadwalan.statusKegiatan')
             ->orderBy('tgl_penjadwalan', 'desc');
 
-        // Apply month filter
         if ($filterMonth) {
             $query->whereMonth('tgl_penjadwalan', $filterMonth);
         }
 
-        // Apply year filter
         if ($filterYear) {
             $query->whereYear('tgl_penjadwalan', $filterYear);
         }
@@ -42,7 +38,6 @@ class PenjadwalanKegiatanController extends Controller
 
         $this->updateLateActivities($penjadwalanKegiatans);
 
-        // Get available years and months for filter dropdowns
         $availableYears = $owner->penjadwalanKegiatan()
             ->selectRaw('YEAR(tgl_penjadwalan) as year')
             ->distinct()
@@ -211,8 +206,8 @@ class PenjadwalanKegiatanController extends Controller
     {
         try {
             $beamsClient = new PushNotifications([
-                'instanceId' => env('VITE_PUSHER_BEAMS_INSTANCE_ID'),
-                'secretKey' => env('VITE_PUSHER_BEAMS_SECRET_KEY'),
+                'instanceId' => config('pusher-beams.instance_id'),
+                'secretKey' => config('pusher-beams.secret_key')
             ]);
 
             $formattedDate = Carbon::parse($penjadwalanKegiatan->tgl_penjadwalan)->format('Y-m-d');
