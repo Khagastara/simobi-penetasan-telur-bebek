@@ -98,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/keuangan/{id}', [KeuanganController::class, 'update'])->name('owner.keuangan.update');
 
     //Pengepul
-    Route::get('/pengepul/dashboard', function () {return view('pengepul.stok.index');})->name('pengepul.stok.index');
+    Route::get('/pengepul/dashboard', [StokDistribusiController::class, 'indexPengepul'])->name('pengepul.stok.index');
     Route::get('p/profil', [PengepulProfilController::class, 'show'])->name('pengepul.profil.show');
     Route::get('p/profil/edit', [PengepulProfilController::class, 'edit'])->name('pengepul.profil.edit');
     Route::post('p/profil/update', [PengepulProfilController::class, 'update'])->name('pengepul.profil.update');
