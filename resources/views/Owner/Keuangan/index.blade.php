@@ -4,7 +4,6 @@
 
 <main class="flex-1 flex flex-col font-['Poppins'] bg-[#D4E6B5] min-h-screen">
     <section class="p-8">
-        <!-- Periode Navigation -->
         <div class="mb-6">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold text-white">
@@ -34,7 +33,6 @@
             </div>
         </div>
 
-        <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center mb-4">
@@ -108,7 +106,6 @@
             </div>
         </div>
 
-        <!-- Chart Section -->
         <div class="bg-white p-6 rounded-xl shadow mb-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-700">Grafik Keuangan Mingguan</h2>
@@ -120,7 +117,6 @@
             <canvas id="keuanganChart" width="400" height="200"></canvas>
         </div>
 
-        <!-- Table Section -->
         <div class="overflow-x-auto bg-white p-6 rounded-xl shadow">
             <table class="min-w-full divide-y divide-gray-300 text-sm text-left text-gray-700">
                 <thead class="bg-[#FFDF64] text-[#877B66]">
@@ -163,7 +159,6 @@
     </section>
 </main>
 
-<!-- Create Modal -->
 <div id="createModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
@@ -208,7 +203,6 @@
     </div>
 </div>
 
-<!-- Detail Modal -->
 <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
@@ -360,7 +354,6 @@
         },
     });
 
-    // Modal functionality
     const createModal = document.getElementById('createModal');
     const detailModal = document.getElementById('detailModal');
     const openCreateModalBtn = document.getElementById('openCreateModal');

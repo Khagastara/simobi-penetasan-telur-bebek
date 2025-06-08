@@ -387,7 +387,6 @@ class TransaksiController extends Controller
             $initialStatusId = 1;
             $paymentStatus = 'pending';
 
-            // Cek apakah pembayaran tunai
             if ($this->isCashPayment($metodePembayaran->nama_metode)) {
                 $initialStatus = 'Menunggu';
                 $initialStatusId = 1;
@@ -401,7 +400,6 @@ class TransaksiController extends Controller
 
             $stokDistribusi->decrement('jumlah_stok', $request->kuantitas);
 
-            // UNTUK PEMBAYARAN TUNAI - Langsung update/create Keuangan
             if ($this->isCashPayment($metodePembayaran->nama_metode)) {
                 $this->updateOrCreateKeuangan($transaksi, $subTotal, $request->kuantitas);
 
@@ -412,9 +410,7 @@ class TransaksiController extends Controller
                     'metode_pembayaran' => $metodePembayaran->nama_metode
                 ]);
             }
-            // UNTUK PEMBAYARAN DIGITAL - Keuangan akan di-update di handlePaymentCallback setelah pembayaran berhasil
 
-            // UNTUK PEMBAYARAN DIGITAL - Setup Midtrans
             if ($this->isDigitalPayment($metodePembayaran->nama_metode)) {
                 try {
                     $this->validateMidtransConfiguration();
@@ -474,7 +470,6 @@ class TransaksiController extends Controller
                     ->with('success', 'Transaksi berhasil dibuat. Silakan lanjutkan pembayaran.');
             }
 
-            // For cash payments, redirect to transaction index
             return redirect()->route('pengepul.transaksi.index')
                 ->with('success', 'Transaksi berhasil dibuat dan sedang menunggu konfirmasi.');
 
@@ -494,12 +489,10 @@ class TransaksiController extends Controller
     private function updateOrCreateKeuangan($transaksi, $subTotal, $kuantitas)
     {
         try {
-            // Pastikan data input valid
             if (!$transaksi || !is_numeric($subTotal) || !is_numeric($kuantitas)) {
                 throw new \Exception('Invalid input data: transaksi, subTotal, or kuantitas is invalid');
             }
 
-            // Konversi ke tipe data yang benar
             $subTotal = (float) $subTotal;
             $kuantitas = (int) $kuantitas;
 
@@ -512,11 +505,9 @@ class TransaksiController extends Controller
                 'tanggal_rekapitulasi' => $tanggalRekapitulasi
             ]);
 
-            // Cek apakah sudah ada record Keuangan untuk tanggal ini
             $keuangan = Keuangan::where('tgl_rekapitulasi', $tanggalRekapitulasi)->first();
 
             if ($keuangan) {
-                // Update existing record
                 Log::info('Updating existing Keuangan record', [
                     'keuangan_id' => $keuangan->id,
                     'current_saldo_pemasukkan' => $keuangan->saldo_pemasukkan,
@@ -544,7 +535,6 @@ class TransaksiController extends Controller
                 ]);
 
             } else {
-                // Create new record
                 Log::info('Creating new Keuangan record', [
                     'tanggal_rekapitulasi' => $tanggalRekapitulasi,
                     'saldo_pemasukkan' => $subTotal,
@@ -570,10 +560,8 @@ class TransaksiController extends Controller
                 ]);
             }
 
-            // Refresh data untuk memastikan data tersimpan
             $keuangan = $keuangan->fresh();
 
-            // Update id_keuangan di transaksi jika belum ada
             if (!$transaksi->id_keuangan) {
                 $transaksi->update(['id_keuangan' => $keuangan->id]);
                 Log::info('Updated transaksi with keuangan_id', [
@@ -582,7 +570,7 @@ class TransaksiController extends Controller
                 ]);
             }
 
-            // Verify final data
+
             $finalKeuangan = Keuangan::find($keuangan->id);
             Log::info('Final Keuangan verification', [
                 'keuangan_id' => $finalKeuangan->id,
@@ -602,7 +590,7 @@ class TransaksiController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            throw $e; // Re-throw untuk handling di level atas
+            throw $e;
         }
     }
 
@@ -670,7 +658,6 @@ class TransaksiController extends Controller
                 throw new \InvalidArgumentException('Invalid payment status');
             }
 
-            // Skip jika status sudah sama dengan yang diminta
             if ($transaksi->payment_status === $paymentStatus) {
                 Log::info('Payment status already set', [
                     'transaksi_id' => $transaksiId,
@@ -710,7 +697,6 @@ class TransaksiController extends Controller
                     'id_status_transaksi' => $statusTransaksiId,
                 ]);
 
-                // Update keuangan hanya jika pembayaran berhasil DAN metode pembayaran adalah digital
                 if ($paymentStatus === 'success' && $this->isDigitalPayment($transaksi->metodePembayaran->nama_metode)) {
                     $detail = $transaksi->detailTransaksi->first();
 
@@ -731,9 +717,6 @@ class TransaksiController extends Controller
                                 'error' => $keuanganError->getMessage(),
                                 'trace' => $keuanganError->getTraceAsString()
                             ]);
-
-                            // Jangan rollback payment update, hanya log error
-                            // Keuangan bisa diupdate manual atau melalui proses terpisah
                         }
                     } else {
                         Log::warning('Detail transaksi tidak ditemukan untuk update keuangan', [
@@ -742,7 +725,6 @@ class TransaksiController extends Controller
                     }
                 }
 
-                // Kembalikan stok jika pembayaran gagal atau dibatalkan
                 if (in_array($paymentStatus, ['failed', 'cancelled'])) {
                     $detail = $transaksi->detailTransaksi->first();
                     if ($detail) {
@@ -829,7 +811,6 @@ class TransaksiController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
             }
 
-            // Skip jika transaksi sudah sukses
             if ($transaksi->payment_status === 'success') {
                 Log::info('Transaction already processed as success', [
                     'transaksi_id' => $transaksi->id,
@@ -838,7 +819,6 @@ class TransaksiController extends Controller
                 return response()->json(['status' => 'success', 'message' => 'Transaction already processed']);
             }
 
-            // Tentukan status pembayaran berdasarkan response Midtrans
             $paymentStatus = 'pending';
             $statusTransaksiId = 1;
 
@@ -864,7 +844,6 @@ class TransaksiController extends Controller
                 $statusTransaksiId = 4;
             }
 
-            // Gunakan method updatePaymentStatus yang sudah diperbaiki
             $result = $this->updatePaymentStatus($transaksi->id, $paymentStatus, $statusTransaksiId);
 
             if ($result['success']) {
