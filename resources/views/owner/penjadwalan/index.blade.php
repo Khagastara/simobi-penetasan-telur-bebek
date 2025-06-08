@@ -102,96 +102,90 @@
                                     @endforeach
                                 </td>
                                 <td class="px-4 py-3 text-center">
+                                    @foreach($penjadwalan->detailPenjadwalan as $detail)
+                                        @php
+                                            $statusName = $detail->statusKegiatan->nama_status_kgtn;
+                                            $badgeColor = '';
+
+                                            switch($statusName) {
+                                                case 'To Do':
+                                                    $badgeColor = 'bg-blue-500';
+                                                    break;
+                                                case 'Selesai':
+                                                    $badgeColor = 'bg-green-500';
+                                                    break;
+                                                case 'Gagal':
+                                                    $badgeColor = 'bg-red-500';
+                                                    break;
+                                                default:
+                                                    $badgeColor = 'bg-gray-500';
+                                            }
+                                        @endphp
+                                        <div class="flex justify-center mb-1">
+                                            <span class="px-2 py-1 text-xs font-medium text-white rounded-full {{ $badgeColor }}">
+                                                {{ $statusName }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </td>
+                                <td class="px-4 py-3 text-center">
                                     <div class="flex flex-col items-center gap-1">
                                         @foreach($penjadwalan->detailPenjadwalan as $detail)
                                             @php
-                                                $statusName = $detail->statusKegiatan->nama_status_kgtn;
-                                                $badgeColor = '';
-
-                                                switch($statusName) {
-                                                    case 'To Do':
-                                                        $badgeColor = 'bg-blue-500';
-                                                        break;
-                                                    case 'Selesai':
-                                                        $badgeColor = 'bg-green-500';
-                                                        break;
-                                                    case 'Gagal':
-                                                        $badgeColor = 'bg-red-500';
-                                                        break;
-                                                    default:
-                                                        $badgeColor = 'bg-gray-500';
-                                                }
+                                                $scheduledDateTime = \Carbon\Carbon::parse($penjadwalan->tgl_penjadwalan->format('Y-m-d') . ' ' . $detail->waktu_kegiatan);
+                                                $currentDateTime = \Carbon\Carbon::now();
+                                                $isLate = $currentDateTime->diffInMinutes($scheduledDateTime, false) < -30;
                                             @endphp
-                                            <div class="flex justify-center">
-                                                <span class="px-2 py-1 text-xs font-medium text-white rounded-full {{ $badgeColor }}">
-                                                    {{ $statusName }}
-                                                </span>
+                                            <div class="flex items-center">
+                                                @if($detail->statusKegiatan->nama_status_kgtn === 'To Do')
+                                                    @if($isLate)
+                                                        <button type="button" disabled class="px-3 py-1 rounded text-xs font-medium bg-green-300 text-gray-700 cursor-not-allowed opacity-60">
+                                                            <i class="fas fa-check mr-1"></i> Selesai
+                                                        </button>
+                                                    @else
+                                                        <form action="{{ route('owner.penjadwalan.duration', $detail->id) }}" method="POST" class="inline">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <input type="hidden" name="status" value="Selesai">
+                                                            <button type="submit"
+                                                                class="px-3 py-1 rounded text-xs font-medium transition bg-green-500 text-white hover:bg-green-600"
+                                                                onclick="return checkScheduleTime('{{ $penjadwalan->tgl_penjadwalan->format('Y-m-d') }} {{ $detail->waktu_kegiatan }}')">
+                                                                <i class="fas fa-check mr-1"></i>Selesai
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @elseif($detail->statusKegiatan->nama_status_kgtn === 'Selesai')
+                                                    <span class="px-3 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                                                        <i class="fas fa-check mr-1"></i> Sudah Selesai
+                                                    </span>
+                                                @elseif($detail->statusKegiatan->nama_status_kgtn === 'Gagal')
+                                                    <span class="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-600">
+                                                        <i class="fas fa-times mr-1"></i> Gagal
+                                                    </span>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-center gap-1">
-                                        <div class="flex flex-col gap-1">
-                                            @foreach($penjadwalan->detailPenjadwalan as $detail)
-                                                @php
-                                                    $scheduledDateTime = \Carbon\Carbon::parse($penjadwalan->tgl_penjadwalan->format('Y-m-d') . ' ' . $detail->waktu_kegiatan);
-                                                    $currentDateTime = \Carbon\Carbon::now();
-                                                    $isLate = $currentDateTime->diffInMinutes($scheduledDateTime, false) < -30;
-                                                @endphp
-                                                <div class="flex gap-1 items-center">
-                                                    @if($detail->statusKegiatan->nama_status_kgtn === 'To Do')
-                                                        @if($isLate)
-                                                            <button type="button" disabled class="px-3 py-1 rounded text-xs font-medium bg-green-300 text-gray-700 cursor-not-allowed opacity-60">
-                                                                <i class="fas fa-check mr-1"></i> Selesai
-                                                            </button>
-                                                        @else
-                                                            <form action="{{ route('owner.penjadwalan.duration', $detail->id) }}" method="POST" class="inline">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <input type="hidden" name="status" value="Selesai">
-                                                                <button type="submit"
-                                                                    class="px-3 py-1 rounded text-xs font-medium transition bg-green-500 text-white hover:bg-green-600"
-                                                                    onclick="return checkScheduleTime('{{ $penjadwalan->tgl_penjadwalan->format('Y-m-d') }} {{ $detail->waktu_kegiatan }}')">
-                                                                    <i class="fas fa-check mr-1"></i> Selesai
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    @elseif($detail->statusKegiatan->nama_status_kgtn === 'Selesai')
-                                                        <span class="px-3 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                                                            <i class="fas fa-check mr-1"></i> Sudah Selesai
-                                                        </span>
-                                                    @elseif($detail->statusKegiatan->nama_status_kgtn === 'Gagal')
-                                                        <span class="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-600">
-                                                            <i class="fas fa-times mr-1"></i> Gagal
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </td>
                                 <td class="px-4 py-3 text-center">
-                                    <div class="flex items justify-center">
-                                        <div class="flex flex-col gap-1">
-                                            <a href="{{ route('owner.penjadwalan.edit', $penjadwalan->id) }}" class="bg-yellow-400 text-white hover:bg-yellow-500 px-3 py-1 rounded text-xs font-medium transition">
-                                                <i class="fas fa-edit mr-1"></i> Ubah
-                                            </a>
-                                            <form action="{{ route('owner.penjadwalan.delete', $penjadwalan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete()">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-full bg-red-500 text-white hover:bg-red-600 px-3 py-1 rounded text-xs font-medium transition">
-                                                    <i class="fas fa-trash mr-1"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <a href="{{ route('owner.penjadwalan.edit', $penjadwalan->id) }}" class="bg-yellow-400 text-white hover:bg-yellow-500 px-3 py-1 rounded text-xs font-medium transition">
+                                            <i class="fas fa-edit mr-1"></i> Ubah
+                                        </a>
+                                        <form action="{{ route('owner.penjadwalan.delete', $penjadwalan->id) }}" method="POST" class="inline" onsubmit="return confirmDelete()">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-full bg-red-500 text-white hover:bg-red-600 px-3 py-1 rounded text-xs font-medium transition">
+                                                <i class="fas fa-trash mr-1"></i> Hapus
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
                             @php $rowIndex++; @endphp
                         @empty
                             <tr class="bg-white">
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-calendar-times text-4xl mb-2 text-gray-300"></i>
                                     <p>
                                         @if($filterMonth || $filterYear)
