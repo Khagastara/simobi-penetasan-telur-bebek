@@ -221,9 +221,8 @@ class PenjadwalanKegiatanController extends Controller
                     'web' => [
                         'notification' => [
                             'title' => 'Pengingat Kegiatan',
-                            'body' => "Kegiatan: {$detailPenjadwalan->keterangan} pada " .
-                                $formattedDate .
-                                " pukul {$detailPenjadwalan->waktu_kegiatan}.",
+                            'body' => "Kegiatan: {$detailPenjadwalan->keterangan} pada pukul {$detailPenjadwalan->waktu_kegiatan} tanggal" .
+                                $formattedDate . "!",
                         ],
                     ],
                 ]
