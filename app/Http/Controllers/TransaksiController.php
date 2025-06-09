@@ -236,13 +236,12 @@ class TransaksiController extends Controller
     {
         $pengepul = Auth::user()->pengepul;
 
+
         $transaksi = Transaksi::with(['detailTransaksi.stokDistribusi', 'metodePembayaran', 'statusTransaksi'])
-            ->where('tgl_transaksi', $pengepul->id)
+            ->where('id_pengepul', $pengepul->id)
             ->findOrFail($id);
 
-        $latestStatus = $transaksi->statusTransaksi()
-            ->orderBy('id', 'desc')
-            ->first();
+        $latestStatus = $transaksi->statusTransaksi;
 
         $detail = $transaksi->detailTransaksi->first();
 
