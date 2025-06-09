@@ -316,17 +316,25 @@
         function createEnhancedModalContent(stok) {
             const totalPrice = stok.harga_stok * currentQuantity;
 
+            // Fix: Ensure proper image path handling
+            let imageSrc = stok.gambar_stok;
+
+            // If no image or empty, use default
+            if (!imageSrc || imageSrc === '' || imageSrc === null) {
+                imageSrc = '{{ asset("images/stok/no-image.png") }}';
+            }
+
             const modalContent = `
                 <div class="container-fluid">
                     <div class="row">
                         <!-- Product Image -->
                         <div class="col-lg-6 mb-4">
                             <div class="text-center">
-                                <img src="${stok.gambar_stok || '/images/no-image.png'}"
-                                     alt="${stok.nama_stok}"
-                                     class="img-fluid rounded-3 shadow-sm"
-                                     style="max-height: 400px; width: 100%; object-fit: cover;"
-                                     onerror="this.src='/images/no-image.png'">
+                                <img src="${imageSrc}"
+                                    alt="${stok.nama_stok}"
+                                    class="img-fluid rounded-3 shadow-sm"
+                                    style="max-height: 400px; width: 100%; object-fit: cover;"
+                                    onerror="this.src='{{ asset("images/stok/no-image.png") }}'">
                             </div>
                         </div>
 
@@ -378,34 +386,37 @@
                 return;
             }
 
-            // Close detail modal
             const detailModal = bootstrap.Modal.getInstance(document.getElementById('stokModal'));
             if (detailModal) {
                 detailModal.hide();
             }
 
-            // Populate purchase modal
-            document.getElementById('purchaseImage').src = currentStockData.gambar_stok || '/images/no-image.png';
+            let imageSrc = currentStockData.gambar_stok;
+            if (!imageSrc || imageSrc === '' || imageSrc === null) {
+                imageSrc = '{{ asset("images/stok/no-image.png") }}';
+            }
+
+            const purchaseImage = document.getElementById('purchaseImage');
+            purchaseImage.src = imageSrc;
+            purchaseImage.onerror = function() {
+                this.src = '{{ asset("images/stok/no-image.png") }}';
+            };
+
             document.getElementById('purchaseStockName').textContent = currentStockData.nama_stok;
             document.getElementById('purchaseStockPrice').textContent = `Rp ${Number(currentStockData.harga_stok).toLocaleString('id-ID')} / unit`;
             document.getElementById('purchaseStockAvailable').textContent = `Tersedia: ${currentStockData.jumlah_stok} unit`;
 
-            // Set form action
             document.getElementById('purchaseForm').action = `/p/transaksi/store/${currentStockData.id}`;
 
-            // Reset quantity
             document.getElementById('quantity').value = 1;
             document.getElementById('quantity').max = currentStockData.jumlah_stok;
 
             updateTotalPrice();
-
-            // Show purchase modal
             const purchaseModal = new bootstrap.Modal(document.getElementById('purchaseModal'));
             purchaseModal.show();
         }
 
         function initializePurchaseForm() {
-            // Quantity controls
             document.getElementById('decreaseQty').addEventListener('click', function() {
                 const qtyInput = document.getElementById('quantity');
                 const currentQty = parseInt(qtyInput.value);

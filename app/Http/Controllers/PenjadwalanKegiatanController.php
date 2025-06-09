@@ -21,8 +21,11 @@ class PenjadwalanKegiatanController extends Controller
         $filterYear = $request->get('year');
 
         $query = $owner->penjadwalanKegiatan()
-            ->with('detailPenjadwalan.statusKegiatan')
-            ->orderBy('tgl_penjadwalan', 'desc');
+            ->with(['detailPenjadwalan' => function($query) {
+                $query->orderBy('waktu_kegiatan', 'desc');
+            }, 'detailPenjadwalan.statusKegiatan'])
+            ->orderBy('tgl_penjadwalan', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($filterMonth) {
             $query->whereMonth('tgl_penjadwalan', $filterMonth);

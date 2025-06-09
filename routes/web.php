@@ -36,13 +36,13 @@ Route::get('/test-email', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {return view('auth.login');});
+Route::get('/', function () {return view('auth.login');})->name('login');
 
 
 Route::get('register', [PengepulRegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [PengepulRegisterController::class, 'register'])->name('register.submit');
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('/login', [LoginController::class, 'showLoginForm']);
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])
