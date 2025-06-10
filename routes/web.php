@@ -17,19 +17,6 @@ use App\Http\Controllers\TransaksiController;
 
 use App\Http\Controllers\PengepulProfilController;
 
-
-Route::get('/test-email', function () {
-    try {
-        Mail::raw('Test email from Laravel', function ($message) {
-            $message->to('fadhluaqil@gmail.com')
-                    ->subject('Test Email');
-        });
-        return 'Email sent successfully! Check your Mailtrap inbox.';
-    } catch (Exception $e) {
-        return 'Email failed: ' . $e->getMessage();
-    }
-});
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
