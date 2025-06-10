@@ -494,6 +494,7 @@ class TransaksiController extends Controller
 
             $subTotal = (float) $subTotal;
             $kuantitas = (int) $kuantitas;
+
             $tanggalRekapitulasi = now()->toDateString();
 
             Log::info('Starting updateOrCreateKeuangan', [
@@ -503,59 +504,81 @@ class TransaksiController extends Controller
                 'tanggal_rekapitulasi' => $tanggalRekapitulasi
             ]);
 
-            // Cek apakah transaksi ini sudah memiliki record keuangan
-            if ($transaksi->id_keuangan) {
-                Log::info('Transaksi sudah memiliki keuangan record, skip update', [
-                    'transaksi_id' => $transaksi->id,
-                    'existing_keuangan_id' => $transaksi->id_keuangan
+            $keuangan = Keuangan::where('tgl_rekapitulasi', $tanggalRekapitulasi)->first();
+
+            if ($keuangan) {
+                Log::info('Updating existing Keuangan record', [
+                    'keuangan_id' => $keuangan->id,
+                    'current_saldo_pemasukkan' => $keuangan->saldo_pemasukkan,
+                    'current_total_penjualan' => $keuangan->total_penjualan,
+                    'adding_sub_total' => $subTotal,
+                    'adding_kuantitas' => $kuantitas
                 ]);
-                return Keuangan::find($transaksi->id_keuangan);
+
+                $newSaldoPemasukkan = $keuangan->saldo_pemasukkan + $subTotal;
+                $newTotalPenjualan = $keuangan->total_penjualan + $kuantitas;
+
+                $updated = $keuangan->update([
+                    'saldo_pemasukkan' => $newSaldoPemasukkan,
+                    'total_penjualan' => $newTotalPenjualan,
+                ]);
+
+                if (!$updated) {
+                    throw new \Exception('Failed to update existing Keuangan record');
+                }
+
+                Log::info('Successfully updated existing Keuangan', [
+                    'keuangan_id' => $keuangan->id,
+                    'new_saldo_pemasukkan' => $newSaldoPemasukkan,
+                    'new_total_penjualan' => $newTotalPenjualan
+                ]);
+
+            } else {
+                Log::info('Creating new Keuangan record', [
+                    'tanggal_rekapitulasi' => $tanggalRekapitulasi,
+                    'saldo_pemasukkan' => $subTotal,
+                    'total_penjualan' => $kuantitas
+                ]);
+
+                $keuangan = Keuangan::create([
+                    'tgl_rekapitulasi' => $tanggalRekapitulasi,
+                    'saldo_pengeluaran' => 0,
+                    'saldo_pemasukkan' => $subTotal,
+                    'total_penjualan' => $kuantitas,
+                    'id_transaksi' => $transaksi->id,
+                ]);
+
+                if (!$keuangan) {
+                    throw new \Exception('Failed to create new Keuangan record');
+                }
+
+                Log::info('Successfully created new Keuangan', [
+                    'keuangan_id' => $keuangan->id,
+                    'saldo_pemasukkan' => $keuangan->saldo_pemasukkan,
+                    'total_penjualan' => $keuangan->total_penjualan
+                ]);
             }
 
-            // Gunakan firstOrCreate untuk menghindari race condition
-            $keuangan = Keuangan::firstOrCreate(
-                [
-                    'tgl_rekapitulasi' => $tanggalRekapitulasi,
-                    'id_transaksi' => null // Record utama untuk hari ini
-                ],
-                [
-                    'saldo_pengeluaran' => 0,
-                    'saldo_pemasukkan' => 0,
-                    'total_penjualan' => 0,
-                ]
-            );
+            $keuangan = $keuangan->fresh();
 
-            // Update dengan increment untuk menghindari race condition
-            $keuangan->increment('saldo_pemasukkan', $subTotal);
-            $keuangan->increment('total_penjualan', $kuantitas);
+            if (!$transaksi->id_keuangan) {
+                $transaksi->update(['id_keuangan' => $keuangan->id]);
+                Log::info('Updated transaksi with keuangan_id', [
+                    'transaksi_id' => $transaksi->id,
+                    'keuangan_id' => $keuangan->id
+                ]);
+            }
 
-            Log::info('Successfully updated Keuangan', [
-                'keuangan_id' => $keuangan->id,
-                'saldo_pemasukkan_after' => $keuangan->fresh()->saldo_pemasukkan,
-                'total_penjualan_after' => $keuangan->fresh()->total_penjualan,
-                'added_sub_total' => $subTotal,
-                'added_kuantitas' => $kuantitas
+
+            $finalKeuangan = Keuangan::find($keuangan->id);
+            Log::info('Final Keuangan verification', [
+                'keuangan_id' => $finalKeuangan->id,
+                'final_saldo_pemasukkan' => $finalKeuangan->saldo_pemasukkan,
+                'final_total_penjualan' => $finalKeuangan->total_penjualan,
+                'tgl_rekapitulasi' => $finalKeuangan->tgl_rekapitulasi
             ]);
 
-            // Buat record spesifik untuk transaksi ini (opsional, untuk tracking)
-            $keuanganTransaksi = Keuangan::create([
-                'tgl_rekapitulasi' => $tanggalRekapitulasi,
-                'saldo_pengeluaran' => 0,
-                'saldo_pemasukkan' => $subTotal,
-                'total_penjualan' => $kuantitas,
-                'id_transaksi' => $transaksi->id,
-            ]);
-
-            // Update transaksi dengan keuangan_id
-            $transaksi->update(['id_keuangan' => $keuanganTransaksi->id]);
-
-            Log::info('Created transaction-specific Keuangan record', [
-                'transaksi_id' => $transaksi->id,
-                'keuangan_transaksi_id' => $keuanganTransaksi->id,
-                'main_keuangan_id' => $keuangan->id
-            ]);
-
-            return $keuangan->fresh(); // Return fresh instance dengan data terbaru
+            return $keuangan;
 
         } catch (\Exception $e) {
             Log::error('Failed to updateOrCreateKeuangan', [
