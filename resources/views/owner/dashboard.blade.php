@@ -94,37 +94,6 @@
                     </div>
                 </div>
             </div>
-                        {{-- Card Selisih Keuangan --}}
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-yellow-300">
-                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient1)" viewBox="0 0 24 24">
-                            <defs>
-                                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#FCD34D;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-gray-600 text-sm mb-1">Selisih Keuangan</h3>
-                        <div class="flex items-center">
-                            @if($dashboardData['selisih_keuangan'] >= 0)
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#10B981" class="bi bi-arrow-up-circle-fill mr-2" viewBox="0 0 16 16">
-                                    <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
-                                </svg>
-                            @else
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#EF4444" class="bi bi-arrow-down-circle-fill mr-2" viewBox="0 0 16 16">
-                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
-                                </svg>
-                            @endif
-                            <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['selisih_keuangan'], 0, ',', '.') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {{-- Card Selisih Keuangan --}}
             <div class="bg-white rounded-3xl p-8 shadow-xl">
