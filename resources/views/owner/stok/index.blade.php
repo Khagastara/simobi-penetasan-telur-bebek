@@ -18,22 +18,21 @@
             @endif
 
             <div class="bg-white p-6 rounded-xl shadow">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="relative" style="width: 400px">
-                        <input type="text" id="searchInput" placeholder="Search items"
-                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] w-full">
-                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <a href="{{ route('owner.stok.create') }}" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition flex items-center ml-4">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Add Item
-                    </a>
+                            <div class="flex justify-between items-center mb-6">
+                <div class="relative" style="width: 400">
+                    <input type="text" id="searchInput" placeholder="Search items"
+                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#AFC97E] w-full">
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
-
+                <a href="{{ route('owner.stok.create') }}" class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded-lg shadow transition flex items-center ml-4">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add Item
+                </a>
+            </div>
                 <div id="cardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     @forelse ($stokDistribusi as $stok)
                         <div class="card-item bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
@@ -42,19 +41,18 @@
                             data-stok-harga="{{ $stok->harga_stok }}"
                             data-stok-jumlah="{{ $stok->jumlah_stok }}"
                             data-stok-deskripsi="{{ $stok->deskripsi_stok ?? '' }}"
-                            data-stok-gambar="{{ $stok->gambar_stok ? Storage::url($stok->gambar_stok) : asset('images/stok/no-image.png') }}"
+                            data-stok-gambar="{{ asset($stok->gambar_stok) }}"
                             data-stok-created="{{ $stok->created_at ?? '' }}"
                             data-stok-updated="{{ $stok->updated_at ?? '' }}">
                             <div class="aspect-square overflow-hidden rounded-t-lg">
-                                <img src="{{ $stok->gambar_stok ? Storage::url($stok->gambar_stok) : asset('images/stok/no-image.png') }}"
+                                <img src="{{ asset($stok->gambar_stok) }}"
                                     alt="{{ $stok->nama_stok }}"
-                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                    onerror="this.src='{{ asset('images/stok/no-image.png') }}'">
+                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                             </div>
                             <div class="p-4">
                                 <h3 class="font-semibold text-gray-800 mb-1 truncate">{{ $stok->nama_stok }}</h3>
                                 <p class="text-[#AFC97E] font-bold">Rp {{ number_format($stok->harga_stok, 0, ',', '.') }}</p>
-                                <p class="text-sm text-gray-500">Stok: {{ $stok->jumlah_stok }} unit</p>
+                                <p class="text-sm text-gray-500">/stok</p>
                             </div>
                         </div>
                     @empty
@@ -72,7 +70,6 @@
         </section>
     </main>
 
-    <!-- Modal -->
     <div class="modal fade" id="stokModal" tabindex="-1" aria-labelledby="stokModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -96,9 +93,6 @@
         </div>
     </div>
 
-    <!-- Add CSRF token meta tag -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -113,7 +107,6 @@
         waitForBootstrap(function() {
             console.log('Bootstrap loaded successfully');
 
-            // Search functionality
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function(e) {
@@ -131,7 +124,6 @@
                 });
             }
 
-            // Card click handlers
             const cards = document.querySelectorAll('.card-item');
             console.log('Found', cards.length, 'cards');
 
@@ -176,7 +168,6 @@
                     return;
                 }
 
-                // Show loading state
                 modalContent.innerHTML = `
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
@@ -187,20 +178,17 @@
                 `;
                 editButton.style.display = 'none';
 
-                // Show fallback data immediately
                 setTimeout(() => {
                     createModalContentFromCard(cardElement);
                     editButton.style.display = 'inline-block';
                     editButton.onclick = () => {
-                        window.location.href = `{{ route('owner.stok.edit', ':id') }}`.replace(':id', id);
+                        window.location.href = `/stok/${id}/edit`;
                     };
                 }, 100);
 
-                // Get CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-                // Fetch fresh data from server
-                fetch(`{{ route('owner.stok.show', ':id') }}`.replace(':id', id), {
+                fetch(`/stok/${id}`, {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -222,13 +210,12 @@
                         createModalContentFromData(data.data);
                         console.log('Modal content updated with server data');
                         editButton.onclick = () => {
-                            window.location.href = `{{ route('owner.stok.edit', ':id') }}`.replace(':id', data.data.id);
+                            window.location.href = `/stok/${data.data.id}/edit`;
                         };
                     }
                 })
                 .catch(error => {
                     console.log('AJAX failed, using fallback data:', error.message);
-                    // Fallback data is already shown, so no need to do anything
                 });
 
             } catch (error) {
@@ -263,11 +250,11 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="text-center">
-                                <img src="${stok.gambar_stok || '{{ asset('images/stok/no-image.png') }}'}"
+                                <img src="${stok.gambar_stok ? (stok.gambar_stok.startsWith('/') ? stok.gambar_stok : '/' + stok.gambar_stok) : '/images/no-image.png'}"
                                      alt="${stok.nama_stok}"
                                      class="img-fluid rounded shadow-sm"
                                      style="max-height: 300px; width: 100%; object-fit: cover;"
-                                     onerror="this.src='{{ asset('images/stok/no-image.png') }}'">
+                                     onerror="this.src='/images/no-image.png'">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -357,7 +344,7 @@
                                      alt="${stokNama}"
                                      class="img-fluid rounded shadow-sm"
                                      style="max-height: 300px; width: 100%; object-fit: cover;"
-                                     onerror="this.src='{{ asset('images/stok/no-image.png') }}'">
+                                     onerror="this.src='/images/no-image.png'">
                             </div>
                         </div>
                         <div class="col-md-6">
