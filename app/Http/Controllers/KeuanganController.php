@@ -12,41 +12,40 @@ class KeuanganController extends Controller
 {
     public function index(Request $request)
     {
-        $currentDate = $request->get('current_date', now()->format('Y-m-d'));
-        $date = Carbon::parse($currentDate);
-
-        $startOfWeek = $date->copy()->startOfWeek(Carbon::MONDAY);
-        $endOfWeek = $date->copy()->endOfWeek(Carbon::SUNDAY);
+        $currentYear = $request->get('current_year', now()->year);
 
         if ($request->get('direction') === 'prev') {
-            $startOfWeek = $startOfWeek->subWeek();
-            $endOfWeek = $endOfWeek->subWeek();
+            $currentYear--;
         } elseif ($request->get('direction') === 'next') {
-            $startOfWeek = $startOfWeek->addWeek();
-            $endOfWeek = $endOfWeek->addWeek();
+            $currentYear++;
         }
 
-        $periodeStart = $startOfWeek->format('d M Y');
-        $periodeEnd = $endOfWeek->format('d M Y');
+        $startOfYear = Carbon::create($currentYear, 1, 1)->startOfDay();
+        $endOfYear = Carbon::create($currentYear, 12, 31)->endOfDay();
 
-        $navigationDate = $startOfWeek->copy()->addDays(3)->format('Y-m-d');
+        $keuangans = Keuangan::whereYear('tgl_rekapitulasi', $currentYear)
+            ->orderBy('tgl_rekapitulasi', 'asc')
+            ->get();
 
-        $keuangans = Keuangan::whereBetween('tgl_rekapitulasi', [
-            $startOfWeek->format('Y-m-d'),
-            $endOfWeek->format('Y-m-d')
-        ])->orderBy('tgl_rekapitulasi', 'asc')->get();
-
+        // Prepare data for 12 months
         $keuanganLabels = [];
         $keuanganPemasukkan = [];
         $keuanganPengeluaran = [];
+        $monthNames = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
 
-        for ($i = 0; $i < 7; $i++) {
-            $currentDay = $startOfWeek->copy()->addDays($i);
-            $dayData = $keuangans->where('tgl_rekapitulasi', $currentDay->format('Y-m-d'))->first();
+        // Initialize data for each month
+        for ($month = 1; $month <= 12; $month++) {
+            $monthData = $keuangans->filter(function ($item) use ($month) {
+                return Carbon::parse($item->tgl_rekapitulasi)->month == $month;
+            });
 
-            $keuanganLabels[] = $currentDay->format('d/m');
-            $keuanganPemasukkan[] = $dayData ? $dayData->saldo_pemasukkan : 0;
-            $keuanganPengeluaran[] = $dayData ? $dayData->saldo_pengeluaran : 0;
+            $keuanganLabels[] = $monthNames[$month];
+            $keuanganPemasukkan[] = $monthData->sum('saldo_pemasukkan');
+            $keuanganPengeluaran[] = $monthData->sum('saldo_pengeluaran');
         }
 
         $totalPemasukan = $keuangans->sum('saldo_pemasukkan');
@@ -63,11 +62,9 @@ class KeuanganController extends Controller
             'keuanganPemasukkan',
             'keuanganPengeluaran',
             'tanggalRekapitulasi',
-            'periodeStart',
-            'periodeEnd',
+            'currentYear',
             'totalPemasukan',
-            'totalPengeluaran',
-            'navigationDate'
+            'totalPengeluaran'
         ));
     }
 

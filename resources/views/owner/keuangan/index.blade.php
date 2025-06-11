@@ -9,11 +9,11 @@
                 <h2 class="text-xl font-semibold text-white">
                     <span class="text-[#877B66]">Periode Keuangan:</span>
                     <span class="ml-4 mr-4 bg-white px-4 py-2 rounded-full text-gray-700">
-                        {{ $periodeStart }} - {{ $periodeEnd }}
+                        Tahun {{ $currentYear }}
                     </span>
                     <form method="GET" action="{{ route('owner.keuangan.index') }}" class="inline">
                         <input type="hidden" name="direction" value="prev">
-                        <input type="hidden" name="current_date" value="{{ $navigationDate }}">
+                        <input type="hidden" name="current_year" value="{{ $currentYear }}">
                         <button type="submit" class="bg-white p-2 rounded-lg shadow hover:shadow-lg transition-all">
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -22,7 +22,7 @@
                     </form>
                     <form method="GET" action="{{ route('owner.keuangan.index') }}" class="inline">
                         <input type="hidden" name="direction" value="next">
-                        <input type="hidden" name="current_date" value="{{ $navigationDate }}">
+                        <input type="hidden" name="current_year" value="{{ $currentYear }}">
                         <button type="submit" class="bg-white p-2 rounded-lg shadow hover:shadow-lg transition-all">
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -108,7 +108,7 @@
 
         <div class="bg-white p-6 rounded-xl shadow mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-700">Grafik Keuangan Mingguan</h2>
+                <h2 class="text-lg font-semibold text-gray-700">Grafik Keuangan Bulanan {{ $currentYear }}</h2>
                 <button id="openCreateModal"
                     class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded shadow text-sm transition">
                     Tambah Data
@@ -133,12 +133,12 @@
                     @forelse ($keuangans as $index => $keuangan)
                         <tr class="text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
-                            <td class="px-4 py-3">{{ $keuangan->tgl_rekapitulasi }}</td>
+                            <td class="px-4 py-3">{{ \Carbon\Carbon::parse($keuangan->tgl_rekapitulasi)->format('d/m/Y') }}</td>
                             <td class="px-4 py-3">Rp{{ number_format($keuangan->saldo_pemasukkan, 0, ',', '.') }}</td>
                             <td class="px-4 py-3">Rp{{ number_format($keuangan->saldo_pengeluaran, 0, ',', '.') }}</td>
                             <td class="px-4 py-3">{{ $keuangan->total_penjualan }}</td>
                             <td class="px-4 py-3">
-                                <button onclick="openDetailModal({{ $keuangan->id }}, '{{ $keuangan->tgl_rekapitulasi }}', {{ $keuangan->saldo_pemasukkan }}, {{ $keuangan->saldo_pengeluaran }}, {{ $keuangan->total_penjualan }})"
+                                <button onclick="openDetailModal({{ $keuangan->id }}, '{{ \Carbon\Carbon::parse($keuangan->tgl_rekapitulasi)->format('d/m/Y') }}', {{ $keuangan->saldo_pemasukkan }}, {{ $keuangan->saldo_pengeluaran }}, {{ $keuangan->total_penjualan }})"
                                     class="inline-block bg-[#AFC97E] text-white hover:bg-[#8fa866] px-3 py-1 rounded shadow text-sm transition">
                                     Detail
                                 </button>
@@ -150,7 +150,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-4 text-center text-gray-500">Tidak ada data keuangan untuk periode ini</td>
+                            <td colspan="6" class="px-4 py-4 text-center text-gray-500">Tidak ada data keuangan untuk tahun {{ $currentYear }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -159,6 +159,7 @@
     </section>
 </main>
 
+<!-- Modal Tambah Data -->
 <div id="createModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
@@ -175,9 +176,15 @@
                 @csrf
                 <div class="mb-4">
                     <label for="modal_tgl_rekapitulasi" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Rekapitulasi</label>
-                    <input type="date" name="tgl_rekapitulasi" id="modal_tgl_rekapitulasi"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]"
-                        value="{{ now()->toDateString() }}" required>
+                    <select name="tgl_rekapitulasi" id="modal_tgl_rekapitulasi"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
+                        <option value="">Pilih Tanggal Rekapitulasi</option>
+                        @foreach($tanggalRekapitulasi as $tanggal)
+                            <option value="{{ $tanggal->tgl_transaksi }}">
+                                {{ \Carbon\Carbon::parse($tanggal->tgl_transaksi)->format('d/m/Y') }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
@@ -203,6 +210,7 @@
     </div>
 </div>
 
+<!-- Modal Detail -->
 <div id="detailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
@@ -254,6 +262,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Grafik Keuangan Bulanan
     const ctx = document.getElementById('keuanganChart').getContext('2d');
     const keuanganChart = new Chart(ctx, {
         type: 'line',
@@ -320,7 +329,7 @@
                 x: {
                     title: {
                         display: true,
-                        text: 'Tanggal Rekapitulasi',
+                        text: 'Bulan',
                         font: {
                             size: 14,
                             family: 'Poppins',
@@ -354,6 +363,7 @@
         },
     });
 
+    // Modal Management
     const createModal = document.getElementById('createModal');
     const detailModal = document.getElementById('detailModal');
     const openCreateModalBtn = document.getElementById('openCreateModal');
@@ -407,6 +417,7 @@
         document.body.style.overflow = 'hidden';
     }
 
+    // Close modal when clicking outside
     window.addEventListener('click', function(event) {
         if (event.target === createModal) {
             closeCreateModal();
@@ -416,6 +427,7 @@
         }
     });
 
+    // Form submission with AJAX
     document.getElementById('createForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -443,6 +455,9 @@
                     if (data.errors.saldo_pengeluaran) {
                         document.getElementById('saldo_pengeluaran_error').textContent = data.errors.saldo_pengeluaran[0];
                         document.getElementById('saldo_pengeluaran_error').classList.remove('hidden');
+                    }
+                    if (data.errors.tgl_rekapitulasi) {
+                        alert(data.errors.tgl_rekapitulasi[0]);
                     }
                 }
             }
