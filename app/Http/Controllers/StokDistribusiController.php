@@ -41,11 +41,27 @@ class StokDistribusiController extends Controller
             return redirect()->back()->with('error', 'data ada yang kosong')->withInput();
         }
 
+        $gambarPath = '';
+
         if ($request->hasFile('gambar_stok')) {
+            $direktori = public_path('images/stok');
+            if (!file_exists($direktori)) {
+                mkdir($direktori, 0755, true);
+            }
+
             $gambarStok = $request->file('gambar_stok');
-            $namaGambar = time() . '.' . $gambarStok->getClientOriginalExtension();
-            $gambarStok->move(public_path('images/stok'), $namaGambar);
-            $gambarPath = 'images/stok/' . $namaGambar;
+
+            if ($gambarStok->isValid()) {
+                $namaGambar = time() . '_' . uniqid() . '.' . $gambarStok->getClientOriginalExtension();
+
+                if ($gambarStok->move($direktori, $namaGambar)) {
+                    $gambarPath = 'images/stok/' . $namaGambar;
+                } else {
+                    return redirect()->back()->with('error', 'Gagal mengupload gambar')->withInput();
+                }
+            } else {
+                return redirect()->back()->with('error', 'File gambar tidak valid')->withInput();
+            }
         }
 
         StokDistribusi::create([
@@ -53,7 +69,7 @@ class StokDistribusiController extends Controller
             'jumlah_stok' => $request->jumlah_stok,
             'harga_stok' => $request->harga_stok,
             'deskripsi_stok' => $request->deskripsi_stok,
-            'gambar_stok' => $gambarPath ?? '',
+            'gambar_stok' => $gambarPath,
         ]);
 
         return redirect()->route('owner.stok.index')->with('success', 'data stok distribusi berhasil dibuat');
