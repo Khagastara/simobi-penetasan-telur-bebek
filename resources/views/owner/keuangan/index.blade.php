@@ -176,15 +176,10 @@
                 @csrf
                 <div class="mb-4">
                     <label for="modal_tgl_rekapitulasi" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Rekapitulasi</label>
-                    <select name="tgl_rekapitulasi" id="modal_tgl_rekapitulasi"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E]" required>
-                        <option value="">Pilih Tanggal Rekapitulasi</option>
-                        @foreach($tanggalRekapitulasi as $tanggal)
-                            <option value="{{ $tanggal->tgl_transaksi }}">
-                                {{ \Carbon\Carbon::parse($tanggal->tgl_transaksi)->format('d/m/Y') }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <input type="date" name="tgl_rekapitulasi" id="modal_tgl_rekapitulasi"
+                        class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:ring-[#AFC97E] focus:border-[#AFC97E] cursor-not-allowed"
+                        readonly required>
+                    <p class="text-xs text-gray-500 mt-1">Tanggal otomatis diatur ke hari ini</p>
                 </div>
 
                 <div class="mb-4">
@@ -230,13 +225,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Saldo Pemasukan</label>
-                    <p id="detail_saldo_pemasukkan" class="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                    <label class="block text-sm font-medium text-gray-700">Saldo Pemasukkan</label>
+                    <p id="detail_saldo_pemasukkan" class="mt-1 text-sm font-medium bg-blue-50 text-blue-700 p-2 rounded"></p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Saldo Pengeluaran</label>
-                    <p id="detail_saldo_pengeluaran" class="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+                    <p id="detail_saldo_pengeluaran" class="mt-1 text-sm font-medium bg-red-50 text-red-700 p-2 rounded"></p>
                 </div>
 
                 <div>
@@ -246,15 +241,15 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Saldo Bersih</label>
-                    <p id="detail_saldo_bersih" class="mt-1 text-sm font-medium bg-gray-50 p-2 rounded"></p>
+                    <p id="detail_saldo_bersih" class="mt-1 text-sm font-medium p-2 rounded"></p>
                 </div>
-            </div>
 
-            <div class="flex justify-end mt-6">
-                <button id="closeDetailBtn"
-                    class="bg-gray-300 text-gray-700 hover:bg-gray-400 px-4 py-2 rounded shadow text-sm transition">
-                    Tutup
-                </button>
+                <div class="flex justify-end">
+                    <button type="button" id="closeDetailBtn"
+                        class="bg-gray-300 text-gray-700 hover:bg-gray-400 px-4 py-2 rounded shadow text-sm transition">
+                        Tutup
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -262,6 +257,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Chart.js untuk grafik keuangan
     const ctx = document.getElementById('keuanganChart').getContext('2d');
     const keuanganChart = new Chart(ctx, {
         type: 'line',
@@ -362,6 +358,22 @@
         },
     });
 
+    document.addEventListener('DOMContentLoaded', function() {
+        setTodayDate();
+    });
+
+    function setTodayDate() {
+        const today = new Date();
+        const formattedDate = today.getFullYear() + '-' +
+            String(today.getMonth() + 1).padStart(2, '0') + '-' +
+            String(today.getDate()).padStart(2, '0');
+
+        const dateInput = document.getElementById('modal_tgl_rekapitulasi');
+        if (dateInput) {
+            dateInput.value = formattedDate;
+        }
+    }
+
     const createModal = document.getElementById('createModal');
     const detailModal = document.getElementById('detailModal');
     const openCreateModalBtn = document.getElementById('openCreateModal');
@@ -371,6 +383,8 @@
     const closeDetailBtn = document.getElementById('closeDetailBtn');
 
     openCreateModalBtn.addEventListener('click', function() {
+        setTodayDate();
+
         createModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     });
@@ -380,6 +394,8 @@
         document.body.style.overflow = 'auto';
         document.getElementById('createForm').reset();
         document.getElementById('saldo_pengeluaran_error').classList.add('hidden');
+
+        setTodayDate();
     }
 
     closeCreateModalBtn.addEventListener('click', closeCreateModal);

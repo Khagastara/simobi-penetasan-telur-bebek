@@ -27,7 +27,6 @@ class KeuanganController extends Controller
             ->orderBy('tgl_rekapitulasi', 'asc')
             ->get();
 
-        // Prepare data for 12 months
         $keuanganLabels = [];
         $keuanganPemasukkan = [];
         $keuanganPengeluaran = [];
@@ -37,7 +36,6 @@ class KeuanganController extends Controller
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
-        // Initialize data for each month
         for ($month = 1; $month <= 12; $month++) {
             $monthData = $keuangans->filter(function ($item) use ($month) {
                 return Carbon::parse($item->tgl_rekapitulasi)->month == $month;
@@ -103,32 +101,42 @@ class KeuanganController extends Controller
 
         $existingKeuangan = Keuangan::where('tgl_rekapitulasi', $request->tgl_rekapitulasi)->first();
 
-        if ($existingKeuangan) {
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => ['tgl_rekapitulasi' => ['Data keuangan untuk tanggal ini sudah ada']]
-                ]);
-            }
-            return redirect()->back()->withErrors(['tgl_rekapitulasi' => 'Data keuangan untuk tanggal ini sudah ada'])->withInput();
-        }
+        $saldoPemasukkan = $this->calculateSaldoPemasukkan($request->tgl_rekapitulasi);
+        $totalPenjualan = $this->calculateTotalPenjualan($request->tgl_rekapitulasi);
 
-        $keuangan = Keuangan::create([
-            'tgl_rekapitulasi' => $request->tgl_rekapitulasi,
-            'saldo_pengeluaran' => $request->saldo_pengeluaran,
-            'saldo_pemasukkan' => $this->calculateSaldoPemasukkan($request->tgl_rekapitulasi),
-            'total_penjualan' => $this->calculateTotalPenjualan($request->tgl_rekapitulasi),
-        ]);
+        if ($existingKeuangan) {
+            $newSaldoPengeluaran = $existingKeuangan->saldo_pengeluaran + $request->saldo_pengeluaran;
+
+            $existingKeuangan->update([
+                'saldo_pengeluaran' => $newSaldoPengeluaran,
+                'saldo_pemasukkan' => $saldoPemasukkan,
+                'total_penjualan' => $totalPenjualan,
+            ]);
+
+            $message = 'Data keuangan berhasil diperbarui. Saldo pengeluaran ditambahkan ke data yang sudah ada.';
+            $action = 'updated';
+        } else {
+            $keuangan = Keuangan::create([
+                'tgl_rekapitulasi' => $request->tgl_rekapitulasi,
+                'saldo_pengeluaran' => $request->saldo_pengeluaran,
+                'saldo_pemasukkan' => $saldoPemasukkan,
+                'total_penjualan' => $totalPenjualan,
+            ]);
+
+            $message = 'Data keuangan berhasil ditambahkan';
+            $action = 'created';
+        }
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Data keuangan berhasil ditambahkan'
+                'message' => $message,
+                'action' => $action
             ]);
         }
 
         return redirect()->route('owner.keuangan.index')
-            ->with('success', 'Data keuangan berhasil ditambahkan');
+            ->with('success', $message);
     }
 
     public function show($id)
