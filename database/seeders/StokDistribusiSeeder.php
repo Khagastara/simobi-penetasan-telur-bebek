@@ -19,7 +19,7 @@ class StokDistribusiSeeder extends Seeder
             'jumlah_stok' => 20,
             'harga_stok' => 6000,
             'deskripsi_stok' => 'Anakan bebek berkualitas umur 2 minggu',
-            'gambar_stok' => 'images/stok/Anakan-Bebek.jpg',
+            'gambar_stok' => 'storage/stok/Anakan-Bebek.jpg',
         ]);
 
         StokDistribusi::insert([
@@ -28,7 +28,7 @@ class StokDistribusiSeeder extends Seeder
             'jumlah_stok' => 100,
             'harga_stok' => 8000,
             'deskripsi_stok' => 'Telur yang belum menetas tapi ada embrio',
-            'gambar_stok' => 'images/stok/Telur-Penetasan-Bebek.jpg',
+            'gambar_stok' => 'storage/stok/Telur-Penetasan-Bebek.jpg',
         ]);
     }
 }

@@ -262,7 +262,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Grafik Keuangan Bulanan
     const ctx = document.getElementById('keuanganChart').getContext('2d');
     const keuanganChart = new Chart(ctx, {
         type: 'line',
@@ -363,7 +362,6 @@
         },
     });
 
-    // Modal Management
     const createModal = document.getElementById('createModal');
     const detailModal = document.getElementById('detailModal');
     const openCreateModalBtn = document.getElementById('openCreateModal');
@@ -417,7 +415,6 @@
         document.body.style.overflow = 'hidden';
     }
 
-    // Close modal when clicking outside
     window.addEventListener('click', function(event) {
         if (event.target === createModal) {
             closeCreateModal();
@@ -427,7 +424,6 @@
         }
     });
 
-    // Form submission with AJAX
     document.getElementById('createForm').addEventListener('submit', function(e) {
         e.preventDefault();
 

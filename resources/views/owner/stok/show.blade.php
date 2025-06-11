@@ -29,9 +29,10 @@
             <div class="bg-white p-6 rounded-xl shadow-md max-w-4xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="text-center">
-                        <img src="{{ asset('storage/' . $stok->gambar_stok) }}"
-                             alt="{{ $stok->nama_stok }}"
-                             class="rounded-xl max-h-[300px] mx-auto">
+                        <img src="{{ $stok->gambar_stok ? Storage::url($stok->gambar_stok) : asset('images/stok/no-image.png') }}"
+                                    alt="{{ $stok->nama_stok }}"
+                                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                    onerror="this.src='{{ asset('images/stok/no-image.png') }}'">
                     </div>
                     <div>
                         <h2 class="text-xl font-semibold text-[#877B66] mb-4">{{ $stok->nama_stok }}</h2>
