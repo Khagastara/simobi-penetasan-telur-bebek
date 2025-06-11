@@ -51,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
     //Owner
     Route::get('/owner/dashboard', [DashboardController::class, 'index'])->name('owner.dashboard');
     Route::get('/financial-data', [DashboardController::class, 'getFinancialData'])->name('financial.data');
-    Route::get('/change-week', [DashboardController::class, 'changeWeek'])->name('dashboard.change-month');
+    Route::get('/dashboard/change-month', [DashboardController::class, 'changeMonth'])->name('dashboard.change-month');
 
     Route::get('o/profil', [OwnerProfilController::class, 'show'])->name('owner.profil.show');
     Route::get('o/profil/edit', [OwnerProfilController::class, 'edit'])->name('owner.profil.edit');
