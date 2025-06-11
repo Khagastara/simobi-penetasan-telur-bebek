@@ -28,7 +28,8 @@
                     <span class="ml-4 mr-4 bg-white px-4 py-2 rounded-full text-gray-700">
                         {{ $dashboardData['periode_start'] }} - {{ $dashboardData['periode_end'] }}
                     </span>
-                    <form method="GET" action="{{ route('dashboard.change-week') }}" class="inline">
+                    {{-- Form untuk navigasi bulan sebelumnya --}}
+                    <form method="GET" action="{{ route('dashboard.change-month') }}" class="inline">
                         <input type="hidden" name="direction" value="prev">
                         <input type="hidden" name="current_date" value="{{ request('date', now()->format('Y-m-d')) }}">
                         <button type="submit" class="bg-white p-2 rounded-lg shadow hover:shadow-lg transition-all">
@@ -37,7 +38,8 @@
                             </svg>
                         </button>
                     </form>
-                    <form method="GET" action="{{ route('dashboard.change-week') }}" class="inline">
+                    {{-- Form untuk navigasi bulan berikutnya --}}
+                    <form method="GET" action="{{ route('dashboard.change-month') }}" class="inline ml-2">
                         <input type="hidden" name="direction" value="next">
                         <input type="hidden" name="current_date" value="{{ request('date', now()->format('Y-m-d')) }}">
                         <button type="submit" class="bg-white p-2 rounded-lg shadow hover:shadow-lg transition-all">
@@ -51,6 +53,48 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {{-- Card Total Pemasukan --}}
+            <div class="bg-white rounded-3xl p-8 shadow-xl">
+                <div class="flex items-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-blue-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient2)" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-600 text-sm mb-1">Total Pemasukan</h3>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['total_pemasukan'], 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Card Total Pengeluaran --}}
+            <div class="bg-white rounded-3xl p-8 shadow-xl">
+                <div class="flex items-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-pink-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-red-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient3)" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#EF4444;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-600 text-sm mb-1">Total Pengeluaran</h3>
+                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['total_pengeluaran'], 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+                        {{-- Card Selisih Keuangan --}}
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center mb-4">
                     <div class="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-yellow-300">
@@ -82,48 +126,41 @@
                 </div>
             </div>
 
+            {{-- Card Selisih Keuangan --}}
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-blue-300">
-                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient2)" viewBox="0 0 24 24">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-yellow-300">
+                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient1)" viewBox="0 0 24 24">
                             <defs>
-                                <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+                                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#FCD34D;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
                                 </linearGradient>
                             </defs>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-gray-600 text-sm mb-1">Total Pemasukan</h3>
-                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['total_pemasukan'], 0, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl p-8 shadow-xl">
-                <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-pink-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-red-300">
-                        <svg class="w-8 h-8" fill="none" stroke="url(#gradient3)" viewBox="0 0 24 24">
-                            <defs>
-                                <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#EF4444;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-gray-600 text-sm mb-1">Total Pengeluaran</h3>
-                        <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['total_pengeluaran'], 0, ',', '.') }}</p>
+                        <h3 class="text-gray-600 text-sm mb-1">Selisih Keuangan</h3>
+                        <div class="flex items-center">
+                            @if($dashboardData['selisih_keuangan'] >= 0)
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#10B981" class="bi bi-arrow-up-circle-fill mr-2" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
+                                </svg>
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#EF4444" class="bi bi-arrow-down-circle-fill mr-2" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                </svg>
+                            @endif
+                            <p class="text-2xl font-bold text-gray-800">Rp{{ number_format($dashboardData['selisih_keuangan'], 0, ',', '.') }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{-- Card Jadwal Gagal --}}
             <div class="bg-white rounded-3xl p-8 shadow-xl">
                 <div class="flex items-center">
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-orange-100 rounded-2xl flex items-center justify-center mr-4 border-2 border-purple-300">
@@ -144,6 +181,7 @@
                 </div>
             </div>
 
+            {{-- Navigation Cards --}}
             <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <a href="{{ route('owner.profil.show') }}"
                    class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-[#AFC97E]">
@@ -205,6 +243,7 @@
         </div>
     </div>
 
+    {{-- Success Notification --}}
     @if(session('success'))
         <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-slide-in">
             <div class="flex items-center">

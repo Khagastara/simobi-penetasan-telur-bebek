@@ -21,8 +21,8 @@ class DashboardController extends Controller
 
         $currentDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
 
-        $startDate = $currentDate->copy()->startOfWeek(Carbon::MONDAY);
-        $endDate = $currentDate->copy()->endOfWeek(Carbon::SUNDAY);
+        $startDate = $currentDate->copy()->startOfMonth();
+        $endDate = $currentDate->copy()->endOfMonth();
 
         $totalPemasukan = Keuangan::whereBetween('tgl_rekapitulasi', [$startDate, $endDate])
             ->sum('saldo_pemasukkan');
@@ -66,8 +66,8 @@ class DashboardController extends Controller
         $owner = Auth::user()->owner;
         $currentDate = $request->get('date') ? Carbon::parse($request->get('date')) : Carbon::now();
 
-        $startDate = $currentDate->copy()->startOfWeek(Carbon::MONDAY);
-        $endDate = $currentDate->copy()->endOfWeek(Carbon::SUNDAY);
+        $startDate = $currentDate->copy()->startOfMonth();
+        $endDate = $currentDate->copy()->endOfMonth();
 
         $keuanganHarian = Keuangan::whereBetween('tgl_rekapitulasi', [$startDate, $endDate])
             ->orderBy('tgl_rekapitulasi')
@@ -95,15 +95,15 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function changeWeek(Request $request)
+    public function changeMonth(Request $request)
     {
         $direction = $request->get('direction');
         $currentDate = $request->get('current_date') ? Carbon::parse($request->get('current_date')) : Carbon::now();
 
         if ($direction === 'prev') {
-            $newDate = $currentDate->subWeek();
+            $newDate = $currentDate->subMonth();
         } else {
-            $newDate = $currentDate->addWeek();
+            $newDate = $currentDate->addMonth();
         }
 
         return redirect()->route('owner.dashboard', ['date' => $newDate->format('Y-m-d')]);
