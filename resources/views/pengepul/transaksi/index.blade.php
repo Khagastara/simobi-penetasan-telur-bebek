@@ -47,7 +47,7 @@
                     @forelse ($transaksis as $index => $transaksi)
                         <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }} text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
-                            <td class="px-4 py-3">{{ $transaksi['tanggal_transaksi']}}</td>
+                            <td class="px-4 py-3">{{ \Carbon\Carbon::parse($transaksi['tanggal_transaksi'])->format('d M Y H:i') }}</td>
                             <td class="px-4 py-3">{{ $transaksi['nama_stok'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['kuantitas'] }}</td>
                             <td class="px-4 py-3">Rp {{ number_format($transaksi['total_transaksi'], 0, ',', '.') }}</td>

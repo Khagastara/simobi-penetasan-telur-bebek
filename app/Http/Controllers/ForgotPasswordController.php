@@ -44,25 +44,27 @@ class ForgotPasswordController extends Controller
 
         $lastSent = Cache::get('otp_last_sent_' . $request->email);
         if ($lastSent && now()->diffInSeconds($lastSent) < 60) {
-            $remainingTime = 60 - now()->diffInSeconds($lastSent);
+            $elapsedTime = now()->diffInSeconds($lastSent);
+            $remainingTime = 60 - $elapsedTime;
+            $remainingTimeRounded = round($remainingTime);
 
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Tunggu {$remainingTime} detik sebelum mengirim ulang kode OTP"
+                    'message' => "Tunggu {$remainingTimeRounded} detik sebelum mengirim ulang kode OTP"
                 ]);
             }
 
             return redirect()->back()
-                ->with('error', "Tunggu {$remainingTime} detik sebelum mengirim ulang kode OTP")
+                ->with('error', "Tunggu {$remainingTimeRounded} detik sebelum mengirim ulang kode OTP")
                 ->withInput();
         }
 
         $otp = rand(100000, 999999);
         $email = $request->email;
 
-        Cache::put('otp_' . $email, $otp, 600);
-        Cache::put('otp_last_sent_' . $email, now(), 600);
+        Cache::put('otp_' . $email, $otp, 60);
+        Cache::put('otp_last_sent_' . $email, now(), 60);
 
         try {
             Mail::to($email)->send(new OtpMail($otp));

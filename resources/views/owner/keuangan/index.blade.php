@@ -108,7 +108,7 @@
 
         <div class="bg-white p-6 rounded-xl shadow mb-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-700">Grafik Keuangan Bulanan {{ $currentYear }}</h2>
+                <h2 class="text-lg font-semibold text-gray-700">Grafik Keuangan Tahunan {{ $currentYear }}</h2>
                 <button id="openCreateModal"
                     class="bg-[#AFC97E] text-white hover:bg-[#8fa866] px-4 py-2 rounded shadow text-sm transition">
                     Tambah Data
@@ -133,7 +133,7 @@
                     @forelse ($keuangans as $index => $keuangan)
                         <tr class="text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
-                            <td class="px-4 py-3">{{ \Carbon\Carbon::parse($keuangan->tgl_rekapitulasi)->format('d/m/Y') }}</td>
+                            <td class="px-4 py-3">{{ \Carbon\Carbon::parse($keuangan->tgl_rekapitulasi)->format('d M Y') }}</td>
                             <td class="px-4 py-3">Rp{{ number_format($keuangan->saldo_pemasukkan, 0, ',', '.') }}</td>
                             <td class="px-4 py-3">Rp{{ number_format($keuangan->saldo_pengeluaran, 0, ',', '.') }}</td>
                             <td class="px-4 py-3">{{ $keuangan->total_penjualan }}</td>
@@ -257,7 +257,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Chart.js untuk grafik keuangan
     const ctx = document.getElementById('keuanganChart').getContext('2d');
     const keuanganChart = new Chart(ctx, {
         type: 'line',

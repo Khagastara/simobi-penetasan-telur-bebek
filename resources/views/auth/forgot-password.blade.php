@@ -76,9 +76,9 @@
                     </div>
                     <div class="text-center">
                         <p class="text-sm text-gray-600 mb-2">Tidak menerima kode?</p>
-                        <button type="button" id="resendBtn" onclick="resendOtp()" class="text-[#5B5447] text-sm font-medium hover:text-[#A8956F] hover:underline disabled:text-gray-400 disabled:no-underline" disabled>
+                        <button type="button" id="resendBtn" onclick="checkCooldownAndResend()" class="text-[#5B5447] text-sm font-medium hover:text-[#A8956F] hover:underline disabled:text-gray-400 disabled:no-underline">
                             <span id="resendText">Kirim Ulang</span>
-                            <span id="countdown">(60s)</span>
+                            <span id="countdown"></span>
                         </button>
                     </div>
 
@@ -127,29 +127,42 @@
 
 @if(isset($step) && $step == 'otp')
 <script>
-let countdown = 60;
 let timer;
+let countdown = 0;
 
-function startCountdown() {
+function updateCountdownDisplay() {
     const resendBtn = document.getElementById('resendBtn');
     const countdownSpan = document.getElementById('countdown');
 
-    resendBtn.disabled = true;
+    if (countdown > 0) {
+        resendBtn.disabled = true;
+        countdownSpan.textContent = `(${countdown}s)`;
+    } else {
+        resendBtn.disabled = false;
+        countdownSpan.textContent = '';
+    }
+}
+
+function startCountdown(seconds) {
+    countdown = seconds;
+
+    if (timer) {
+        clearInterval(timer);
+    }
+
+    updateCountdownDisplay();
 
     timer = setInterval(() => {
         countdown--;
-        countdownSpan.textContent = `(${countdown}s)`;
+        updateCountdownDisplay();
 
         if (countdown <= 0) {
             clearInterval(timer);
-            resendBtn.disabled = false;
-            countdownSpan.textContent = '';
-            countdown = 60;
         }
     }, 1000);
 }
 
-function resendOtp() {
+function checkCooldownAndResend() {
     fetch('{{ route("password.email") }}', {
         method: 'POST',
         headers: {
@@ -174,7 +187,7 @@ function resendOtp() {
                 document.querySelector('h1').after(alertDiv);
             }
 
-            startCountdown();
+            startCountdown(60);
         } else {
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-danger mb-4 text-red-600 bg-red-50 border border-red-200 rounded p-3';
@@ -186,6 +199,14 @@ function resendOtp() {
             } else {
                 document.querySelector('h1').after(alertDiv);
             }
+
+            if (data.message && data.message.includes('Tunggu')) {
+                const match = data.message.match(/Tunggu (\d+) detik/);
+                if (match) {
+                    const remainingSeconds = parseInt(match[1]);
+                    startCountdown(remainingSeconds);
+                }
+            }
         }
     })
     .catch(error => {
@@ -193,9 +214,8 @@ function resendOtp() {
     });
 }
 
-// Start countdown when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    startCountdown();
+    checkCooldownAndResend();
 });
 </script>
 @endif

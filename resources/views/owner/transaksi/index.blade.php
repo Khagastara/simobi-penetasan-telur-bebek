@@ -47,7 +47,7 @@
                     @forelse ($transaksis as $index => $transaksi)
                         <tr class="{{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-100' }} text-center">
                             <td class="px-4 py-3">{{ $index + 1 }}</td>
-                            <td class="px-4 py-3">{{ $transaksi['tgl_transaksi'] }}</td>
+                            <td class="px-4 py-3">{{ \Carbon\Carbon::parse($transaksi['tgl_transaksi'])->format('d M Y H:i') }}</td>
                             <td class="px-4 py-3">{{ $transaksi['username'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['nama_stok'] }}</td>
                             <td class="px-4 py-3">{{ $transaksi['kuantitas'] }}</td>
@@ -83,7 +83,7 @@
                 </tbody>
             </table>
             <div class="mt-4">
-                {{ $transaksis->links() }} <!-- Add this line for pagination links -->
+                {{ $transaksis->links() }}
             </div>
         </div>
     </section>
@@ -103,7 +103,6 @@
             </div>
             <div class="p-6">
                 <div id="modalContent">
-                    <!-- Content will be loaded here -->
                     <div class="flex justify-center items-center h-32">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                     </div>
@@ -231,7 +230,6 @@
         const formData = new FormData(form);
         const submitButton = form.querySelector('button[type="submit"]');
 
-        // Disable submit button to prevent multiple submissions
         submitButton.disabled = true;
         submitButton.textContent = 'Updating...';
 
@@ -254,7 +252,6 @@
                 showSuccessMessage(result.message || 'Status berhasil diubah');
                 closeModal();
 
-                // Reload page after a short delay to show the updated status
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
@@ -262,7 +259,6 @@
                 const message = result.message || 'Terjadi kesalahan saat mengupdate status';
                 showErrorMessage(message);
 
-                // Re-enable submit button
                 submitButton.disabled = false;
                 submitButton.textContent = 'Update Status';
             }
@@ -271,7 +267,6 @@
             console.error('Error:', error);
             showErrorMessage('Terjadi kesalahan saat mengupdate status');
 
-            // Re-enable submit button
             submitButton.disabled = false;
             submitButton.textContent = 'Update Status';
         }
@@ -282,7 +277,6 @@
     }
 
     function getStatusColor(status) {
-        // Updated status color mapping to match your PHP function
         switch (status) {
             case 'Menunggu Pembayaran':
                 return 'yellow-500';
@@ -333,7 +327,6 @@
         }, 3000);
     }
 
-    // Close modal when clicking outside
     document.getElementById('transactionModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeModal();
