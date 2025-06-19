@@ -9,15 +9,15 @@
     <title>{{ config('app.name', 'SIMOBI') }}</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap">
     <link rel="icon" href="{{ asset('images/icons/iconweb.png') }}" type="image/png" />
-    {{-- <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/app.js') }}" defer></script> --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/app.js') }}" defer></script>
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 <body class="font-['Poppins'] bg-[#D4E6B5] min-h-screen flex">
 
-<aside class="sidebar w-64 min-h-screen p-6 text-black shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
+<aside class="sidebar w-64 min-h-screen p-6 text-black shadow-lg flex flex-col justify-between sticky top-0 h-screen" style="background-color: #AFC97E;">
     <div>
         <h2 class="text-xl font-bold mb-2 text-[#5B5447] flex items-center">
             <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2">

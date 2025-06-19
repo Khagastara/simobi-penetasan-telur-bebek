@@ -73,13 +73,16 @@
                                         Detail
                                     </button>
                                 </div>
-                                <div class="flex justify-center gap-2">
-                                    @if($transaksi['status'] == 'Menunggu Pembayaran')
-                                    <a href="{{ route('pengepul.transaksi.payment', $transaksi['id']) }}" class="inline-block bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow text-xs">
-                                        Bayar
-                                    </a>
+
+                                @if($transaksi['metode_pembayaran'] == 'Pembayaran Digital')
+                                    <div class="flex justify-center gap-2 mt-2">
+                                        @if($transaksi['status'] == 'Menunggu Pembayaran')
+                                        <a href="{{ route('pengepul.transaksi.payment', $transaksi['id']) }}" class="inline-block bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow text-xs">
+                                            Bayar
+                                        </a>
+                                        @endif
+                                    </div>
                                 @endif
-                                </div>
                             </td>
                         </tr>
                         @php $rowIndex++; @endphp

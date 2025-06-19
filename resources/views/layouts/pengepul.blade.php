@@ -18,14 +18,14 @@
 <body class="font-['Poppins'] bg-[#D4E6B5] min-h-screen flex">
 
 {{-- Sidebar --}}
-<aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg flex flex-col justify-between" style="background-color: #AFC97E;">
+<aside class="sidebar w-64 min-h-screen p-6 text-white shadow-lg flex flex-col justify-between sticky top-0 h-screen" style="background-color: #AFC97E;">
     {{-- Bagian Atas: Judul dan Menu --}}
     <div>
         <h2 class="text-l font-bold mb-2 text-[#5B5447] flex items-center">
             <img src="{{ asset('images/icons/logo bebek.png') }}" alt="SiMOBI Icon" class="h-8 w-8 mr-2">
             SiMOBI Pengepul
         </h2>
-        <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div> <!-- Yellow line -->
+        <div class="h-1 bg-[#E2D686] rounded-full w-4/4 mb-4"></div>
         <br>
         <nav class="space-y-3">
             </a>
